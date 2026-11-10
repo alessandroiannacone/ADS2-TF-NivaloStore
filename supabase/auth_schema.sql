@@ -59,7 +59,8 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 4. TRIGGER: AUTO-CREACIÓN DE PERFIL AL REGISTRARSE (Supabase Auth)
--- Todo usuario nuevo recibe SIEMPRE el rol 'CLIENTE' de forma segura en PostgreSQL
+-- Asigna 'ADMIN' automáticamente al correo oficial alex1400ahjulio@gmail.com
+-- y 'CLIENTE' a todos los demás usuarios de forma segura.
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -70,10 +71,17 @@ BEGIN
         COALESCE(NEW.raw_user_meta_data->>'nombres', split_part(NEW.email, '@', 1)),
         COALESCE(NEW.raw_user_meta_data->>'apellidos', ''),
         COALESCE(NEW.raw_user_meta_data->>'telefono', ''),
-        'CLIENTE' -- Rol inmutable por el usuario en el registro
+        CASE 
+            WHEN LOWER(NEW.email) = LOWER('alex1400ahjulio@gmail.com') THEN 'ADMIN'
+            ELSE 'CLIENTE'
+        END
     )
     ON CONFLICT (id) DO UPDATE SET
         email = EXCLUDED.email,
+        role = CASE 
+            WHEN LOWER(EXCLUDED.email) = LOWER('alex1400ahjulio@gmail.com') THEN 'ADMIN'
+            ELSE public.profiles.role
+        END,
         updated_at = NOW();
     RETURN NEW;
 END;
@@ -235,11 +243,9 @@ CREATE POLICY "clientes_all_policy" ON public.clientes
     WITH CHECK (public.is_admin() OR user_id = auth.uid());
 
 -- ==============================================================================
--- 7. PROCEDIMIENTO SEGURO PARA ASIGNAR EL PRIMER ADMINISTRADOR
+-- 7. ASIGNAR EL ROL DE ADMINISTRADOR A TU CUENTA
 -- ==============================================================================
--- Reemplaza 'tu_correo@gmail.com' con el correo de tu cuenta registrada en Supabase:
---
--- UPDATE public.profiles 
--- SET role = 'ADMIN' 
--- WHERE email = 'tu_correo@gmail.com';
+UPDATE public.profiles 
+SET role = 'ADMIN' 
+WHERE LOWER(email) = LOWER('alex1400ahjulio@gmail.com');
 -- ==============================================================================
