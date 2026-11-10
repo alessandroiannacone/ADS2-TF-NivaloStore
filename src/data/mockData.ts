@@ -629,7 +629,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 16,
     stockReservado: 0,
     stockTotalFisico: 16,
-    imagen: './cartuchera.jpg',
+    imagen: './wifty.jpg',
     descripcion: 'Estuche espacioso de tela acolchada bicolor estilo drama WIFTY con compartimentos internos para lapiceros y washi tapes.',
   },
   {
