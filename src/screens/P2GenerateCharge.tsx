@@ -5,7 +5,6 @@ import {
   Copy,
   Check,
   Clock,
-  Phone,
   Sparkles,
   ShieldAlert,
   ExternalLink,

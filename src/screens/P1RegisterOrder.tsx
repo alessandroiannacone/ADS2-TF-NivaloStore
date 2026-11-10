@@ -13,7 +13,6 @@ import {
   ShieldAlert,
   ShoppingBag,
   RotateCcw,
-  Phone,
 } from 'lucide-react';
 import { WhatsAppIcon } from '../components/WhatsAppIcon';
 
