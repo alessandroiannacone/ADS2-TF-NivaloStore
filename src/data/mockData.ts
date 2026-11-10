@@ -611,7 +611,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 22,
     stockReservado: 0,
     stockTotalFisico: 22,
-    imagen: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
+    imagen: './llavero_trebol.jpg',
     descripcion: 'Phone charm de trébol de cuatro hojas de la suerte con perlitas y mosquetón plateado.',
   },
   {
