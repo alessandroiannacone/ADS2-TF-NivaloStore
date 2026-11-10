@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import type { Producto, Pedido, Pago, HistorialEstado } from '../types';
+import type { Producto, Pedido, Pago, HistorialEstado, UserProfile } from '../types';
 
 /**
  * Servicio para sincronizar datos con Supabase Backend (PostgreSQL)
@@ -64,6 +64,7 @@ export const saveOrderToSupabase = async (pedido: Pedido): Promise<boolean> => {
     // B) Insertar pedido maestro
     const { error: orderError } = await supabase.from('pedidos').insert({
       id: pedido.id,
+      user_id: pedido.userId || null,
       cliente_id: pedido.cliente.id,
       cliente_data: pedido.cliente,
       total: pedido.total,
@@ -197,6 +198,7 @@ export const fetchOrdersFromSupabase = async (): Promise<Pedido[] | null> => {
 
     return data.map((p: any) => ({
       id: p.id,
+      userId: p.user_id || undefined,
       cliente: p.cliente_data,
       total: Number(p.total),
       estado: p.estado,
@@ -238,6 +240,137 @@ export const fetchOrdersFromSupabase = async (): Promise<Pedido[] | null> => {
     }));
   } catch (err) {
     console.warn('Excepción en fetchOrdersFromSupabase:', err);
+    return null;
+  }
+};
+
+// 6. Obtener perfil de usuario
+export const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  if (!isSupabaseConfigured || !supabase) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error || !data) {
+      console.warn('No se pudo obtener el perfil:', error?.message);
+      return null;
+    }
+
+    return {
+      id: data.id,
+      email: data.email,
+      nombres: data.nombres,
+      apellidos: data.apellidos,
+      telefono: data.telefono,
+      direccion: data.direccion,
+      ciudad: data.ciudad,
+      role: data.role as 'ADMIN' | 'CLIENTE',
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+    };
+  } catch (err) {
+    console.warn('Excepción en fetchUserProfile:', err);
+    return null;
+  }
+};
+
+// 7. Actualizar perfil de usuario (campos permitidos)
+export const updateUserProfileInSupabase = async (
+  userId: string,
+  data: Partial<Omit<UserProfile, 'id' | 'role' | 'email'>>
+): Promise<boolean> => {
+  if (!isSupabaseConfigured || !supabase) return false;
+
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        nombres: data.nombres,
+        apellidos: data.apellidos,
+        telefono: data.telefono,
+        direccion: data.direccion,
+        ciudad: data.ciudad,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId);
+
+    if (error) {
+      console.warn('Error al actualizar perfil:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Excepción en updateUserProfileInSupabase:', err);
+    return false;
+  }
+};
+
+// 8. Obtener pedidos específicos de un cliente
+export const fetchOrdersForUser = async (userId: string): Promise<Pedido[] | null> => {
+  if (!isSupabaseConfigured || !supabase) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('pedidos')
+      .select(`
+        *,
+        detalles:detalles_pedido(*),
+        pagos:pagos(*),
+        historial:historial_estados(*)
+      `)
+      .eq('user_id', userId)
+      .order('fecha_creacion', { ascending: false });
+
+    if (error || !data) return null;
+
+    return data.map((p: any) => ({
+      id: p.id,
+      userId: p.user_id,
+      cliente: p.cliente_data,
+      total: Number(p.total),
+      estado: p.estado,
+      motivoCancelacion: p.motivo_cancelacion,
+      fechaCreacion: p.fecha_creacion,
+      fechaVencimientoReserva: p.fecha_vencimiento_reserva,
+      enlacePagoActivo: p.enlace_pago_activo,
+      intentosCobro: [],
+      detalles: (p.detalles || []).map((d: any) => ({
+        id: d.id,
+        productoId: d.producto_id,
+        productoNombre: d.producto_nombre,
+        precioUnitario: Number(d.precio_unitario),
+        cantidad: d.cantidad,
+        subtotal: Number(d.subtotal),
+      })),
+      pagos: (p.pagos || []).map((pg: any) => ({
+        id: pg.id,
+        pedidoId: pg.pedido_id,
+        referenciaExterna: pg.referencia_externa,
+        fechaPago: pg.fecha_pago,
+        totalPedido: Number(pg.total_pedido),
+        montoRecibido: Number(pg.monto_recibido),
+        diferencia: Number(pg.diferencia),
+        estadoPago: pg.estado_pago,
+        motivoObservacion: pg.motivo_observacion,
+        motivoRechazo: pg.motivo_rechazo,
+        resultadoReembolso: pg.resultado_reembolso,
+      })),
+      historial: (p.historial || []).map((h: any) => ({
+        id: h.id,
+        pedidoId: h.pedido_id,
+        fechaHora: h.fecha_hora,
+        estadoAnterior: h.estado_anterior,
+        estadoNuevo: h.estado_nuevo,
+        origen: h.origen,
+        observaciones: h.observaciones,
+      })),
+    }));
+  } catch (err) {
+    console.warn('Excepción en fetchOrdersForUser:', err);
     return null;
   }
 };

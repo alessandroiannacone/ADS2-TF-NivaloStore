@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
+import { useAuth } from '../context/AuthContext';
 import { isSupabaseConfigured } from '../lib/supabase';
 import {
   Bell,
@@ -8,6 +9,8 @@ import {
   Database,
   CheckCheck,
   Trash2,
+  LogOut,
+  ShieldCheck,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -19,10 +22,18 @@ export const Header: React.FC = () => {
     setViewMode,
   } = useStore();
 
+  const { user, profile, signOut } = useAuth();
+
   const [showNotifMenu, setShowNotifMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const unreadCount = notificaciones.filter((n) => !n.leida).length;
+
+  const handleAdminSignOut = async () => {
+    await signOut();
+    setViewMode('storefront');
+    window.location.hash = '#/';
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-[#F4A7C1]/30 px-4 lg:px-8 py-3 transition-all">
@@ -170,43 +181,51 @@ export const Header: React.FC = () => {
             )}
           </div>
 
-          {/* Perfil del Vendedor */}
+          {/* Perfil del Administrador Autenticado */}
           <div className="relative">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex items-center gap-2 p-1.5 pl-2.5 pr-2 rounded-2xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition cursor-pointer"
             >
-              <img
-                src={vendedor.avatar}
-                alt={vendedor.nombre}
-                className="w-7 h-7 rounded-full object-cover border border-[#F4A7C1]"
-              />
+              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#DE6978] to-[#9A7BB0] text-white flex items-center justify-center font-bold text-xs border border-[#F4A7C1]">
+                {profile?.nombres?.charAt(0).toUpperCase() || 'A'}
+              </div>
               <span className="text-xs font-semibold text-[#343047] hidden md:inline">
-                {vendedor.nombre.split(' ')[0]}
+                {profile?.nombres || vendedor.nombre.split(' ')[0]}
               </span>
               <ChevronDown size={14} className="text-[#746E8B]" />
             </button>
 
             {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-kawaii border border-[#C9B6F2]/30 p-3 z-50">
+              <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-kawaii border border-[#C9B6F2]/30 p-4 z-50 space-y-3">
                 <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
-                  <img
-                    src={vendedor.avatar}
-                    alt={vendedor.nombre}
-                    className="w-10 h-10 rounded-full object-cover border-2 border-[#F4A7C1]"
-                  />
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#DE6978] to-[#9A7BB0] text-white flex items-center justify-center font-bold text-base shadow-xs">
+                    {profile?.nombres?.charAt(0).toUpperCase() || 'A'}
+                  </div>
                   <div>
-                    <h4 className="text-xs font-bold text-[#343047]">{vendedor.nombre}</h4>
-                    <p className="text-[11px] text-[#746E8B]">{vendedor.rol}</p>
-                    <span className="inline-block mt-0.5 text-[10px] text-[#2D9D78] font-medium bg-[#2D9D78]/10 px-1.5 py-0.2 rounded-full">
-                      ● Sesión activa
+                    <h4 className="text-xs font-bold text-[#343047]">
+                      {profile ? `${profile.nombres} ${profile.apellidos}` : vendedor.nombre}
+                    </h4>
+                    <p className="text-[11px] text-[#746E8B]">{user?.email || 'admin@nivalostore.com'}</p>
+                    <span className="inline-flex items-center gap-1 mt-1 text-[10px] text-[#2D9D78] font-bold bg-[#2D9D78]/10 px-2 py-0.5 rounded-full">
+                      <ShieldCheck size={11} />
+                      <span>Administrador Autorizado</span>
                     </span>
                   </div>
                 </div>
-                <div className="pt-2 text-[11px] text-[#746E8B] space-y-1">
-                  <p><strong>Ubicación:</strong> Lima, Perú</p>
-                  <p><strong>Canales:</strong> Instagram & WhatsApp</p>
+
+                <div className="text-[11px] text-[#746E8B] space-y-1">
+                  <p><strong>Rol:</strong> ADMIN (Control Total)</p>
+                  <p><strong>Protección:</strong> Supabase RLS Activo</p>
                 </div>
+
+                <button
+                  onClick={handleAdminSignOut}
+                  className="w-full py-2 px-3 rounded-xl bg-red-50 hover:bg-red-100 text-[#DE6978] text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <LogOut size={13} />
+                  <span>Cerrar sesión de Administrador</span>
+                </button>
               </div>
             )}
           </div>

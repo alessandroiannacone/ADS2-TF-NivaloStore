@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useStore } from '../context/StoreContext';
+import { useAuth } from '../context/AuthContext';
 import {
   Search,
   ShoppingBag,
@@ -19,12 +20,14 @@ import {
   Truck,
   Gift,
   ShieldCheck,
+  Shield,
   Music,
   Lightbulb,
   ExternalLink,
   Play,
   Pause,
   Send,
+  LogOut,
 } from 'lucide-react';
 import { WhatsAppIcon } from '../components/WhatsAppIcon';
 import { getAssetUrl } from '../data/mockData';
@@ -81,8 +84,9 @@ export const Storefront: React.FC = () => {
     wishlist,
     toggleWishlist,
     transferCartToP1,
-    setViewMode,
   } = useStore();
+
+  const { user, profile, isAdmin, signOut } = useAuth();
 
   // Control de vista: 'inicio' (Pantalla Principal scrollable completa) vs 'tienda' (Catálogo con filtros laterales)
   const [currentView, setCurrentView] = useState<'inicio' | 'tienda'>('inicio');
@@ -463,12 +467,14 @@ export const Storefront: React.FC = () => {
             </button>
             <span className="opacity-30">•</span>
             <button
-              onClick={() => setViewMode('admin')}
-              className="font-bold text-[#E2678D] hover:underline flex items-center gap-1 cursor-pointer"
-              title="Ir al Panel Vendedor ICONIX (P1-P4)"
+              onClick={() => {
+                window.location.hash = isAdmin ? '#/admin' : '#/admin/login';
+              }}
+              className="font-bold text-[#7E5E6E] hover:text-[#DE6978] flex items-center gap-1 cursor-pointer transition-colors"
+              title="Portal de Acceso Administrativo Seguro"
             >
-              <Sparkles size={12} />
-              <span>Panel Vendedor</span>
+              <Shield size={12} className="text-[#DE6978]" />
+              <span>{isAdmin ? 'Panel Admin 🛡️' : 'Acceso Admin'}</span>
             </button>
           </div>
         </div>
@@ -525,11 +531,30 @@ export const Storefront: React.FC = () => {
           {/* Iconos de acción */}
           <div className="flex items-center gap-4 shrink-0">
             <button
-              onClick={() => setShowUserModal(true)}
-              className="p-2 text-[#7E5E6E] hover:text-[#E2678D] hover:bg-[#FFF0F6] rounded-full transition-colors cursor-pointer"
-              title="Mi Perfil"
+              onClick={() => {
+                if (user) {
+                  window.location.hash = '#/mi-cuenta';
+                } else {
+                  window.location.hash = '#/login';
+                }
+              }}
+              className="p-1.5 text-[#7E5E6E] hover:text-[#E2678D] hover:bg-[#FFF0F6] rounded-full transition-colors cursor-pointer flex items-center gap-1.5"
+              title={user ? `Mi Cuenta (${profile?.nombres || user.email})` : 'Iniciar Sesión / Registrarse'}
             >
-              <User size={20} strokeWidth={1.8} />
+              {user ? (
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#F4A7C1] to-[#C9B6F2] text-white flex items-center justify-center font-bold text-xs shadow-xs border border-pink-200">
+                  {profile?.nombres?.charAt(0).toUpperCase() || 'U'}
+                </div>
+              ) : (
+                <div className="p-1">
+                  <User size={20} strokeWidth={1.8} />
+                </div>
+              )}
+              {user && (
+                <span className="text-xs font-semibold text-[#4A3B4E] hidden md:inline max-w-[100px] truncate">
+                  {profile?.nombres || 'Mi Cuenta'}
+                </span>
+              )}
             </button>
 
             <button
@@ -1716,30 +1741,69 @@ export const Storefront: React.FC = () => {
             </button>
 
             <NivaloCatMascot className="w-16 h-16 mx-auto mb-3" />
-            <h3 className="font-display font-bold text-lg text-[#4A3B4E]">Cliente Nivalo Lover</h3>
-            <p className="text-xs text-[#8E7C94] mb-4">Nivel: Sakura VIP • 420 Puntos ✨</p>
+            <h3 className="font-display font-bold text-lg text-[#4A3B4E]">
+              {user ? (profile?.nombres || 'Cliente Nivalo') : 'Bienvenido a Nivalo Store'}
+            </h3>
+            <p className="text-xs text-[#8E7C94] mb-4">
+              {user ? user.email : 'Inicia sesión para consultar tus pedidos'}
+            </p>
 
-            <div className="space-y-2 text-xs text-left mb-5">
-              <div className="p-2.5 rounded-xl bg-[#FFF0F6] flex justify-between border border-[#FCDCE7]">
-                <span className="text-[#8E7C94]">Pedidos realizados:</span>
-                <strong className="text-[#4A3B4E]">3 entregados</strong>
+            {user ? (
+              <div className="space-y-2 mb-4">
+                <button
+                  onClick={() => {
+                    setShowUserModal(false);
+                    window.location.hash = '#/mi-cuenta';
+                  }}
+                  className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#F4A7C1] to-[#DE6978] text-white text-xs font-bold shadow-xs transition"
+                >
+                  Ir a Mi Cuenta y Pedidos
+                </button>
+                {isAdmin && (
+                  <button
+                    onClick={() => {
+                      setShowUserModal(false);
+                      window.location.hash = '#/admin';
+                    }}
+                    className="w-full py-2 rounded-2xl bg-purple-50 hover:bg-purple-100 text-[#742284] text-xs font-bold border border-purple-200 transition flex items-center justify-center gap-1.5"
+                  >
+                    <Shield size={13} />
+                    <span>Abrir Panel de Control Admin</span>
+                  </button>
+                )}
+                <button
+                  onClick={async () => {
+                    await signOut();
+                    setShowUserModal(false);
+                  }}
+                  className="w-full py-2 rounded-2xl bg-gray-50 hover:bg-gray-100 text-[#8E7C94] text-xs font-semibold transition flex items-center justify-center gap-1.5"
+                >
+                  <LogOut size={13} />
+                  <span>Cerrar sesión</span>
+                </button>
               </div>
-              <div className="p-2.5 rounded-xl bg-[#FFF0F6] flex justify-between border border-[#FCDCE7]">
-                <span className="text-[#8E7C94]">Cupones activos:</span>
-                <strong className="text-[#E2678D]">KAWAII10 (-10%)</strong>
+            ) : (
+              <div className="space-y-2 mb-2">
+                <button
+                  onClick={() => {
+                    setShowUserModal(false);
+                    window.location.hash = '#/login';
+                  }}
+                  className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#F4A7C1] to-[#DE6978] text-white text-xs font-bold shadow-xs transition"
+                >
+                  Iniciar Sesión
+                </button>
+                <button
+                  onClick={() => {
+                    setShowUserModal(false);
+                    window.location.hash = '#/register';
+                  }}
+                  className="w-full py-2 rounded-2xl bg-pink-50 hover:bg-pink-100 text-[#DE6978] text-xs font-bold transition"
+                >
+                  Crear Cuenta Nueva
+                </button>
               </div>
-            </div>
-
-            <button
-              onClick={() => {
-                setShowUserModal(false);
-                setViewMode('admin');
-              }}
-              className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#F4A7C1] to-[#EE8EAF] hover:from-[#EE8EAF] hover:to-[#E0799E] text-white text-xs font-semibold shadow-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Sparkles size={14} />
-              <span>Abrir Panel Administrativo ICONIX</span>
-            </button>
+            )}
           </div>
         </div>
       )}

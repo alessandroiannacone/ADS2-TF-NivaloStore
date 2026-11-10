@@ -104,6 +104,7 @@ export interface Pago {
 
 export interface Pedido {
   id: string; // Código único (ej. PED-000120)
+  userId?: string; // UUID de usuario autenticado en Supabase Auth
   cliente: Cliente;
   detalles: DetallePedido[];
   total: number;
@@ -116,6 +117,21 @@ export interface Pedido {
   pagos: Pago[];
   historial: HistorialEstado[];
   enlacePagoActivo?: string;
+}
+
+export type UserRole = 'ADMIN' | 'CLIENTE';
+
+export interface UserProfile {
+  id: string; // UUID de auth.users
+  email: string;
+  nombres: string;
+  apellidos: string;
+  telefono?: string;
+  direccion?: string;
+  ciudad?: string;
+  role: UserRole;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface NotificacionSistema {
