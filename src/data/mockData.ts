@@ -234,7 +234,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 30,
     stockReservado: 4,
     stockTotalFisico: 34,
-    imagen: 'https://images.unsplash.com/photo-1572375992501-4b0892d50c69?auto=format&fit=crop&w=400&q=80',
+    imagen: 'https://i.etsystatic.com/61106308/r/il/6c00b7/8435193635/il_fullxfull.8435193635_am5y.jpg',
     descripcion: 'Pack de 50 stickers vinílicos holográficos con temática anime y Sanrio.',
   },
   {
@@ -285,7 +285,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 12,
     stockReservado: 0,
     stockTotalFisico: 12,
-    imagen: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80',
+    imagen: 'https://i5.walmartimages.com/seo/KILOGOGRAPH-KPOP-Photocard-Holder-Keychain-Pack-of-4-Acrylic-Frame-3x4-inches-Photo-Card-Display-Stand_b8a174da-bf2d-462f-bc6c-4745b77c5ec6.68cd23427d3b0e5b8816d70d41be8bdf.jpeg',
     descripcion: 'Incluye lomo cards aleatorias, photocard holder acrílico y pin decorativo.',
   },
   {
@@ -535,7 +535,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 15,
     stockReservado: 0,
     stockTotalFisico: 15,
-    imagen: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+    imagen: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcR-c-9FboVAClxs6JG0HombRuk9rFwWn3KE1S1K4RSx_Z3-VH_n2el9w&s=10',
     descripcion: 'Bandana floral tejida a crochet con margaritas en punto suave para atar al cuello.',
   },
   {
@@ -555,7 +555,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 18,
     stockReservado: 0,
     stockTotalFisico: 18,
-    imagen: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?auto=format&fit=crop&w=400&q=80',
+    imagen: 'https://img.kwcdn.com/product/fancy/5193dae5-acc3-43d9-9d62-8ca43356fb13.jpg?imageMogr2/auto-orient%7CimageView2/2/w/800/q/70/format/webp',
     descripcion: 'Funda ondulada anti-impacto con cerecitas kawaii y acabado brillante siliconado.',
   },
   {
@@ -575,7 +575,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 14,
     stockReservado: 0,
     stockTotalFisico: 14,
-    imagen: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?auto=format&fit=crop&w=400&q=80',
+    imagen: 'https://coolboxpe.vtexassets.com/arquivos/ids/380572/IP04-IP15PXBL_1.jpg?v=638592492743030000',
     descripcion: 'Funda vintage con diseño de disco de vinilo y tipografía retro Sweet Music.',
   },
   {
