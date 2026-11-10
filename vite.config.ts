@@ -5,7 +5,6 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/ADS2-TF-NivaloStore/',
   base: './',
   plugins: [
     react(),
