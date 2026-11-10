@@ -11,6 +11,13 @@ import type {
   IntentoCobro,
 } from '../types';
 import { INITIAL_PEDIDOS, INITIAL_PRODUCTOS, INITIAL_VENDEDOR } from '../data/mockData';
+import {
+  fetchProductsFromSupabase,
+  saveOrderToSupabase,
+  updateOrderStatusInSupabase,
+  savePaymentToSupabase,
+} from '../services/supabaseService';
+import { isSupabaseConfigured } from '../lib/supabase';
 
 interface StoreContextType {
   // Estado general
@@ -246,6 +253,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       console.error('Error saving notifs to localStorage', e);
     }
   }, [notificaciones]);
+
+  // Carga inicial y sincronización con Supabase Backend (PostgreSQL)
+  useEffect(() => {
+    if (isSupabaseConfigured) {
+      fetchProductsFromSupabase().then((supabaseProducts) => {
+        if (supabaseProducts && supabaseProducts.length > 0) {
+          setProductos(supabaseProducts);
+          addNotification(
+            'info',
+            'Backend Supabase Conectado',
+            'Catálogo y stock sincronizados en vivo desde tu base de datos PostgreSQL en Supabase.'
+          );
+        }
+      });
+    }
+  }, []);
 
   // Temporizador para verificar pedidos vencidos (RNF06)
   useEffect(() => {
@@ -489,6 +512,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setPedidos((prev) => [newPedido, ...prev]);
 
+    // Sincronización asíncrona con Supabase
+    if (isSupabaseConfigured) {
+      saveOrderToSupabase(newPedido).catch(console.error);
+    }
+
     addNotification(
       'success',
       'Pedido registrado correctamente',
@@ -681,6 +709,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         )
       );
 
+      if (isSupabaseConfigured) {
+        savePaymentToSupabase(nuevoPago).catch(console.error);
+      }
+
       addNotification(
         'error',
         'Pago en pedido cancelado (P4)',
@@ -728,6 +760,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             : p
         )
       );
+
+      if (isSupabaseConfigured) {
+        savePaymentToSupabase(nuevoPago).catch(console.error);
+      }
 
       addNotification(
         'warning',
@@ -790,6 +826,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           : p
       )
     );
+
+    if (isSupabaseConfigured) {
+      savePaymentToSupabase(nuevoPago).catch(console.error);
+      updateOrderStatusInSupabase(pedido.id, 'PAGADO', newHistory).catch(console.error);
+    }
 
     addNotification(
       'success',
