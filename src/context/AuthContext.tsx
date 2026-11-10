@@ -41,18 +41,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const loadUserProfile = async (currentUser: User): Promise<UserProfile | null> => {
     let p = await fetchUserProfile(currentUser.id);
+    const meta = currentUser.user_metadata || {};
+    const isAdminEmail = currentUser.email?.trim().toLowerCase() === 'alex1400ahjulio@gmail.com';
+
     if (!p) {
-      // Si el perfil aún no se creó en la tabla (ej. primer login con Google o delay de trigger),
-      // generar un perfil seguro provisional con rol CLIENTE
-      const meta = currentUser.user_metadata || {};
+      // Si el perfil aún no se creó en la tabla (ej. primer login con Google OAuth o delay del trigger),
+      // generamos un perfil completo a partir de la metadata de Google o registro
+      const fullName = (meta.full_name || meta.name || '').trim();
+      const nameParts = fullName ? fullName.split(' ') : [];
+      const nombres = meta.nombres || (nameParts.length > 0 ? nameParts[0] : (currentUser.email ? currentUser.email.split('@')[0] : 'Cliente'));
+      const apellidos = meta.apellidos || (nameParts.length > 1 ? nameParts.slice(1).join(' ') : '');
+
       p = {
         id: currentUser.id,
         email: currentUser.email || '',
-        nombres: meta.nombres || meta.full_name || meta.name || 'Cliente',
-        apellidos: meta.apellidos || '',
-        role: (meta.role === 'ADMIN' ? 'ADMIN' : 'CLIENTE'),
+        nombres: nombres,
+        apellidos: apellidos,
+        role: isAdminEmail ? 'ADMIN' : (meta.role === 'ADMIN' ? 'ADMIN' : 'CLIENTE'),
       };
+
+      // Intentar persistir el perfil en la base de datos para sincronización futura
+      if (supabase) {
+        supabase.from('profiles').upsert({
+          id: currentUser.id,
+          email: currentUser.email || '',
+          nombres: p.nombres,
+          apellidos: p.apellidos,
+          role: p.role,
+        }).then(({ error }) => {
+          if (error) console.warn('Aviso sincronización de perfil:', error.message);
+        });
+      }
+    } else if (isAdminEmail && p.role !== 'ADMIN') {
+      // Garantizar que la cuenta oficial de administrador tenga siempre el rol ADMIN
+      p.role = 'ADMIN';
+      if (supabase) {
+        supabase.from('profiles').update({ role: 'ADMIN' }).eq('id', currentUser.id).then();
+      }
     }
+
     setProfile(p);
     setRole(p.role);
     return p;
@@ -72,7 +99,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     let isMounted = true;
 
-    // 1. Obtener sesión activa al cargar
+    // Detectar si hay errores de OAuth en la URL al regresar
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#\/?/, ''));
+      const errorDesc = searchParams.get('error_description') || hashParams.get('error_description');
+      const errorCode = searchParams.get('error') || hashParams.get('error');
+
+      if (errorDesc || errorCode) {
+        const readable = errorDesc
+          ? decodeURIComponent(errorDesc).replace(/\+/g, ' ')
+          : errorCode;
+        setAuthError(`Aviso de inicio de sesión: ${readable}`);
+        // Limpiar parámetros de error de la barra de direcciones
+        const cleanUrl = window.location.origin + window.location.pathname + '#/login';
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    } catch (e) {
+      console.warn('Error al leer parámetros de URL:', e);
+    }
+
+    // 1. Obtener sesión activa al cargar la aplicación
     supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
       if (!isMounted) return;
       setSession(currentSession);
@@ -87,13 +134,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(false);
     });
 
-    // 2. Escuchar cambios de estado en Auth (Login, Logout, Token Refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    // 2. Escuchar cambios de estado en Auth (Login, Logout, OAuth callback, Token Refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       if (!isMounted) return;
       setSession(newSession);
       if (newSession?.user) {
         setUser(newSession.user);
-        await loadUserProfile(newSession.user);
+        const p = await loadUserProfile(newSession.user);
+
+        // Si regresamos de un flujo de OAuth o hay código de autorización en la URL
+        const hadOAuthPending = sessionStorage.getItem('nivalo_oauth_pending');
+        const hasAuthParamsInUrl = window.location.search.includes('code=') || window.location.hash.includes('access_token=');
+
+        if (hadOAuthPending || hasAuthParamsInUrl || event === 'SIGNED_IN') {
+          sessionStorage.removeItem('nivalo_oauth_pending');
+
+          // Limpiar el query param ?code=... de la URL para dejarla limpia
+          if (window.location.search.includes('code=')) {
+            const cleanUrl = window.location.origin + window.location.pathname + (window.location.hash || '');
+            window.history.replaceState({}, document.title, cleanUrl);
+          }
+
+          // Redireccionar al usuario si se encuentra en la pantalla de login o raíz
+          const currentHash = window.location.hash;
+          if (!currentHash || currentHash === '#/' || currentHash === '#/login' || currentHash === '#/register') {
+            if (p?.role === 'ADMIN' || newSession.user.email?.trim().toLowerCase() === 'alex1400ahjulio@gmail.com') {
+              window.location.hash = '#/admin';
+            } else {
+              window.location.hash = '#/mi-cuenta';
+            }
+          }
+        }
       } else {
         setUser(null);
         setProfile(null);
@@ -205,20 +276,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      sessionStorage.setItem('nivalo_oauth_pending', 'true');
+
+      // Redirigir a la URL base limpia sin el fragmento #
+      // Cumple con la especificación RFC 6749 y evita errores de redirección
+      const cleanRedirectUrl = window.location.origin + window.location.pathname;
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}${window.location.pathname}#/mi-cuenta`,
+          redirectTo: cleanRedirectUrl,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          },
         },
       });
 
       if (error) {
-        setAuthError(error.message);
-        return { success: false, error: error.message };
+        sessionStorage.removeItem('nivalo_oauth_pending');
+        let errorMsg = error.message;
+        if (
+          errorMsg.toLowerCase().includes('provider is not enabled') ||
+          errorMsg.toLowerCase().includes('unsupported provider')
+        ) {
+          errorMsg =
+            'El inicio con Google aún no está activado en tu panel de Supabase. Activa Google en Supabase > Authentication > Providers > Google con tu Client ID y Secret.';
+        }
+        setAuthError(errorMsg);
+        return { success: false, error: errorMsg };
+      }
+
+      // Si el navegador no redirige automáticamente con el SDK
+      if (data?.url) {
+        window.location.href = data.url;
       }
 
       return { success: true };
     } catch (err: any) {
+      sessionStorage.removeItem('nivalo_oauth_pending');
       const msg = err.message || 'Error al conectar con Google.';
       setAuthError(msg);
       return { success: false, error: msg };

@@ -132,3 +132,4 @@ INSERT INTO public.intentos_cobro (id, pedido_id, numero_intento, fecha_hora, re
 ('INT-001', 'PED-000121', 1, NOW() - INTERVAL '2 hours 50 minutes', 'Generado', 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000121'),
 ('INT-002', 'PED-000122', 1, NOW() - INTERVAL '11 hours', 'Generado', 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000122'),
 ('INT-003', 'PED-000123', 1, NOW() - INTERVAL '5 hours 30 minutes', 'Generado', 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000123');
+

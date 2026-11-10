@@ -48,6 +48,22 @@ const MainLayout: React.FC = () => {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, [setViewMode]);
 
+  // Redirigir a cuenta o panel si el usuario ya tiene sesión activa
+  useEffect(() => {
+    if (user && !isLoading) {
+      if (currentRoute === '#/login' || currentRoute === '#/register') {
+        if (isAdmin) {
+          window.location.hash = '#/admin';
+        } else {
+          window.location.hash = '#/mi-cuenta';
+        }
+      } else if (currentRoute === '#/admin/login' && isAdmin) {
+        setViewMode('admin');
+        window.location.hash = '#/admin';
+      }
+    }
+  }, [user, isAdmin, isLoading, currentRoute, setViewMode]);
+
   // 1. Pantalla de carga mientras se verifica la sesión en Supabase
   if (isLoading) {
     return (
@@ -75,24 +91,13 @@ const MainLayout: React.FC = () => {
   }
 
   // 3. Rutas de Autenticación de Clientes
-  if (currentRoute === '#/login') {
+  if (currentRoute === '#/login' || currentRoute === '#/register') {
+    if (user) {
+      return null;
+    }
     return (
       <CustomerAuthPage
-        initialMode="login"
-        onSuccess={() => {
-          window.location.hash = '#/mi-cuenta';
-        }}
-        onCancel={() => {
-          window.location.hash = '#/';
-        }}
-      />
-    );
-  }
-
-  if (currentRoute === '#/register') {
-    return (
-      <CustomerAuthPage
-        initialMode="register"
+        initialMode={currentRoute === '#/register' ? 'register' : 'login'}
         onSuccess={() => {
           window.location.hash = '#/mi-cuenta';
         }}
@@ -144,6 +149,9 @@ const MainLayout: React.FC = () => {
 
   // 5. Login Administrativo Exclusivo (#/admin/login)
   if (currentRoute === '#/admin/login') {
+    if (user && isAdmin) {
+      return null;
+    }
     return (
       <AdminLoginPage
         onSuccess={() => {
