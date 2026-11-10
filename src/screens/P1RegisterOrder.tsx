@@ -253,19 +253,19 @@ export const P1RegisterOrder: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Título de la pantalla según especificación */}
+      {/* Título de la pantalla */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#F4A7C1]/30">
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-[#343047] font-['Quicksand',sans-serif] m-0">
-              Registrar pedido – Iteración 2
+              Registrar Pedido
             </h2>
-            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#FFF0F6] text-[#F4A7C1] border border-[#F4A7C1]/40 font-bold">
-              P1 • CUS-01
+            <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#FFF0F6] text-[#F4A7C1] border border-[#F4A7C1]/40">
+              Nueva Orden
             </span>
           </div>
           <p className="text-xs text-[#746E8B] m-0 mt-0.5">
-            Registro de ventas por Instagram y WhatsApp con verificación de stock y reserva temporal por 24 horas (RF01, RF02, RF05, RF08).
+            Registro de ventas por Instagram y WhatsApp con reserva automática de stock por 24 horas.
           </p>
         </div>
 
@@ -808,10 +808,10 @@ export const P1RegisterOrder: React.FC = () => {
             <div className="p-3 rounded-2xl bg-[#FFF0F6]/80 border border-[#F4A7C1]/30 text-xs text-[#746E8B] space-y-1.5">
               <div className="flex items-center gap-1.5 text-[#343047] font-semibold">
                 <Clock size={14} className="text-[#F4A7C1]" />
-                <span>Regla de Negocio ICONIX:</span>
+                <span>Reserva de Stock:</span>
               </div>
               <p className="leading-relaxed text-[11px]">
-                Al presionar <strong>"Guardar pedido"</strong> se reservará el stock temporalmente por <strong>24 horas</strong>. El stock disponible disminuirá para evitar sobreventas en redes sociales, sin deducir físicamente el inventario hasta la aprobación del pago (CUS-03).
+                Al presionar <strong>"Guardar pedido"</strong> se reservará el stock temporalmente por <strong>24 horas</strong>. El stock disponible disminuirá para evitar sobreventas en redes sociales hasta la confirmación del pago.
               </p>
             </div>
 

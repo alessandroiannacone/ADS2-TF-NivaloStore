@@ -13,6 +13,7 @@ import type {
 import { INITIAL_PEDIDOS, INITIAL_PRODUCTOS, INITIAL_VENDEDOR } from '../data/mockData';
 import {
   fetchProductsFromSupabase,
+  fetchOrdersFromSupabase,
   saveOrderToSupabase,
   updateOrderStatusInSupabase,
   savePaymentToSupabase,
@@ -257,16 +258,25 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Carga inicial y sincronización con Supabase Backend (PostgreSQL)
   useEffect(() => {
     if (isSupabaseConfigured) {
+      // 1. Cargar catálogo de productos desde Supabase
       fetchProductsFromSupabase().then((supabaseProducts) => {
         if (supabaseProducts && supabaseProducts.length > 0) {
           setProductos(supabaseProducts);
-          addNotification(
-            'info',
-            'Backend Supabase Conectado',
-            'Catálogo y stock sincronizados en vivo desde tu base de datos PostgreSQL en Supabase.'
-          );
         }
       });
+
+      // 2. Cargar pedidos desde Supabase
+      fetchOrdersFromSupabase().then((supabaseOrders) => {
+        if (supabaseOrders && supabaseOrders.length > 0) {
+          setPedidos(supabaseOrders);
+        }
+      });
+
+      addNotification(
+        'info',
+        'Backend Supabase Conectado',
+        'Datos sincronizados en tiempo real desde tu base de datos PostgreSQL en Supabase.'
+      );
     }
   }, []);
 

@@ -702,7 +702,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         numeroIntento: 1,
         fechaHora: hoursAgo(2.8),
         resultado: 'Generado',
-        enlaceGenerado: 'https://demo.nivalostore.local/pago/000121',
+        enlaceGenerado: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000121',
       },
     ],
     pagos: [],
@@ -726,7 +726,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         observaciones: 'Generación de enlace de cobro demostrativo (Intento #1).',
       },
     ],
-    enlacePagoActivo: 'https://demo.nivalostore.local/pago/000121',
+    enlacePagoActivo: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000121',
   },
 
   // 2. Pedido pagado (aprobado y listo para preparación)
@@ -767,7 +767,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         numeroIntento: 1,
         fechaHora: hoursAgo(9.5),
         resultado: 'Generado',
-        enlaceGenerado: 'https://demo.nivalostore.local/pago/000122',
+        enlaceGenerado: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000122',
       },
     ],
     pagos: [
@@ -802,7 +802,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         observaciones: 'Pago verificado exitosamente por S/ 63.00 (REF-789012). Reserva de stock confirmada definitivamente.',
       },
     ],
-    enlacePagoActivo: 'https://demo.nivalostore.local/pago/000122',
+    enlacePagoActivo: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000122',
   },
 
   // 3. Pedido a punto de vencer (creado hace 23.6 horas, restan ~24 minutos)
@@ -843,7 +843,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         numeroIntento: 1,
         fechaHora: hoursAgo(23),
         resultado: 'Generado',
-        enlaceGenerado: 'https://demo.nivalostore.local/pago/000123',
+        enlaceGenerado: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000123',
       },
       {
         id: 'INT-004',
@@ -866,7 +866,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         observaciones: 'Pedido registrado con reserva temporal activa por 24 horas.',
       },
     ],
-    enlacePagoActivo: 'https://demo.nivalostore.local/pago/000123',
+    enlacePagoActivo: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000123',
   },
 
   // 4. Pedido cancelado por falta de pago (vencido hace 5 horas, origen Temporizador)
@@ -900,7 +900,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         numeroIntento: 1,
         fechaHora: hoursAgo(28),
         resultado: 'Generado',
-        enlaceGenerado: 'https://demo.nivalostore.local/pago/000124',
+        enlaceGenerado: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000124',
       },
     ],
     pagos: [],
@@ -924,7 +924,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         observaciones: 'CUS-04: Transcurrieron 24 horas sin pago aprobado. Se cancela pedido y se libera la reserva de stock.',
       },
     ],
-    enlacePagoActivo: 'https://demo.nivalostore.local/pago/000124',
+    enlacePagoActivo: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000124',
   },
 
   // 5. Pedido con pago observado por diferencia de importe (CUS-03 Escenario B -> visible en P4)
@@ -965,7 +965,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         numeroIntento: 1,
         fechaHora: hoursAgo(5.8),
         resultado: 'Generado',
-        enlaceGenerado: 'https://demo.nivalostore.local/pago/000125',
+        enlaceGenerado: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000125',
       },
     ],
     pagos: [
@@ -1001,7 +1001,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         observaciones: 'Pago observado: Monto recibido (S/ 45.00) discrepa con total (S/ 59.00). Derivado a P4 para revisión manual.',
       },
     ],
-    enlacePagoActivo: 'https://demo.nivalostore.local/pago/000125',
+    enlacePagoActivo: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000125',
   },
 
   // 6. Pedido cancelado con pago recibido posteriormente (CUS-03 Escenario D -> Regla 10: visible en P4 para rechazo/reembolso)
@@ -1043,7 +1043,7 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         numeroIntento: 1,
         fechaHora: hoursAgo(29),
         resultado: 'Generado',
-        enlaceGenerado: 'https://demo.nivalostore.local/pago/000126',
+        enlaceGenerado: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000126',
       },
     ],
     pagos: [
@@ -1088,6 +1088,6 @@ export const INITIAL_PEDIDOS: Pedido[] = [
         observaciones: 'Notificación de pago REF-992144 recibida con pedido ya cancelado. Se marca pago POR_REVISAR para tramitar reembolso.',
       },
     ],
-    enlacePagoActivo: 'https://demo.nivalostore.local/pago/000126',
+    enlacePagoActivo: 'https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/000126',
   },
 ];

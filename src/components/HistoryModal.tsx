@@ -98,8 +98,8 @@ export const HistoryModal: React.FC = () => {
                 <h3 className="text-base font-bold text-[#343047] font-['Quicksand',sans-serif]">
                   Historial de Estados – {currentPedido.id}
                 </h3>
-                <span className="text-[11px] bg-white text-[#C9B6F2] font-mono px-2 py-0.5 rounded-full border border-[#C9B6F2]/40">
-                  CUS-05 (Auditoría)
+                <span className="text-[11px] bg-white text-[#C9B6F2] font-medium px-2 py-0.5 rounded-full border border-[#C9B6F2]/40">
+                  Auditoría
                 </span>
               </div>
               <p className="text-xs text-[#746E8B]">

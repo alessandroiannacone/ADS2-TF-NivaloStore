@@ -5,7 +5,6 @@ import {
   Clock,
   History,
   CreditCard,
-  Sparkles,
   Flame,
 } from 'lucide-react';
 import type { EstadoPedido } from '../types';
@@ -17,7 +16,6 @@ export const P3OrdersList: React.FC = () => {
     setActiveScreen,
     setSelectedOrderId,
     setHistoryModalOrderId,
-    setPaymentSimulatorOpen,
     simulate24HoursExpiration,
   } = useStore();
 
@@ -72,14 +70,14 @@ export const P3OrdersList: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-[#343047] font-['Quicksand',sans-serif] m-0">
-              Lista de pedidos e historial – Iteración 2
+              Lista de Pedidos e Historial
             </h2>
-            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#FFF0F6] text-[#F4A7C1] border border-[#F4A7C1]/40 font-bold">
-              P3 • CUS-04 y CUS-05
+            <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#FFF0F6] text-[#F4A7C1] border border-[#F4A7C1]/40">
+              Control General
             </span>
           </div>
           <p className="text-xs text-[#746E8B] m-0 mt-0.5">
-            Consulta consolidada de pedidos, estado de reserva temporal y auditoría cronológica de transiciones de estado (RF06, RF07, RF12).
+            Consulta consolidada de pedidos, estado de reservas temporales y auditoría cronológica de cambios de estado.
           </p>
         </div>
 
@@ -90,7 +88,7 @@ export const P3OrdersList: React.FC = () => {
         </div>
       </div>
 
-      {/* B. Vencimiento de 24 horas (Control Demostrativo CUS-04) */}
+      {/* Control de Reservas 24 horas */}
       <div className="p-4 rounded-3xl bg-gradient-to-r from-[#FFF0F6] via-[#F3EEFF] to-white border border-[#C9B6F2]/40 shadow-kawaii-sm space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -99,13 +97,10 @@ export const P3OrdersList: React.FC = () => {
             </div>
             <div>
               <h4 className="text-xs font-bold text-[#343047] flex items-center gap-1.5">
-                <span>Vencimiento de 24 horas – Control de Demostración</span>
-                <span className="text-[10px] bg-white text-[#E9B44C] font-mono px-2 py-0.2 rounded-full border border-[#E9B44C]/30 font-bold">
-                  CUS-04
-                </span>
+                <span>Control de Reservas (Ventana de 24 Horas)</span>
               </h4>
               <p className="text-[11px] text-[#746E8B]">
-                Simula el paso de 24 horas en pedidos pendientes: cancela el pedido, libera el stock temporal de vuelta al catálogo y registra el origen "Temporizador".
+                Los pedidos no pagados al expirar las 24 horas pasan a cancelados y liberan el stock reservado de vuelta al catálogo.
               </p>
             </div>
           </div>
@@ -129,10 +124,10 @@ export const P3OrdersList: React.FC = () => {
             <button
               onClick={handleSimulateExpiration}
               className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#E9B44C] hover:bg-[#E9B44C]/90 text-white shadow-xs transition flex items-center gap-1.5 cursor-pointer shrink-0"
-              title="Acelerar el paso de 24 horas sin esperar un día real"
+              title="Ejecutar verificación de reservas vencidas"
             >
               <Flame size={14} />
-              <span>Simular vencimiento de 24 horas</span>
+              <span>Ejecutar vencimiento de reserva</span>
             </button>
           </div>
         </div>
@@ -315,11 +310,11 @@ export const P3OrdersList: React.FC = () => {
                       {/* Acciones */}
                       <td className="py-3 px-2 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          {/* Ver Historial (CUS-05) */}
+                          {/* Ver Historial */}
                           <button
                             onClick={() => setHistoryModalOrderId(pedido.id)}
                             className="p-1.5 rounded-xl bg-gray-100 hover:bg-[#F3EEFF] text-[#343047] hover:text-[#C9B6F2] transition cursor-pointer flex items-center gap-1 text-[11px] font-semibold"
-                            title="Ver Historial de Cambios (CUS-05)"
+                            title="Ver Historial de Cambios"
                           >
                             <History size={13} />
                             <span className="hidden sm:inline">Historial</span>
@@ -333,24 +328,12 @@ export const P3OrdersList: React.FC = () => {
                                 setActiveScreen('P2');
                               }}
                               className="p-1.5 rounded-xl bg-[#FFF0F6] hover:bg-[#F4A7C1] text-[#F4A7C1] hover:text-white transition cursor-pointer flex items-center gap-1 text-[11px] font-semibold border border-[#F4A7C1]/30"
-                              title="Generar Cobro en P2"
+                              title="Generar Cobro"
                             >
                               <CreditCard size={13} />
                               <span className="hidden sm:inline">Cobrar</span>
                             </button>
                           )}
-
-                          {/* Botón rápido para simular pago (CUS-03) */}
-                          <button
-                            onClick={() => {
-                              setSelectedOrderId(pedido.id);
-                              setPaymentSimulatorOpen(true);
-                            }}
-                            className="p-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-[#746E8B] transition cursor-pointer"
-                            title="Simular Notificación de Pago (CUS-03)"
-                          >
-                            <Sparkles size={13} />
-                          </button>
                         </div>
                       </td>
                     </tr>

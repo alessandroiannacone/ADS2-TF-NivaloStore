@@ -32,7 +32,6 @@ export const P4ReviewPayments: React.FC = () => {
 
   const [rejectMotivo, setRejectMotivo] = useState('');
   const [rejectErrorMsg, setRejectErrorMsg] = useState('');
-  const [simulateRefundFail, setSimulateRefundFail] = useState(false);
 
   // Recopilar todos los pagos observados (POR_REVISAR)
   const observedPaymentsWithOrder: Array<{ pago: Pago; pedido: Pedido }> = [];
@@ -71,14 +70,14 @@ export const P4ReviewPayments: React.FC = () => {
   const handleConfirmRejection = () => {
     if (!rejectModalData) return;
     if (!rejectMotivo.trim()) {
-      setRejectErrorMsg('El motivo del rechazo es obligatorio según la regla de negocio RF11.');
+      setRejectErrorMsg('El motivo del rechazo es obligatorio para auditar la operación.');
       return;
     }
 
     const res = rejectObservedPayment(
       rejectModalData.pago.id,
       rejectMotivo.trim(),
-      simulateRefundFail
+      false
     );
 
     if (res.success) {
@@ -97,14 +96,14 @@ export const P4ReviewPayments: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-[#343047] font-['Quicksand',sans-serif] m-0">
-              Pagos por revisar – Iteración 2
+              Pagos por Revisar
             </h2>
-            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#FFF0F6] text-[#DE6978] border border-[#DE6978]/40 font-bold">
-              P4 • CUS-06
+            <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#FFF0F6] text-[#DE6978] border border-[#DE6978]/40">
+              Conciliación
             </span>
           </div>
           <p className="text-xs text-[#746E8B] m-0 mt-0.5">
-            Conciliación de pagos con diferencias de importe o recibidos tras la cancelación del pedido. Gestión de aprobación, rechazo y reembolso simulado (RF11).
+            Conciliación de pagos con diferencias de importe o recibidos tras la cancelación del pedido. Gestión de aprobación o reembolso.
           </p>
         </div>
 
@@ -121,7 +120,7 @@ export const P4ReviewPayments: React.FC = () => {
         <div className="flex items-center justify-between pb-2 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <span className="w-6 h-6 rounded-lg bg-[#FFF0F6] text-[#DE6978] flex items-center justify-center text-xs font-bold">
-              A
+              ✓
             </span>
             <h3 className="text-sm font-bold text-[#343047]">
               Pagos Observados en Espera de Decisión
@@ -141,7 +140,7 @@ export const P4ReviewPayments: React.FC = () => {
               ¡Al día! No hay pagos observados pendientes de revisión
             </h4>
             <p className="text-xs max-w-md mx-auto leading-relaxed">
-              Todos los cobros recibidos han sido aprobados o ya fueron gestionados mediante rechazo y reembolso. Puedes simular nuevos pagos observados desde el <strong>Simulador CUS-03</strong>.
+              Todos los cobros recibidos han sido aprobados o gestionados mediante resolución y reembolso.
             </p>
           </div>
         ) : (
@@ -304,7 +303,7 @@ export const P4ReviewPayments: React.FC = () => {
                             type="button"
                             onClick={() => setHistoryModalOrderId(pedido.id)}
                             className="p-1.5 rounded-xl bg-gray-100 hover:bg-[#F3EEFF] text-[#746E8B] hover:text-[#C9B6F2] transition cursor-pointer"
-                            title="Consultar historial del pedido (CUS-05)"
+                            title="Consultar historial del pedido"
                           >
                             <History size={13} />
                           </button>
@@ -434,7 +433,7 @@ export const P4ReviewPayments: React.FC = () => {
         </div>
       )}
 
-      {/* C y E. MODAL DE RECHAZO Y REEMBOLSO SIMULADO */}
+      {/* MODAL DE RECHAZO Y REEMBOLSO */}
       {rejectModalData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-lg rounded-3xl shadow-kawaii border border-[#DE6978]/40 p-5 space-y-4">
@@ -444,7 +443,7 @@ export const P4ReviewPayments: React.FC = () => {
               </div>
               <div>
                 <h4 className="text-sm font-bold text-[#343047]">
-                  Rechazar Pago y Gestionar Reembolso Simulado
+                  Rechazar Pago y Registrar Reembolso
                 </h4>
                 <p className="text-xs text-[#746E8B] mt-0.5">
                   Pedido <strong>{rejectModalData.pedido.id}</strong> • Monto a reembolsar: <strong>S/ {rejectModalData.pago.montoRecibido.toFixed(2)}</strong>
@@ -454,7 +453,7 @@ export const P4ReviewPayments: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-[#343047] mb-1">
-                Motivo del Rechazo <span className="text-[#DE6978]">*</span> (Obligatorio - RF11):
+                Motivo del Rechazo <span className="text-[#DE6978]">*</span> (Obligatorio):
               </label>
               <textarea
                 rows={3}
@@ -472,28 +471,6 @@ export const P4ReviewPayments: React.FC = () => {
                 </p>
               )}
             </div>
-
-            {/* E. Switch para simular error en pasarela de reembolso */}
-            <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-between">
-              <div>
-                <span className="text-xs font-bold text-[#343047] block">
-                  Simular Fallo en Servicio de Pago (Reembolso)
-                </span>
-                <span className="text-[10px] text-[#746E8B]">
-                  Emula error de conexión para demostrar el botón "Reintentar"
-                </span>
-              </div>
-              <input
-                type="checkbox"
-                checked={simulateRefundFail}
-                onChange={(e) => setSimulateRefundFail(e.target.checked)}
-                className="rounded text-[#DE6978] focus:ring-[#DE6978]"
-              />
-            </div>
-
-            <p className="text-[10px] text-[#746E8B] italic">
-              * Nota: En este prototipo académico no se ejecutan transferencias bancarias reales. Se simula la solicitud ante la API de pasarela.
-            </p>
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button

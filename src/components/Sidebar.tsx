@@ -5,12 +5,13 @@ import {
   CreditCard,
   ListOrdered,
   AlertCircle,
-  Heart,
+  Database,
   ChevronRight,
 } from 'lucide-react';
+import { isSupabaseConfigured } from '../lib/supabase';
 
 export const Sidebar: React.FC = () => {
-  const { activeScreen, setActiveScreen, pedidos, setPaymentSimulatorOpen } = useStore();
+  const { activeScreen, setActiveScreen, pedidos, productos } = useStore();
 
   // Contadores
   const pendingCount = pedidos.filter((p) => p.estado === 'PENDIENTE_PAGO').length;
@@ -23,39 +24,34 @@ export const Sidebar: React.FC = () => {
     label: string;
     sublabel: string;
     icon: React.ComponentType<{ size?: number; className?: string }>;
-    cus: string;
     badge?: number;
     badgeColor?: string;
   }> = [
     {
       id: 'P1',
       label: 'Registrar pedido',
-      sublabel: 'P1 – Nuevo pedido y stock',
+      sublabel: 'Nueva orden y reserva',
       icon: FilePlus,
-      cus: 'CUS-01',
     },
     {
       id: 'P2',
       label: 'Generar cobro',
-      sublabel: 'P2 – Enlace de pago',
+      sublabel: 'Enlaces de pago',
       icon: CreditCard,
-      cus: 'CUS-02',
       badge: pendingCount > 0 ? pendingCount : undefined,
       badgeColor: 'bg-[#C9B6F2] text-white',
     },
     {
       id: 'P3',
       label: 'Lista de pedidos',
-      sublabel: 'P3 – Historial y 24h',
+      sublabel: 'Control y reservas 24h',
       icon: ListOrdered,
-      cus: 'CUS-04 / 05',
     },
     {
       id: 'P4',
       label: 'Pagos por revisar',
-      sublabel: 'P4 – Conciliación manual',
+      sublabel: 'Conciliación de pagos',
       icon: AlertCircle,
-      cus: 'CUS-06',
       badge: observedCount > 0 ? observedCount : undefined,
       badgeColor: 'bg-[#DE6978] text-white animate-pulse',
     },
@@ -67,7 +63,7 @@ export const Sidebar: React.FC = () => {
         {/* Banner de Navegación */}
         <div className="px-2 py-1">
           <span className="text-[10px] font-bold tracking-wider uppercase text-[#746E8B]">
-            Módulos Principales – Iteración 2
+            Gestión de Tienda
           </span>
         </div>
 
@@ -99,9 +95,6 @@ export const Sidebar: React.FC = () => {
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-sm font-semibold">{item.label}</span>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded-md bg-gray-100 text-[#746E8B] font-mono">
-                        {item.id}
-                      </span>
                     </div>
                     <span className="text-[11px] block text-[#746E8B] font-normal">
                       {item.sublabel}
@@ -129,38 +122,42 @@ export const Sidebar: React.FC = () => {
           })}
         </nav>
 
-        {/* Tarjeta de Acceso al Simulador de Pasarela CUS-03 */}
+        {/* Resumen de Base de Datos */}
         <div className="p-3.5 rounded-2xl bg-gradient-to-br from-[#FFF0F6] via-[#F3EEFF] to-white border border-[#C9B6F2]/40 shadow-xs space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[#343047] flex items-center gap-1">
-              <span>💳</span> Pasarela CUS-03
+            <span className="text-xs font-bold text-[#343047] flex items-center gap-1.5">
+              <Database size={14} className="text-[#9A7BB0]" /> Base de Datos
             </span>
-            <span className="text-[10px] bg-[#C9B6F2]/30 text-[#343047] font-semibold px-1.5 py-0.5 rounded-full">
-              Simulación
+            <span
+              className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                isSupabaseConfigured
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-amber-100 text-amber-700'
+              }`}
+            >
+              {isSupabaseConfigured ? 'Supabase Activo' : 'Modo Local'}
             </span>
           </div>
-          <p className="text-[11px] text-[#746E8B] leading-snug">
-            Prueba la confirmación automática, pagos con diferencia, duplicados y post-cancelación.
-          </p>
-          <button
-            onClick={() => setPaymentSimulatorOpen(true)}
-            className="w-full py-1.5 px-2 bg-white hover:bg-[#F3EEFF] text-[#343047] text-xs font-semibold rounded-xl border border-[#C9B6F2]/50 shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
-          >
-            <span>Lanzar Pasarela</span>
-            <span className="text-[#F4A7C1]">✨</span>
-          </button>
+          <div className="grid grid-cols-2 gap-2 pt-1 text-center">
+            <div className="bg-white/80 p-2 rounded-xl border border-pink-100">
+              <span className="text-[10px] text-[#746E8B] block">Productos</span>
+              <span className="text-sm font-bold text-[#343047]">{productos.length}</span>
+            </div>
+            <div className="bg-white/80 p-2 rounded-xl border border-purple-100">
+              <span className="text-[10px] text-[#746E8B] block">Pedidos</span>
+              <span className="text-sm font-bold text-[#343047]">{pedidos.length}</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Footer académico del menú */}
-      <div className="p-4 border-t border-gray-100 text-center space-y-2">
-        <div className="flex items-center justify-center gap-1 text-[11px] text-[#746E8B]">
-          <span>Hecho con</span>
-          <Heart size={12} className="text-[#DE6978] fill-[#DE6978]" />
-          <span>para Análisis y Sistemas II</span>
+      {/* Footer del menú */}
+      <div className="p-4 border-t border-gray-100 text-center space-y-1">
+        <div className="text-[11px] font-medium text-[#746E8B]">
+          Nivalo Store © 2026
         </div>
-        <div className="text-[10px] text-[#C9B6F2] font-medium">
-          ICONIX Iteración 2 • 2026
+        <div className="text-[10px] text-[#C9B6F2]">
+          Gestión Omnicanal & Reservas
         </div>
       </div>
     </aside>

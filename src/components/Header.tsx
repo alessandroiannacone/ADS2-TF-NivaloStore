@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
+import { isSupabaseConfigured } from '../lib/supabase';
 import {
   Bell,
   Sparkles,
-  Wifi,
-  WifiOff,
-  RotateCcw,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
-  XCircle,
-  CreditCard,
   ChevronDown,
+  Database,
+  CheckCheck,
+  Trash2,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -20,11 +16,6 @@ export const Header: React.FC = () => {
     notificaciones,
     markNotificationAsRead,
     clearAllNotifications,
-    resetDemoData,
-    isOffline,
-    setIsOffline,
-    setPaymentSimulatorOpen,
-    pedidos,
     setViewMode,
   } = useStore();
 
@@ -32,28 +23,9 @@ export const Header: React.FC = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const unreadCount = notificaciones.filter((n) => !n.leida).length;
-  const observedCount = pedidos.flatMap((p) => p.pagos || []).filter((pg) => pg.estadoPago === 'POR_REVISAR').length;
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-[#F4A7C1]/30 px-4 lg:px-8 py-3 transition-all">
-      {/* Alerta de conexión intermitente RNF02 */}
-      {isOffline && (
-        <div className="mb-2 bg-[#FFF0F6] border border-[#DE6978] text-[#DE6978] px-3 py-1.5 rounded-xl text-xs font-medium flex items-center justify-between animate-pulse">
-          <div className="flex items-center gap-2">
-            <WifiOff size={14} />
-            <span>
-              <strong>Simulación RNF02:</strong> Modo sin conexión activado. Las operaciones se almacenan localmente y se sincronizarán al recuperar la red.
-            </span>
-          </div>
-          <button
-            onClick={() => setIsOffline(false)}
-            className="text-xs underline hover:text-[#DE6978]/80 cursor-pointer"
-          >
-            Reconectar
-          </button>
-        </div>
-      )}
-
       <div className="flex items-center justify-between gap-4">
         {/* Logo e Identidad */}
         <div className="flex items-center gap-3">
@@ -66,11 +38,11 @@ export const Header: React.FC = () => {
                 Nivalo Store
               </h1>
               <span className="bg-[#FFF0F6] text-[#F4A7C1] border border-[#F4A7C1]/40 text-[11px] font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
-                🌸 Iteración 2 – ICONIX
+                🌸 Panel de Control
               </span>
             </div>
             <p className="text-xs text-[#746E8B] m-0 flex items-center gap-1.5">
-              <span>Panel del Vendedor</span>
+              <span>Gestión de Pedidos y Stock</span>
               <span className="w-1 h-1 rounded-full bg-[#C9B6F2]"></span>
               <span className="text-[11px] text-[#C9B6F2] font-medium">Ventas por Redes Sociales</span>
             </p>
@@ -82,52 +54,25 @@ export const Header: React.FC = () => {
           {/* Botón Ir a Tienda Online (Cliente) */}
           <button
             onClick={() => setViewMode('storefront')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#F4A7C1] to-[#EE8EAF] hover:from-[#EE8EAF] hover:to-[#E0799E] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#F4A7C1] to-[#EE8EAF] hover:from-[#EE8EAF] hover:to-[#E0799E] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
             title="Volver a la Tienda Online (Vista Cliente)"
           >
-            <span>🌸</span>
-            <span className="hidden sm:inline">Tienda Online</span>
+            <span>🛍️</span>
+            <span>Ver Tienda Online</span>
           </button>
 
-          {/* Botón rápido CUS-03 Pasarela */}
-          <button
-            onClick={() => setPaymentSimulatorOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F3EEFF] text-[#746E8B] hover:text-[#343047] hover:bg-[#C9B6F2]/30 border border-[#C9B6F2]/40 text-xs font-medium transition cursor-pointer"
-            title="Abrir Simulador de Notificaciones de Pago Pasarela (CUS-03)"
-          >
-            <CreditCard size={15} className="text-[#C9B6F2]" />
-            <span>Simulador CUS-03</span>
-            {observedCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.2 bg-[#DE6978] text-white text-[10px] rounded-full font-bold">
-                {observedCount}
-              </span>
-            )}
-          </button>
-
-          {/* Toggle RNF02 Red */}
-          <button
-            onClick={() => setIsOffline(!isOffline)}
-            className={`p-2 rounded-xl text-xs flex items-center gap-1 border transition cursor-pointer ${
-              isOffline
-                ? 'bg-[#FFF0F6] text-[#DE6978] border-[#DE6978]/40'
-                : 'bg-gray-50 hover:bg-gray-100 text-[#746E8B] border-gray-200'
+          {/* Badge Estado Base de Datos */}
+          <div
+            className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border ${
+              isSupabaseConfigured
+                ? 'bg-[#2D9D78]/10 text-[#2D9D78] border-[#2D9D78]/30'
+                : 'bg-gray-100 text-[#746E8B] border-gray-200'
             }`}
-            title={isOffline ? 'Red desconectada (RNF02)' : 'Simular desconexión móvil (RNF02)'}
+            title={isSupabaseConfigured ? 'Conectado a PostgreSQL en Supabase' : 'Modo local activo'}
           >
-            {isOffline ? <WifiOff size={16} /> : <Wifi size={16} />}
-            <span className="hidden md:inline text-[11px]">
-              {isOffline ? 'Offline' : 'Online'}
-            </span>
-          </button>
-
-          {/* Restablecer datos */}
-          <button
-            onClick={resetDemoData}
-            className="p-2 rounded-xl bg-gray-50 hover:bg-gray-100 text-[#746E8B] border border-gray-200 text-xs transition cursor-pointer"
-            title="Restablecer datos de demostración a estado inicial"
-          >
-            <RotateCcw size={16} />
-          </button>
+            <Database size={13} className={isSupabaseConfigured ? 'text-[#2D9D78]' : 'text-[#746E8B]'} />
+            <span>{isSupabaseConfigured ? 'Supabase Conectado' : 'Base de Datos Local'}</span>
+          </div>
 
           {/* Notificaciones */}
           <div className="relative">
@@ -138,63 +83,85 @@ export const Header: React.FC = () => {
             >
               <Bell size={18} />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#F4A7C1] text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#DE6978] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-xs">
                   {unreadCount}
                 </span>
               )}
             </button>
 
-            {/* Menú desplegable de notificaciones */}
+            {/* Menú Desplegable Notificaciones */}
             {showNotifMenu && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-kawaii border border-[#C9B6F2]/30 p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
-                <div className="flex items-center justify-between pb-2 border-b border-gray-100 mb-2">
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-kawaii border border-[#C9B6F2]/30 p-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-semibold text-[#343047]">Notificaciones</span>
-                    <span className="text-[11px] bg-[#F3EEFF] text-[#C9B6F2] font-bold px-2 py-0.5 rounded-full">
-                      {notificaciones.length}
-                    </span>
+                    <span className="font-bold text-xs text-[#343047]">Centro de Alertas</span>
+                    {unreadCount > 0 && (
+                      <span className="bg-[#FFF0F6] text-[#DE6978] text-[10px] font-bold px-2 py-0.2 rounded-full border border-[#DE6978]/30">
+                        {unreadCount} nuevas
+                      </span>
+                    )}
                   </div>
-                  {notificaciones.length > 0 && (
-                    <button
-                      onClick={clearAllNotifications}
-                      className="text-[11px] text-[#746E8B] hover:text-[#DE6978] cursor-pointer"
-                    >
-                      Limpiar todo
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={() => notificaciones.forEach((n) => markNotificationAsRead(n.id))}
+                        className="text-[11px] text-[#746E8B] hover:text-[#343047] flex items-center gap-1 transition cursor-pointer"
+                        title="Marcar todas como leídas"
+                      >
+                        <CheckCheck size={13} />
+                        <span className="hidden sm:inline">Leer todas</span>
+                      </button>
+                    )}
+                    {notificaciones.length > 0 && (
+                      <button
+                        onClick={clearAllNotifications}
+                        className="text-[11px] text-[#DE6978] hover:text-[#DE6978]/80 flex items-center gap-1 transition cursor-pointer"
+                        title="Borrar todas"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
+                <div className="max-h-72 overflow-y-auto space-y-2 py-2 pr-1">
                   {notificaciones.length === 0 ? (
                     <div className="text-center py-6 text-xs text-[#746E8B]">
                       <p>✨ No hay notificaciones pendientes</p>
                     </div>
                   ) : (
-                    notificaciones.map((notif) => (
+                    notificaciones.map((n) => (
                       <div
-                        key={notif.id}
-                        onClick={() => markNotificationAsRead(notif.id)}
-                        className={`p-2.5 rounded-xl text-xs transition border cursor-pointer ${
-                          !notif.leida ? 'bg-[#FFF0F6]/60 border-[#F4A7C1]/40' : 'bg-gray-50/70 border-gray-100'
+                        key={n.id}
+                        className={`p-2.5 rounded-xl text-xs transition border ${
+                          n.tipo === 'success'
+                            ? 'bg-[#2D9D78]/5 border-[#2D9D78]/20'
+                            : n.tipo === 'warning'
+                            ? 'bg-[#E9B44C]/10 border-[#E9B44C]/30'
+                            : n.tipo === 'error'
+                            ? 'bg-[#DE6978]/10 border-[#DE6978]/30'
+                            : 'bg-[#F3EEFF] border-[#C9B6F2]/30'
                         }`}
                       >
-                        <div className="flex items-start gap-2">
-                          <span className="mt-0.5">
-                            {notif.tipo === 'success' && <CheckCircle2 size={14} className="text-[#2D9D78]" />}
-                            {notif.tipo === 'warning' && <AlertTriangle size={14} className="text-[#E9B44C]" />}
-                            {notif.tipo === 'error' && <XCircle size={14} className="text-[#DE6978]" />}
-                            {notif.tipo === 'info' && <Info size={14} className="text-[#C9B6F2]" />}
+                        <div className="flex items-center justify-between gap-1">
+                          <span
+                            className={`font-bold text-[11px] ${
+                              n.tipo === 'success'
+                                ? 'text-[#2D9D78]'
+                                : n.tipo === 'warning'
+                                ? 'text-[#E9B44C]'
+                                : n.tipo === 'error'
+                                ? 'text-[#DE6978]'
+                                : 'text-[#746E8B]'
+                            }`}
+                          >
+                            {n.titulo}
                           </span>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <span className="font-semibold text-[#343047]">{notif.titulo}</span>
-                              <span className="text-[10px] text-[#746E8B]">{notif.fechaHora}</span>
-                            </div>
-                            <p className="text-[11px] text-[#746E8B] mt-0.5 leading-relaxed">
-                              {notif.mensaje}
-                            </p>
-                          </div>
+                          <span className="text-[10px] text-gray-400">
+                            {new Date(n.fechaHora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </div>
+                        <p className="text-[11px] text-[#343047] mt-0.5 leading-snug">{n.mensaje}</p>
                       </div>
                     ))
                   )}
@@ -207,24 +174,16 @@ export const Header: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="flex items-center gap-2 pl-2 pr-3 py-1 rounded-2xl bg-white hover:bg-[#FFF0F6]/50 border border-gray-200 transition cursor-pointer"
+              className="flex items-center gap-2 p-1.5 pl-2.5 pr-2 rounded-2xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition cursor-pointer"
             >
-              <div className="relative">
-                <img
-                  src={vendedor.avatar}
-                  alt={vendedor.nombre}
-                  className="w-8 h-8 rounded-full object-cover border-2 border-[#F4A7C1]"
-                />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#2D9D78] ring-2 ring-white"></span>
-              </div>
-              <div className="text-left hidden sm:block">
-                <span className="block text-xs font-semibold text-[#343047] leading-tight">
-                  {vendedor.nombre}
-                </span>
-                <span className="block text-[10px] text-[#746E8B] leading-none">
-                  {vendedor.usuario}
-                </span>
-              </div>
+              <img
+                src={vendedor.avatar}
+                alt={vendedor.nombre}
+                className="w-7 h-7 rounded-full object-cover border border-[#F4A7C1]"
+              />
+              <span className="text-xs font-semibold text-[#343047] hidden md:inline">
+                {vendedor.nombre.split(' ')[0]}
+              </span>
               <ChevronDown size={14} className="text-[#746E8B]" />
             </button>
 
@@ -240,16 +199,13 @@ export const Header: React.FC = () => {
                     <h4 className="text-xs font-bold text-[#343047]">{vendedor.nombre}</h4>
                     <p className="text-[11px] text-[#746E8B]">{vendedor.rol}</p>
                     <span className="inline-block mt-0.5 text-[10px] text-[#2D9D78] font-medium bg-[#2D9D78]/10 px-1.5 py-0.2 rounded-full">
-                      ● Sesión activa simulada
+                      ● Sesión activa
                     </span>
                   </div>
                 </div>
                 <div className="pt-2 text-[11px] text-[#746E8B] space-y-1">
-                  <p><strong>Sucursal:</strong> Lima, Perú</p>
+                  <p><strong>Ubicación:</strong> Lima, Perú</p>
                   <p><strong>Canales:</strong> Instagram & WhatsApp</p>
-                  <p className="text-[10px] text-[#C9B6F2] font-medium pt-1">
-                    Metodología ICONIX – Análisis y Sistemas II
-                  </p>
                 </div>
               </div>
             )}

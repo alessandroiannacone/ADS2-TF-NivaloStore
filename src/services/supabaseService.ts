@@ -178,3 +178,67 @@ export const savePaymentToSupabase = async (pago: Pago): Promise<boolean> => {
   }
 };
 
+// 5. Obtener pedidos desde Supabase
+export const fetchOrdersFromSupabase = async (): Promise<Pedido[] | null> => {
+  if (!isSupabaseConfigured || !supabase) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('pedidos')
+      .select(`
+        *,
+        detalles:detalles_pedido(*),
+        pagos:pagos(*),
+        historial:historial_estados(*)
+      `)
+      .order('fecha_creacion', { ascending: false });
+
+    if (error || !data || data.length === 0) return null;
+
+    return data.map((p: any) => ({
+      id: p.id,
+      cliente: p.cliente_data,
+      total: Number(p.total),
+      estado: p.estado,
+      motivoCancelacion: p.motivo_cancelacion,
+      fechaCreacion: p.fecha_creacion,
+      fechaVencimientoReserva: p.fecha_vencimiento_reserva,
+      enlacePagoActivo: p.enlace_pago_activo,
+      intentosCobro: [],
+      detalles: (p.detalles || []).map((d: any) => ({
+        id: d.id,
+        productoId: d.producto_id,
+        productoNombre: d.producto_nombre,
+        precioUnitario: Number(d.precio_unitario),
+        cantidad: d.cantidad,
+        subtotal: Number(d.subtotal),
+      })),
+      pagos: (p.pagos || []).map((pg: any) => ({
+        id: pg.id,
+        pedidoId: pg.pedido_id,
+        referenciaExterna: pg.referencia_externa,
+        fechaPago: pg.fecha_pago,
+        totalPedido: Number(pg.total_pedido),
+        montoRecibido: Number(pg.monto_recibido),
+        diferencia: Number(pg.diferencia),
+        estadoPago: pg.estado_pago,
+        motivoObservacion: pg.motivo_observacion,
+        motivoRechazo: pg.motivo_rechazo,
+        resultadoReembolso: pg.resultado_reembolso,
+      })),
+      historial: (p.historial || []).map((h: any) => ({
+        id: h.id,
+        pedidoId: h.pedido_id,
+        fechaHora: h.fecha_hora,
+        estadoAnterior: h.estado_anterior,
+        estadoNuevo: h.estado_nuevo,
+        origen: h.origen,
+        observaciones: h.observaciones,
+      })),
+    }));
+  } catch (err) {
+    console.warn('Excepción en fetchOrdersFromSupabase:', err);
+    return null;
+  }
+};
+

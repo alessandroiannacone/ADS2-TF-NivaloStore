@@ -26,7 +26,6 @@ export const P2GenerateCharge: React.FC = () => {
     selectedOrderId,
     setSelectedOrderId,
     generatePaymentLink,
-    setPaymentSimulatorOpen,
   } = useStore();
 
   const [currentOrderId, setCurrentOrderId] = useState<string>('');
@@ -34,7 +33,6 @@ export const P2GenerateCharge: React.FC = () => {
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [copiedWhatsAppMsg, setCopiedWhatsAppMsg] = useState<boolean>(false);
   const [copiedInstagramMsg, setCopiedInstagramMsg] = useState<boolean>(false);
-  const [simulateErrorToggle, setSimulateErrorToggle] = useState<boolean>(false);
   const [lastGeneratedLink, setLastGeneratedLink] = useState<string | null>(null);
 
   // Inicializar o sincronizar con pedido seleccionado
@@ -94,24 +92,24 @@ export const P2GenerateCharge: React.FC = () => {
     setIsProcessing(true);
     setLastGeneratedLink(null);
 
-    // Simulación de latencia de red (RNF05: menos de 2s)
+    // Procesamiento de enlace
     setTimeout(() => {
-      const res = generatePaymentLink(currentPedido.id, simulateErrorToggle);
+      const res = generatePaymentLink(currentPedido.id, false);
       setIsProcessing(false);
       if (res.success && res.enlace) {
         setLastGeneratedLink(res.enlace);
       }
-    }, 900);
+    }, 500);
   };
 
   // Mensaje para WhatsApp
   const whatsappText = currentPedido
-    ? `🌸 ¡Hola ${currentPedido.cliente.nombreOIdentificador}! Gracias por comprar en *Nivalo Store*.\n\nAquí tienes tu enlace seguro de pago para el pedido *${currentPedido.id}* por un total de *S/ ${currentPedido.total.toFixed(2)}*:\n👉 ${currentPedido.enlacePagoActivo || lastGeneratedLink || `https://demo.nivalostore.local/pago/${currentPedido.id.replace('PED-', '')}`}\n\n⚠️ Recuerda que tu stock está reservado durante 24 horas. ¡Esperamos tu confirmación!`
+    ? `🌸 ¡Hola ${currentPedido.cliente.nombreOIdentificador}! Gracias por comprar en *Nivalo Store*.\n\nAquí tienes tu enlace seguro de pago para el pedido *${currentPedido.id}* por un total de *S/ ${currentPedido.total.toFixed(2)}*:\n👉 ${currentPedido.enlacePagoActivo || lastGeneratedLink || `https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/${currentPedido.id.replace('PED-', '')}`}\n\n⚠️ Recuerda que tu stock está reservado durante 24 horas. ¡Esperamos tu confirmación!`
     : '';
 
   // Mensaje para Instagram
   const instagramText = currentPedido
-    ? `Hola ${currentPedido.cliente.nombreOIdentificador} 💖 Tu pedido ${currentPedido.id} en Nivalo Store está listo para pago. Total: S/ ${currentPedido.total.toFixed(2)}. Enlace de pago: ${currentPedido.enlacePagoActivo || lastGeneratedLink || `https://demo.nivalostore.local/pago/${currentPedido.id.replace('PED-', '')}`} (Reserva activa por 24 horas).`
+    ? `Hola ${currentPedido.cliente.nombreOIdentificador} 💖 Tu pedido ${currentPedido.id} en Nivalo Store está listo para pago. Total: S/ ${currentPedido.total.toFixed(2)}. Enlace de pago: ${currentPedido.enlacePagoActivo || lastGeneratedLink || `https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/${currentPedido.id.replace('PED-', '')}`} (Reserva activa por 24 horas).`
     : '';
 
   const copyToClipboard = (text: string, type: 'link' | 'wa' | 'ig') => {
@@ -135,30 +133,16 @@ export const P2GenerateCharge: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-[#343047] font-['Quicksand',sans-serif] m-0">
-              Generar cobro – Iteración 2
+              Generar Cobro
             </h2>
-            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-[#FFF0F6] text-[#F4A7C1] border border-[#F4A7C1]/40 font-bold">
-              P2 • CUS-02
+            <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#FFF0F6] text-[#F4A7C1] border border-[#F4A7C1]/40">
+              Enlace Seguro
             </span>
           </div>
           <p className="text-xs text-[#746E8B] m-0 mt-0.5">
-            Generación de enlaces de pago seguros exclusivamente para pedidos pendientes y no vencidos (RF03, RF09, RF10).
+            Generación y envío de enlaces de pago para pedidos pendientes con reserva activa de 24 horas.
           </p>
         </div>
-
-        {/* Botón hacia Simulador CUS-03 */}
-        {currentPedido && (
-          <button
-            onClick={() => {
-              setSelectedOrderId(currentPedido.id);
-              setPaymentSimulatorOpen(true);
-            }}
-            className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#F3EEFF] text-[#343047] hover:bg-[#C9B6F2]/30 border border-[#C9B6F2]/40 transition flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
-          >
-            <CreditCard size={14} className="text-[#C9B6F2]" />
-            <span>Simular Pago Webhook (CUS-03)</span>
-          </button>
-        )}
       </div>
 
       {/* Selector de Pedido */}
@@ -282,21 +266,10 @@ export const P2GenerateCharge: React.FC = () => {
               <div className="flex items-center justify-between pb-2 border-b border-gray-100">
                 <h3 className="text-sm font-bold text-[#343047] flex items-center gap-2">
                   <span className="w-6 h-6 rounded-lg bg-[#F3EEFF] text-[#C9B6F2] flex items-center justify-center text-xs font-bold">
-                    B
+                    ✓
                   </span>
                   <span>Generar Enlace de Pago</span>
                 </h3>
-
-                {/* E: Switch para simular error de pasarela */}
-                <label className="flex items-center gap-2 text-[11px] text-[#DE6978] font-semibold cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={simulateErrorToggle}
-                    onChange={(e) => setSimulateErrorToggle(e.target.checked)}
-                    className="rounded text-[#DE6978] focus:ring-[#DE6978]"
-                  />
-                  <span>Simular: Servicio de pago no responde (Error)</span>
-                </label>
               </div>
 
               {/* F. Validación: si el pedido no es válido para cobro */}
@@ -313,7 +286,7 @@ export const P2GenerateCharge: React.FC = () => {
               ) : (
                 <div className="space-y-3">
                   <p className="text-xs text-[#746E8B] leading-relaxed">
-                    Al generar el enlace, se enviará una solicitud simulada a la pasarela de pagos y se registrará el intento en la auditoría del pedido.
+                    Al generar el enlace seguro, se creará el acceso único para que el cliente pague su pedido dentro de las 24 horas de reserva.
                   </p>
 
                   <button
@@ -325,7 +298,7 @@ export const P2GenerateCharge: React.FC = () => {
                     {isProcessing ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Procesando solicitud al Servicio de Pago...</span>
+                        <span>Generando enlace de cobro...</span>
                       </>
                     ) : (
                       <>
@@ -342,7 +315,7 @@ export const P2GenerateCharge: React.FC = () => {
                 <div className="p-3.5 rounded-2xl bg-[#F3EEFF]/80 border border-[#C9B6F2]/50 space-y-2">
                   <span className="text-[11px] font-bold text-[#343047] flex items-center gap-1.5">
                     <Sparkles size={13} className="text-[#C9B6F2]" />
-                    Enlace de Demostración Activo:
+                    Enlace de Pago Activo:
                   </span>
                   <div className="flex items-center gap-2">
                     <input
