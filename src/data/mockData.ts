@@ -647,7 +647,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 25,
     stockReservado: 0,
     stockTotalFisico: 25,
-    imagen: './prod_holder_estrella.jpg',
+    imagen: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzIrmLgs_G6tYqnzp9Qa-CZs4-mNirFxKTg2Qz8H_tYmi7ZqyeBkUUwzZn&s=10',
     descripcion: 'Portafotos de felpa en forma de estrella con ventana transparente y estrellitas bordadas para photocards de idols.',
   },
 ];
