@@ -593,7 +593,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 20,
     stockReservado: 0,
     stockTotalFisico: 20,
-    imagen: 'https://images.unsplash.com/photo-1582845512747-e42001c95638?auto=format&fit=crop&w=400&q=80',
+    imagen: 'https://img.ltwebstatic.com/v4/p/spmp/2026/06/12/9f/1781228948196404efc7a5651e4ba7b0c476fb0064_thumbnail_750x999.jpg',
     descripcion: 'Dúo de llaveros de conos de helado acrílico con cuentas translúcidas y estrellas de cristal.',
   },
   {
