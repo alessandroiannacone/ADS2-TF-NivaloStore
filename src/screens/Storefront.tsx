@@ -128,31 +128,31 @@ export const Storefront: React.FC = () => {
     {
       id: 'Papelería',
       name: 'Papelería',
-      image: '/prod_memopads.jpg',
+      image: './prod_memopads.jpg',
       desc: 'Libretas, stickers, washi tapes',
     },
     {
       id: 'Ropa',
       name: 'Ropa',
-      image: '/prod_vestido.jpg',
+      image: './prod_vestido.jpg',
       desc: 'Moda coreana, faldas, vestidos',
     },
     {
       id: 'Maquillaje',
       name: 'Maquillaje',
-      image: '/prod_paleta.jpg',
+      image: './prod_paleta.jpg',
       desc: 'Lip tints, sombras, rubores',
     },
     {
       id: 'Accesorios',
       name: 'Accesorios',
-      image: '/prod_lazo.jpg',
+      image: './prod_lazo.jpg',
       desc: 'Lazos, ganchitos, scrunchies',
     },
     {
       id: 'Accesorios',
       name: 'Keychains & Trinkets',
-      image: '/prod_tostada.jpg',
+      image: './prod_tostada.jpg',
       desc: 'Peluches, phone straps, dijes',
     },
     {

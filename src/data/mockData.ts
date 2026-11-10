@@ -35,7 +35,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     stockDisponible: 35,
     stockReservado: 0,
     stockTotalFisico: 35,
-    imagen: '/prod_memopads.jpg',
+    imagen: './prod_memopads.jpg',
     descripcion: 'Bloc de notas Sanrio pastel de edición limitada. Hojas decoradas a todo color con Cinnamoroll, My Melody y Kuromi.',
   },
   {
@@ -52,7 +52,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     stockDisponible: 18,
     stockReservado: 0,
     stockTotalFisico: 18,
-    imagen: '/prod_paleta.jpg',
+    imagen: './prod_paleta.jpg',
     descripcion: 'Paleta 9 tonos con glitter prensado ultrabrillante y sombras mate suaves de alta pigmentación estilo coreano.',
   },
   {
@@ -69,7 +69,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     stockDisponible: 24,
     stockReservado: 0,
     stockTotalFisico: 24,
-    imagen: '/prod_portaminas.jpg',
+    imagen: './prod_portaminas.jpg',
     descripcion: 'Set de portaminas recargables con cabezal 3D de personajes kawaii. Mina suave de 0.5 mm con agarre ergonómico.',
   },
   {
@@ -86,7 +86,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     stockDisponible: 15,
     stockReservado: 0,
     stockTotalFisico: 15,
-    imagen: '/prod_tostada.jpg',
+    imagen: './prod_tostada.jpg',
     descripcion: 'Monedero suave de felpa con forma de pan tostado, patitas colgantes y cadenita dorada para cartera.',
   },
   {
@@ -154,7 +154,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     stockDisponible: 9,
     stockReservado: 0,
     stockTotalFisico: 9,
-    imagen: '/prod_vestido.jpg',
+    imagen: './prod_vestido.jpg',
     descripcion: 'Vestido coreano blanco de gasa y encaje bordado con mangas abullonadas y cintura entallada.',
   },
   {
@@ -171,7 +171,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     stockDisponible: 20,
     stockReservado: 0,
     stockTotalFisico: 20,
-    imagen: '/prod_lazo.jpg',
+    imagen: './prod_lazo.jpg',
     descripcion: 'Lazo maxi en satén rojo vino con puntilla de encaje negro y broche central estilo Lolita.',
   },
   {
@@ -309,7 +309,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     stockDisponible: 8,
     stockReservado: 1,
     stockTotalFisico: 9,
-    imagen: '/cat_ropa.jpg',
+    imagen: './cat_ropa.jpg',
     descripcion: 'Oversized cardigan tejido en punto suave color rosa pastel con falda plisada blanca.',
   },
   {
@@ -326,7 +326,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     stockDisponible: 14,
     stockReservado: 2,
     stockTotalFisico: 16,
-    imagen: '/cat_maquillaje.jpg',
+    imagen: './cat_maquillaje.jpg',
     descripcion: 'Cushion rubor en estuche de fresita y tinte de labios coreano hidratante con brillo natural.',
   },
   {
@@ -343,7 +343,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     stockDisponible: 22,
     stockReservado: 0,
     stockTotalFisico: 22,
-    imagen: '/cat_accesorios.jpg',
+    imagen: './cat_accesorios.jpg',
     descripcion: 'Pack de clips con flores, nubes sonrientes y scrunchies de terciopelo rosa pastel.',
   },
   {
@@ -360,7 +360,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     stockDisponible: 18,
     stockReservado: 1,
     stockTotalFisico: 19,
-    imagen: '/cat_keychains.jpg',
+    imagen: './cat_keychains.jpg',
     descripcion: 'Correa para celular con cuentas pastel, dije de estrella y mini peluche colgante.',
   },
   {
@@ -377,7 +377,7 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     stockDisponible: 19,
     stockReservado: 2,
     stockTotalFisico: 21,
-    imagen: '/cat_papeleria.jpg',
+    imagen: './cat_papeleria.jpg',
     descripcion: 'Cartuchera de felpa con orejitas, libreta de notas, lapiceros kawaii y 6 rollos washi tape.',
   },
 
