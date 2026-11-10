@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-primary: #F4A7C1;
+    --color-primary-light: #FFF0F6;
+    --color-primary-hover: #EE8EAF;
+    --color-primary-deep: #D4547B;
+    --color-secondary: #C9B6F2;
+    --color-secondary-light: #F6F2FF;
+    --color-bg: #FFF8FA;
+    --color-card: #FFFFFF;
+    --color-text: #4A3E4E;
+    --color-text-muted: #8E7C94;
+    --color-success: #2D9D78;
+    --color-warning: #E9B44C;
+    --color-error: #DE6978;
+  }
+
+  body {
+    background-color: #FFF8FA;
+    color: #4A3E4E;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+}
+
+.font-display {
+  font-family: 'Fredoka', 'Quicksand', sans-serif;
+}
+
+/* Custom kawaii utility classes and shadows */
+.shadow-kawaii {
+  box-shadow: 0 10px 25px -5px rgba(201, 182, 242, 0.25), 0 8px 10px -6px rgba(244, 167, 193, 0.2);
+}
+
+.shadow-kawaii-sm {
+  box-shadow: 0 4px 12px rgba(201, 182, 242, 0.18);
+}
+
+.shadow-kawaii-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.shadow-kawaii-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -4px rgba(244, 167, 193, 0.32), 0 8px 14px -6px rgba(201, 182, 242, 0.25);
+}
+
+.border-kawaii {
+  border-color: rgba(201, 182, 242, 0.35);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #F3EEFF;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb {
+  background: #C9B6F2;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #F4A7C1;
+}
+
+/* Animations */
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.88; transform: scale(1.02); }
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 3s ease-in-out infinite;
+}
+
+@keyframes floatCute {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-3px) rotate(1deg); }
+}
+
+.animate-float-cute {
+  animation: floatCute 4s ease-in-out infinite;
+}
