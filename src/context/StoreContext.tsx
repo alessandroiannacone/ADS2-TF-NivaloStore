@@ -502,7 +502,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       intentosCobro: [],
       pagos: [],
       historial: [initialHistory],
-      enlacePagoActivo: `https://demo.nivalostore.local/pago/${String(nextNumber).padStart(6, '0')}`,
+      enlacePagoActivo: `https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/${String(nextNumber).padStart(6, '0')}`,
     };
 
     // Regla 3: Actualizar stock (disminuye disponible, aumenta reservado)
@@ -603,7 +603,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Éxito: Enlace generado
     const linkNumber = pedidoId.replace('PED-', '');
-    const enlace = `https://demo.nivalostore.local/pago/${linkNumber}`;
+    const enlace = `https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/${linkNumber}`;
 
     const newAttempt: IntentoCobro = {
       id: `INT-${Date.now()}`,

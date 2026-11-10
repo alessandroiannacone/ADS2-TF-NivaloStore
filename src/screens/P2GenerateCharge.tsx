@@ -10,6 +10,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { WhatsAppIcon } from '../components/WhatsAppIcon';
+import { NIVALO_STORE_CONTACT } from '../data/mockData';
 
 const InstagramIcon: React.FC<{ size?: number; className?: string }> = ({ size = 16, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -102,17 +103,24 @@ export const P2GenerateCharge: React.FC = () => {
     }, 500);
   };
 
-  // Mensaje para WhatsApp
+  const [copiedYapeInfo, setCopiedYapeInfo] = useState<boolean>(false);
+
+  const rawLinkId = currentPedido?.id ? currentPedido.id.replace('PED-', '') : '';
+  const finalLink = currentPedido?.enlacePagoActivo?.includes('alessandroiannacone.github.io')
+    ? currentPedido.enlacePagoActivo
+    : `https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/${rawLinkId}`;
+
+  // Mensaje para WhatsApp con datos de Yape y enlace
   const whatsappText = currentPedido
-    ? `🌸 ¡Hola ${currentPedido.cliente.nombreOIdentificador}! Gracias por comprar en *Nivalo Store*.\n\nAquí tienes tu enlace seguro de pago para el pedido *${currentPedido.id}* por un total de *S/ ${currentPedido.total.toFixed(2)}*:\n👉 ${currentPedido.enlacePagoActivo || lastGeneratedLink || `https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/${currentPedido.id.replace('PED-', '')}`}\n\n⚠️ Recuerda que tu stock está reservado durante 24 horas. ¡Esperamos tu confirmación!`
+    ? `🌸 ¡Hola ${currentPedido.cliente.nombreOIdentificador}! Gracias por comprar en *Nivalo Store*.\n\nAquí tienes las opciones de pago para tu pedido *${currentPedido.id}* por un total de *S/ ${currentPedido.total.toFixed(2)}*:\n\n💜 *1. YAPE / PLIN (Directo):*\n📱 Número: *${NIVALO_STORE_CONTACT.telefonoDisplay}*\n👤 Titular: *Nivalo Store (Camila Villavicencio)*\n\n💳 *2. O PAGA EN LÍNEA CON QR Y TARJETAS:*\n👉 ${finalLink}\n\n⚠️ Recuerda que tu stock está reservado durante *24 horas*. Por favor envíanos la captura de tu comprobante por aquí. ¡Muchas gracias! 💕`
     : '';
 
   // Mensaje para Instagram
   const instagramText = currentPedido
-    ? `Hola ${currentPedido.cliente.nombreOIdentificador} 💖 Tu pedido ${currentPedido.id} en Nivalo Store está listo para pago. Total: S/ ${currentPedido.total.toFixed(2)}. Enlace de pago: ${currentPedido.enlacePagoActivo || lastGeneratedLink || `https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/${currentPedido.id.replace('PED-', '')}`} (Reserva activa por 24 horas).`
+    ? `Hola ${currentPedido.cliente.nombreOIdentificador} 💖 Tu pedido ${currentPedido.id} en Nivalo Store está listo para pago por S/ ${currentPedido.total.toFixed(2)}.\n\n💜 Yapea al número: ${NIVALO_STORE_CONTACT.telefonoDisplay} (Nivalo Store)\n💳 O paga en línea: ${finalLink}\n\n(Tu stock está reservado por 24 horas ✨)`
     : '';
 
-  const copyToClipboard = (text: string, type: 'link' | 'wa' | 'ig') => {
+  const copyToClipboard = (text: string, type: 'link' | 'wa' | 'ig' | 'yape') => {
     navigator.clipboard.writeText(text);
     if (type === 'link') {
       setCopiedLink(true);
@@ -123,6 +131,9 @@ export const P2GenerateCharge: React.FC = () => {
     } else if (type === 'ig') {
       setCopiedInstagramMsg(true);
       setTimeout(() => setCopiedInstagramMsg(false), 2000);
+    } else if (type === 'yape') {
+      setCopiedYapeInfo(true);
+      setTimeout(() => setCopiedYapeInfo(false), 2000);
     }
   };
 
@@ -343,8 +354,93 @@ export const P2GenerateCharge: React.FC = () => {
             </div>
           </div>
 
-          {/* Columna Derecha: C. Compartir Enlace & D. Historial de Intentos */}
+          {/* Columna Derecha: Tarjeta Yape, Compartir Enlace & Historial */}
           <div className="lg:col-span-5 space-y-6">
+            {/* TARJETA DE COBRO YAPE */}
+            <div className="bg-gradient-to-br from-[#742284] via-[#631B72] to-[#450F52] text-white p-5 rounded-3xl shadow-kawaii space-y-4">
+              <div className="flex items-center justify-between border-b border-white/15 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-white text-[#742284] font-extrabold text-xl flex items-center justify-center shadow-xs">
+                    Y
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold flex items-center gap-1.5 text-white">
+                      <span>Cobro por Yape</span>
+                      <span className="text-[10px] bg-[#00D4B2] text-[#343047] font-bold px-1.5 py-0.2 rounded-full">
+                        Oficial
+                      </span>
+                    </h4>
+                    <span className="text-[11px] text-white/80">
+                      Datos directos para el cliente
+                    </span>
+                  </div>
+                </div>
+
+                <a
+                  href={`#/pago/${rawLinkId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[11px] bg-white/20 hover:bg-white/30 text-white font-semibold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1"
+                  title="Abrir vista de pago que ve el cliente"
+                >
+                  <ExternalLink size={12} />
+                  <span>Ver página</span>
+                </a>
+              </div>
+
+              {/* QR y Teléfono */}
+              <div className="flex items-center gap-4 bg-white/10 p-3 rounded-2xl backdrop-blur-xs border border-white/10">
+                {/* QR Ilustrativo */}
+                <div className="bg-white p-1.5 rounded-xl shrink-0 shadow-sm">
+                  <svg width="64" height="64" viewBox="0 0 120 120" className="rounded-md">
+                    <rect width="120" height="120" fill="white" />
+                    <rect x="10" y="10" width="30" height="30" fill="#742284" rx="3" />
+                    <rect x="15" y="15" width="20" height="20" fill="white" rx="1" />
+                    <rect x="20" y="20" width="10" height="10" fill="#742284" />
+                    <rect x="80" y="10" width="30" height="30" fill="#742284" rx="3" />
+                    <rect x="85" y="15" width="20" height="20" fill="white" rx="1" />
+                    <rect x="90" y="20" width="10" height="10" fill="#742284" />
+                    <rect x="10" y="80" width="30" height="30" fill="#742284" rx="3" />
+                    <rect x="15" y="85" width="20" height="20" fill="white" rx="1" />
+                    <rect x="20" y="90" width="10" height="10" fill="#742284" />
+                    <rect x="45" y="45" width="30" height="30" fill="#00D4B2" rx="4" />
+                    <text x="60" y="65" fontSize="18" fontWeight="bold" fill="#742284" textAnchor="middle">Y</text>
+                  </svg>
+                </div>
+
+                {/* Número y Titular */}
+                <div className="flex-1 space-y-1">
+                  <span className="text-[10px] text-white/70 block uppercase font-bold tracking-wider">
+                    Número Yape:
+                  </span>
+                  <div className="text-lg font-mono font-bold tracking-wide">
+                    {NIVALO_STORE_CONTACT.telefonoDisplay}
+                  </div>
+                  <div className="text-[11px] text-white/90">
+                    Titular: <strong>Nivalo Store</strong>
+                  </div>
+                  <div className="text-[11px] text-[#00D4B2] font-semibold">
+                    Total: S/ {currentPedido.total.toFixed(2)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Botón copiar datos Yape */}
+              <button
+                type="button"
+                onClick={() =>
+                  copyToClipboard(
+                    `💜 Datos de Pago por Yape:\n📱 Celular: ${NIVALO_STORE_CONTACT.telefonoDisplay}\n👤 Titular: Nivalo Store (Camila Villavicencio)\n💰 Total: S/ ${currentPedido.total.toFixed(2)}\n🔗 Enlace seguro: ${finalLink}`,
+                    'yape'
+                  )
+                }
+                className="w-full py-2.5 px-3 bg-white hover:bg-purple-50 text-[#742284] font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {copiedYapeInfo ? <Check size={14} /> : <Copy size={14} />}
+                <span>{copiedYapeInfo ? '¡Datos de Yape copiados!' : 'Copiar datos de Yape'}</span>
+              </button>
+            </div>
+
             {/* C. Compartir Enlace con Cliente */}
             <div className="bg-white p-5 rounded-3xl shadow-kawaii-sm border border-[#C9B6F2]/30 space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
