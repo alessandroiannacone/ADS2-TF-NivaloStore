@@ -27,6 +27,7 @@ import {
   Send,
 } from 'lucide-react';
 import { WhatsAppIcon } from '../components/WhatsAppIcon';
+import { getAssetUrl } from '../data/mockData';
 import type { Producto } from '../types';
 
 // Mascota oficial kawaii de Nivalo Store (Pastel Pink Ultra Kawaii)
@@ -128,31 +129,31 @@ export const Storefront: React.FC = () => {
     {
       id: 'Papelería',
       name: 'Papelería',
-      image: './prod_memopads.jpg',
+      image: getAssetUrl('prod_memopads.jpg'),
       desc: 'Libretas, stickers, washi tapes',
     },
     {
       id: 'Ropa',
       name: 'Ropa',
-      image: './prod_vestido.jpg',
+      image: getAssetUrl('prod_vestido.jpg'),
       desc: 'Moda coreana, faldas, vestidos',
     },
     {
       id: 'Maquillaje',
       name: 'Maquillaje',
-      image: './prod_paleta.jpg',
+      image: getAssetUrl('prod_paleta.jpg'),
       desc: 'Lip tints, sombras, rubores',
     },
     {
       id: 'Accesorios',
       name: 'Accesorios',
-      image: './prod_lazo.jpg',
+      image: getAssetUrl('prod_lazo.jpg'),
       desc: 'Lazos, ganchitos, scrunchies',
     },
     {
       id: 'Accesorios',
       name: 'Keychains & Trinkets',
-      image: './prod_tostada.jpg',
+      image: getAssetUrl('prod_tostada.jpg'),
       desc: 'Peluches, phone straps, dijes',
     },
     {
@@ -757,10 +758,10 @@ export const Storefront: React.FC = () => {
                   </p>
 
                   <div className="mt-3 grid grid-cols-4 gap-2">
-                    <img src="/prod_memopads.jpg" alt="Sanrio" className="h-16 w-full object-cover rounded-xl border border-[#FCDCE7]" />
-                    <img src="/prod_tostada.jpg" alt="Plush" className="h-16 w-full object-cover rounded-xl border border-[#FCDCE7]" />
-                    <img src="/prod_paleta.jpg" alt="Makeup" className="h-16 w-full object-cover rounded-xl border border-[#FCDCE7]" />
-                    <img src="/prod_lazo.jpg" alt="Ribbon" className="h-16 w-full object-cover rounded-xl border border-[#FCDCE7]" />
+                    <img src={getAssetUrl('prod_memopads.jpg')} alt="Sanrio" className="h-16 w-full object-cover rounded-xl border border-[#FCDCE7]" />
+                    <img src={getAssetUrl('prod_tostada.jpg')} alt="Plush" className="h-16 w-full object-cover rounded-xl border border-[#FCDCE7]" />
+                    <img src={getAssetUrl('prod_paleta.jpg')} alt="Makeup" className="h-16 w-full object-cover rounded-xl border border-[#FCDCE7]" />
+                    <img src={getAssetUrl('prod_lazo.jpg')} alt="Ribbon" className="h-16 w-full object-cover rounded-xl border border-[#FCDCE7]" />
                   </div>
                 </div>
 
@@ -1626,7 +1627,7 @@ export const Storefront: React.FC = () => {
             </div>
 
             <img
-              src="/shein_banner.jpg"
+              src={getAssetUrl('shein_banner.jpg')}
               alt="Shein Banner"
               className="w-full h-36 object-cover rounded-2xl mb-4 border border-[#FCDCE7]"
             />

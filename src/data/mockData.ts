@@ -18,8 +18,18 @@ export const NIVALO_STORE_CONTACT = {
   ubicacion: 'Lima, Perú (Envíos a nivel nacional)',
 };
 
+// Helper para resolver rutas de assets con compatibilidad para GitHub Pages
+export const getAssetUrl = (path: string): string => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
+  const cleanPath = path.replace(/^\.?\//, '');
+  const base = import.meta.env.BASE_URL || '/';
+  const cleanBase = base.endsWith('/') ? base : `${base}/`;
+  return `${cleanBase}${cleanPath}`;
+};
+
 // Catálogo oficial simulado según los datos del enunciado
-export const INITIAL_PRODUCTOS: Producto[] = [
+const RAW_PRODUCTOS: Producto[] = [
   // 1. Productos exactos de la captura de pantalla de Nivalo Store
   {
     id: 'PROD-12',
@@ -641,6 +651,11 @@ export const INITIAL_PRODUCTOS: Producto[] = [
     descripcion: 'Portafotos de felpa en forma de estrella con ventana transparente y estrellitas bordadas.',
   },
 ];
+
+export const INITIAL_PRODUCTOS: Producto[] = RAW_PRODUCTOS.map((p) => ({
+  ...p,
+  imagen: getAssetUrl(p.imagen),
+}));
 
 // Helper para calcular horas relativas
 const now = new Date();
