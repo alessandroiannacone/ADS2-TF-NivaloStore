@@ -495,7 +495,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 19,
     stockReservado: 0,
     stockTotalFisico: 19,
-    imagen: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    imagen: 'https://i.etsystatic.com/61784267/r/il/e3aaf2/8042809312/il_570xN.8042809312_grgf.jpg',
     descripcion: 'Par de lazos de terciopelo negro vintage para peinados coquette y coletas francesas.',
   },
   {
