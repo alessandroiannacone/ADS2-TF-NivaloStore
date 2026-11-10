@@ -629,8 +629,8 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 16,
     stockReservado: 0,
     stockTotalFisico: 16,
-    imagen: 'https://images.unsplash.com/photo-1585336261026-7f519523297a?auto=format&fit=crop&w=400&q=80',
-    descripcion: 'Estuche espacioso de tela acolchada bicolor con compartimentos internos para lapiceros y washi tapes.',
+    imagen: './prod_cartuchera_wifty.jpg',
+    descripcion: 'Estuche espacioso de tela acolchada bicolor estilo drama WIFTY con compartimentos internos para lapiceros y washi tapes.',
   },
   {
     id: 'PROD-40',
@@ -647,8 +647,8 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 25,
     stockReservado: 0,
     stockTotalFisico: 25,
-    imagen: 'https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&w=400&q=80',
-    descripcion: 'Portafotos de felpa en forma de estrella con ventana transparente y estrellitas bordadas.',
+    imagen: './prod_holder_estrella.jpg',
+    descripcion: 'Portafotos de felpa en forma de estrella con ventana transparente y estrellitas bordadas para photocards de idols.',
   },
 ];
 
