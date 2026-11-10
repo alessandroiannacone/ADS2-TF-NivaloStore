@@ -74,11 +74,10 @@ export const Header: React.FC = () => {
 
           {/* Badge Estado Base de Datos */}
           <div
-            className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border ${
-              isSupabaseConfigured
+            className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border ${isSupabaseConfigured
                 ? 'bg-[#2D9D78]/10 text-[#2D9D78] border-[#2D9D78]/30'
                 : 'bg-gray-100 text-[#746E8B] border-gray-200'
-            }`}
+              }`}
             title={isSupabaseConfigured ? 'Conectado a PostgreSQL en Supabase' : 'Modo local activo'}
           >
             <Database size={13} className={isSupabaseConfigured ? 'text-[#2D9D78]' : 'text-[#746E8B]'} />
@@ -144,27 +143,25 @@ export const Header: React.FC = () => {
                     notificaciones.map((n) => (
                       <div
                         key={n.id}
-                        className={`p-2.5 rounded-xl text-xs transition border ${
-                          n.tipo === 'success'
+                        className={`p-2.5 rounded-xl text-xs transition border ${n.tipo === 'success'
                             ? 'bg-[#2D9D78]/5 border-[#2D9D78]/20'
                             : n.tipo === 'warning'
-                            ? 'bg-[#E9B44C]/10 border-[#E9B44C]/30'
-                            : n.tipo === 'error'
-                            ? 'bg-[#DE6978]/10 border-[#DE6978]/30'
-                            : 'bg-[#F3EEFF] border-[#C9B6F2]/30'
-                        }`}
+                              ? 'bg-[#E9B44C]/10 border-[#E9B44C]/30'
+                              : n.tipo === 'error'
+                                ? 'bg-[#DE6978]/10 border-[#DE6978]/30'
+                                : 'bg-[#F3EEFF] border-[#C9B6F2]/30'
+                          }`}
                       >
                         <div className="flex items-center justify-between gap-1">
                           <span
-                            className={`font-bold text-[11px] ${
-                              n.tipo === 'success'
+                            className={`font-bold text-[11px] ${n.tipo === 'success'
                                 ? 'text-[#2D9D78]'
                                 : n.tipo === 'warning'
-                                ? 'text-[#E9B44C]'
-                                : n.tipo === 'error'
-                                ? 'text-[#DE6978]'
-                                : 'text-[#746E8B]'
-                            }`}
+                                  ? 'text-[#E9B44C]'
+                                  : n.tipo === 'error'
+                                    ? 'text-[#DE6978]'
+                                    : 'text-[#746E8B]'
+                              }`}
                           >
                             {n.titulo}
                           </span>

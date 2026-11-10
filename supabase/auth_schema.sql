@@ -242,10 +242,7 @@ CREATE POLICY "clientes_all_policy" ON public.clientes
     FOR ALL USING (public.is_admin() OR user_id = auth.uid())
     WITH CHECK (public.is_admin() OR user_id = auth.uid());
 
--- ==============================================================================
--- 7. ASIGNAR EL ROL DE ADMINISTRADOR A TU CUENTA
--- ==============================================================================
 UPDATE public.profiles 
 SET role = 'ADMIN' 
 WHERE LOWER(email) = LOWER('alex1400ahjulio@gmail.com');
--- ==============================================================================
+
