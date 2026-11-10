@@ -177,3 +177,4 @@ export const savePaymentToSupabase = async (pago: Pago): Promise<boolean> => {
     return false;
   }
 };
+

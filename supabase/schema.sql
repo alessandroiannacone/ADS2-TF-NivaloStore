@@ -179,3 +179,4 @@ INSERT INTO productos (id, nombre, categoria, marca, precio, puntos, medidas, ba
 ('PROD-38', 'Trebol Good Luck Keychain', 'Accesorios', 'KAWAII LIFE', 14.00, 70, 'Largo 10 cm', 'NUEVO', 'Azul claro', 'Única', 22, 0, 22, './llavero_trebol.jpg', 'Phone charm de trébol de cuatro hojas.', false, true, true),
 ('PROD-39', 'Cartuchera Su Zai Zai (WIFTY)', 'Papelería', 'WIFTY', 24.00, 120, '20cm x 10cm x 6cm', 'NUEVO', 'Cream White', 'Única', 16, 0, 16, './wifty.jpg', 'Estuche espacioso de tela acolchada bicolor estilo drama WIFTY.', false, true, true),
 ('PROD-40', 'Holder de Estrella Plush Photocard', 'K-pop', 'K-POP WORLD', 18.00, 90, '14cm x 14cm', 'NUEVO', 'Azul claro', 'Única', 25, 0, 25, './prod_holder_estrella.jpg', 'Portafotos de felpa en forma de estrella con ventana.', false, true, true);
+
