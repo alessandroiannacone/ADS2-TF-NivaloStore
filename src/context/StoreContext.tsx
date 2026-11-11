@@ -201,8 +201,27 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const saved = localStorage.getItem(STORAGE_KEY_PRODUCTOS);
       if (saved) {
         const parsed: Producto[] = JSON.parse(saved);
-        if (parsed.length >= INITIAL_PRODUCTOS.length) {
-          return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Sincronizar siempre las imágenes y atributos oficiales de INITIAL_PRODUCTOS
+          return INITIAL_PRODUCTOS.map((initProd) => {
+            const found = parsed.find((p) => p.id === initProd.id);
+            if (found) {
+              return {
+                ...found,
+                imagen: initProd.imagen,
+                nombre: initProd.nombre,
+                categoria: initProd.categoria,
+                marca: initProd.marca,
+                precio: initProd.precio,
+                descripcion: initProd.descripcion,
+                badge: initProd.badge,
+                esOferta: initProd.esOferta,
+                esFavorito: initProd.esFavorito,
+                esRecomendado: initProd.esRecomendado,
+              };
+            }
+            return initProd;
+          });
         }
       }
       return INITIAL_PRODUCTOS;
@@ -263,7 +282,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // 1. Cargar catálogo de productos desde Supabase
       fetchProductsFromSupabase().then((supabaseProducts) => {
         if (supabaseProducts && supabaseProducts.length > 0) {
-          setProductos(supabaseProducts);
+          // Fusionar con INITIAL_PRODUCTOS para garantizar imágenes oficiales actualizadas
+          const merged = supabaseProducts.map((sp) => {
+            const initMatch = INITIAL_PRODUCTOS.find((ip) => ip.id === sp.id);
+            return {
+              ...sp,
+              imagen: initMatch?.imagen || sp.imagen,
+            };
+          });
+          setProductos(merged);
         }
       });
 
