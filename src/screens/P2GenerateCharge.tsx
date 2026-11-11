@@ -360,9 +360,11 @@ export const P2GenerateCharge: React.FC = () => {
             <div className="bg-gradient-to-br from-[#742284] via-[#631B72] to-[#450F52] text-white p-5 rounded-3xl shadow-kawaii space-y-4">
               <div className="flex items-center justify-between border-b border-white/15 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-2xl bg-white text-[#742284] font-extrabold text-xl flex items-center justify-center shadow-xs">
-                    Y
-                  </div>
+                  <img
+                    src={getAssetUrl('yape_logo.png')}
+                    alt="Yape Oficial"
+                    className="w-10 h-10 rounded-2xl object-cover shadow-sm bg-white"
+                  />
                   <div>
                     <h4 className="text-sm font-bold flex items-center gap-1.5 text-white">
                       <span>Cobro por Yape</span>
@@ -395,7 +397,7 @@ export const P2GenerateCharge: React.FC = () => {
                   <img
                     src={getAssetUrl('qr_yape.jpg')}
                     alt="Yape QR"
-                    className="w-16 h-16 object-contain rounded-lg"
+                    className="w-20 h-20 object-contain rounded-lg"
                   />
                 </div>
 
@@ -408,7 +410,7 @@ export const P2GenerateCharge: React.FC = () => {
                     {NIVALO_STORE_CONTACT.telefonoDisplay}
                   </div>
                   <div className="text-[11px] text-white/90">
-                    Titular: <strong>Nivalo Store</strong>
+                    Titular: <strong>{NIVALO_STORE_CONTACT.titularYape}</strong>
                   </div>
                   <div className="text-[11px] text-[#00D4B2] font-semibold">
                     Total: S/ {currentPedido.total.toFixed(2)}

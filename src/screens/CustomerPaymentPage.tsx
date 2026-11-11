@@ -236,9 +236,11 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                 {/* Cabecera Yape */}
                 <div className="flex items-center justify-between border-b border-purple-100 pb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#742284] to-[#50155E] text-white flex items-center justify-center font-bold text-xl shadow-md">
-                      Y
-                    </div>
+                    <img
+                      src={getAssetUrl('yape_logo.png')}
+                      alt="Yape Oficial"
+                      className="w-12 h-12 rounded-2xl object-cover shadow-md bg-white border border-purple-100"
+                    />
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-base font-bold text-[#742284]">
