@@ -7,6 +7,7 @@ import { P1RegisterOrder } from './screens/P1RegisterOrder';
 import { P2GenerateCharge } from './screens/P2GenerateCharge';
 import { P3OrdersList } from './screens/P3OrdersList';
 import { P4ReviewPayments } from './screens/P4ReviewPayments';
+import { P5CatalogManagement } from './screens/P5CatalogManagement';
 import { HistoryModal } from './components/HistoryModal';
 import { NotificationToast } from './components/NotificationToast';
 import { Storefront } from './screens/Storefront';
@@ -196,6 +197,7 @@ const MainLayout: React.FC = () => {
             {activeScreen === 'P2' && <P2GenerateCharge />}
             {activeScreen === 'P3' && <P3OrdersList />}
             {activeScreen === 'P4' && <P4ReviewPayments />}
+            {activeScreen === 'P5' && <P5CatalogManagement />}
           </main>
         </div>
         <HistoryModal />

@@ -9,6 +9,7 @@ import type {
   HistorialEstado,
   Pago,
   IntentoCobro,
+  TrackingEnvio,
 } from '../types';
 import { INITIAL_PEDIDOS, INITIAL_PRODUCTOS, INITIAL_VENDEDOR } from '../data/mockData';
 import {
@@ -17,6 +18,9 @@ import {
   saveOrderToSupabase,
   updateOrderStatusInSupabase,
   savePaymentToSupabase,
+  saveProductToSupabase,
+  deleteProductFromSupabase,
+  updateOrderTrackingInSupabase,
 } from '../services/supabaseService';
 import { isSupabaseConfigured } from '../lib/supabase';
 
@@ -26,8 +30,8 @@ interface StoreContextType {
   pedidos: Pedido[];
   productos: Producto[];
   notificaciones: NotificacionSistema[];
-  activeScreen: 'P1' | 'P2' | 'P3' | 'P4';
-  setActiveScreen: (screen: 'P1' | 'P2' | 'P3' | 'P4') => void;
+  activeScreen: 'P1' | 'P2' | 'P3' | 'P4' | 'P5';
+  setActiveScreen: (screen: 'P1' | 'P2' | 'P3' | 'P4' | 'P5') => void;
   selectedOrderId: string | null;
   setSelectedOrderId: (id: string | null) => void;
   historyModalOrderId: string | null;
@@ -104,6 +108,32 @@ interface StoreContextType {
     error?: string;
   };
 
+  // Gestión de Catálogo y Productos (P5)
+  addProduct: (productoData: {
+    nombre: string;
+    categoria: string;
+    precio: number;
+    stock: number;
+    imagen: string;
+    descripcion?: string;
+    marca?: string;
+    medidas?: string;
+    color?: string;
+    talla?: string;
+    badge?: string;
+    esOferta?: boolean;
+    esFavorito?: boolean;
+    esRecomendado?: boolean;
+  }) => Promise<{ success: boolean; producto?: Producto; error?: string }>;
+
+  deleteProduct: (productoId: string) => Promise<boolean>;
+
+  // Gestión y Seguimiento de Envíos
+  updateOrderTracking: (
+    pedidoId: string,
+    tracking: TrackingEnvio
+  ) => Promise<{ success: boolean; error?: string }>;
+
   addNotification: (
     tipo: 'success' | 'warning' | 'error' | 'info',
     titulo: string,
@@ -124,7 +154,7 @@ const STORAGE_KEY_NOTIFS = 'nivalo_v2_notificaciones';
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [vendedor] = useState<Vendedor>(INITIAL_VENDEDOR);
-  const [activeScreen, setActiveScreen] = useState<'P1' | 'P2' | 'P3' | 'P4'>('P1');
+  const [activeScreen, setActiveScreen] = useState<'P1' | 'P2' | 'P3' | 'P4' | 'P5'>('P1');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [historyModalOrderId, setHistoryModalOrderId] = useState<string | null>(null);
   const [paymentSimulatorOpen, setPaymentSimulatorOpen] = useState<boolean>(false);
@@ -1172,6 +1202,132 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
+  // Gestión de Catálogo (P5): Agregar nuevo producto y guardar en BD
+  const addProduct = async (data: {
+    nombre: string;
+    categoria: string;
+    precio: number;
+    stock: number;
+    imagen: string;
+    descripcion?: string;
+    marca?: string;
+    medidas?: string;
+    color?: string;
+    talla?: string;
+    badge?: string;
+    esOferta?: boolean;
+    esFavorito?: boolean;
+    esRecomendado?: boolean;
+  }): Promise<{ success: boolean; producto?: Producto; error?: string }> => {
+    if (!data.nombre.trim()) {
+      return { success: false, error: 'Ingresa el nombre del producto.' };
+    }
+    if (data.precio <= 0) {
+      return { success: false, error: 'El precio debe ser mayor a 0.' };
+    }
+    if (data.stock < 0) {
+      return { success: false, error: 'El stock no puede ser negativo.' };
+    }
+    if (!data.imagen.trim()) {
+      return { success: false, error: 'Ingresa una URL o sube una foto para el producto.' };
+    }
+
+    const nextId = `PROD-${Date.now().toString().slice(-5)}`;
+    const newProd: Producto = {
+      id: nextId,
+      nombre: data.nombre.trim(),
+      categoria: data.categoria.trim() || 'General',
+      marca: data.marca?.trim() || 'NIVALO STUDIO',
+      precio: Number(data.precio),
+      puntos: Math.round(Number(data.precio) * 5),
+      medidas: data.medidas?.trim() || 'Estándar',
+      badge: data.badge?.trim() || (data.esOferta ? 'OFERTA' : 'NUEVO'),
+      color: data.color?.trim() || 'Pastel',
+      talla: data.talla?.trim() || 'Única',
+      stockDisponible: Number(data.stock),
+      stockReservado: 0,
+      stockTotalFisico: Number(data.stock),
+      imagen: data.imagen.trim(),
+      descripcion: data.descripcion?.trim() || 'Producto exclusivo importado para Nivalo Store.',
+      esOferta: Boolean(data.esOferta),
+      esFavorito: Boolean(data.esFavorito),
+      esRecomendado: Boolean(data.esRecomendado),
+    };
+
+    setProductos((prev) => [newProd, ...prev]);
+
+    if (isSupabaseConfigured) {
+      saveProductToSupabase(newProd).then((saved) => {
+        if (saved) {
+          console.log(`✅ Producto ${newProd.id} guardado en Supabase.`);
+        }
+      });
+    }
+
+    addNotification(
+      'success',
+      '¡Producto agregado al catálogo! 🌸',
+      `"${newProd.nombre}" ya está visible y disponible en la tienda.`
+    );
+
+    return { success: true, producto: newProd };
+  };
+
+  // Gestión de Catálogo: Eliminar producto
+  const deleteProduct = async (productoId: string): Promise<boolean> => {
+    setProductos((prev) => prev.filter((p) => p.id !== productoId));
+    if (isSupabaseConfigured) {
+      await deleteProductFromSupabase(productoId);
+    }
+    addNotification('info', 'Producto eliminado', 'El producto fue retirado del catálogo.');
+    return true;
+  };
+
+  // Seguimiento de Envíos: Actualizar tracking de un pedido
+  const updateOrderTracking = async (
+    pedidoId: string,
+    tracking: TrackingEnvio
+  ): Promise<{ success: boolean; error?: string }> => {
+    const targetOrder = pedidos.find((p) => p.id === pedidoId);
+    if (!targetOrder) {
+      return { success: false, error: 'Pedido no encontrado.' };
+    }
+
+    const now = new Date();
+    const historyItem: HistorialEstado = {
+      id: `HIST-${Date.now()}`,
+      pedidoId,
+      fechaHora: now.toISOString(),
+      estadoAnterior: targetOrder.estado,
+      estadoNuevo: targetOrder.estado,
+      origen: 'Vendedor',
+      observaciones: `Envío actualizado: ${tracking.empresa} (${tracking.estadoEnvio}) - Guía: ${tracking.numeroSeguimiento || 'Sin guía'}. Destino: ${tracking.destino || 'No especificado'}`,
+    };
+
+    setPedidos((prev) =>
+      prev.map((p) => {
+        if (p.id !== pedidoId) return p;
+        return {
+          ...p,
+          envio: tracking,
+          historial: [historyItem, ...(p.historial || [])],
+        };
+      })
+    );
+
+    if (isSupabaseConfigured) {
+      await updateOrderTrackingInSupabase(pedidoId, tracking, historyItem);
+    }
+
+    addNotification(
+      'success',
+      '🚚 Envío Actualizado',
+      `Pedido ${pedidoId} asignado a ${tracking.empresa} [${tracking.estadoEnvio}]`
+    );
+
+    return { success: true };
+  };
+
   // Restablecer datos iniciales de demostración
   const resetDemoData = () => {
     setPedidos(INITIAL_PEDIDOS);
@@ -1293,6 +1449,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         approveObservedPayment,
         rejectObservedPayment,
         retryRefund,
+        addProduct,
+        deleteProduct,
+        updateOrderTracking,
         addNotification,
         markNotificationAsRead,
         clearAllNotifications,

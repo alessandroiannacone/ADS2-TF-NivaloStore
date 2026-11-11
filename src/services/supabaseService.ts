@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import type { Producto, Pedido, Pago, HistorialEstado, UserProfile } from '../types';
+import type { Producto, Pedido, Pago, HistorialEstado, UserProfile, TrackingEnvio } from '../types';
 import { INITIAL_PRODUCTOS } from '../data/mockData';
 
 /**
@@ -201,6 +201,7 @@ export const fetchOrdersFromSupabase = async (): Promise<Pedido[] | null> => {
       id: p.id,
       userId: p.user_id || undefined,
       cliente: p.cliente_data,
+      envio: p.cliente_data?.envio || undefined,
       total: Number(p.total),
       estado: p.estado,
       motivoCancelacion: p.motivo_cancelacion,
@@ -340,6 +341,7 @@ export const fetchOrdersForUser = async (userId: string): Promise<Pedido[] | nul
       id: p.id,
       userId: p.user_id,
       cliente: p.cliente_data,
+      envio: p.cliente_data?.envio || undefined,
       total: Number(p.total),
       estado: p.estado,
       motivoCancelacion: p.motivo_cancelacion,
@@ -389,6 +391,106 @@ export const fetchOrdersForUser = async (userId: string): Promise<Pedido[] | nul
   } catch (err) {
     console.warn('Excepción en fetchOrdersForUser:', err);
     return null;
+  }
+};
+
+// 9. Guardar o actualizar un producto en Supabase (Catálogo en vivo)
+export const saveProductToSupabase = async (producto: Producto): Promise<boolean> => {
+  if (!isSupabaseConfigured || !supabase) return false;
+
+  try {
+    const payload = {
+      id: producto.id,
+      nombre: producto.nombre,
+      categoria: producto.categoria,
+      marca: producto.marca || 'NIVALO STUDIO',
+      precio: producto.precio,
+      puntos: producto.puntos || Math.round(producto.precio * 5),
+      medidas: producto.medidas || 'Estándar',
+      badge: producto.badge || null,
+      color: producto.color || 'Multicolor',
+      talla: producto.talla || 'Única',
+      stock_disponible: producto.stockDisponible,
+      stock_reservado: producto.stockReservado || 0,
+      stock_total_fisico: producto.stockTotalFisico,
+      imagen: producto.imagen,
+      descripcion: producto.descripcion || '',
+      es_oferta: producto.esOferta || false,
+      es_favorito: producto.esFavorito || false,
+      es_recomendado: producto.esRecomendado || false,
+    };
+
+    const { error } = await supabase.from('productos').upsert(payload);
+    if (error) {
+      console.warn('Error al guardar producto en Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Excepción en saveProductToSupabase:', err);
+    return false;
+  }
+};
+
+// 10. Eliminar producto de Supabase
+export const deleteProductFromSupabase = async (productoId: string): Promise<boolean> => {
+  if (!isSupabaseConfigured || !supabase) return false;
+
+  try {
+    const { error } = await supabase.from('productos').delete().eq('id', productoId);
+    if (error) {
+      console.warn('Error al eliminar producto en Supabase:', error.message);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('Excepción en deleteProductFromSupabase:', err);
+    return false;
+  }
+};
+
+// 11. Actualizar tracking de envío de un pedido en Supabase
+export const updateOrderTrackingInSupabase = async (
+  pedidoId: string,
+  envio: TrackingEnvio,
+  historialItem?: HistorialEstado
+): Promise<boolean> => {
+  if (!isSupabaseConfigured || !supabase) return false;
+
+  try {
+    const { data: order } = await supabase
+      .from('pedidos')
+      .select('cliente_data')
+      .eq('id', pedidoId)
+      .single();
+
+    if (order) {
+      const updatedClientData = {
+        ...order.cliente_data,
+        envio,
+      };
+      await supabase
+        .from('pedidos')
+        .update({ cliente_data: updatedClientData })
+        .eq('id', pedidoId);
+    }
+
+    if (historialItem) {
+      await supabase.from('historial_estados').insert({
+        id: historialItem.id,
+        pedido_id: pedidoId,
+        fecha_hora: historialItem.fechaHora,
+        estado_anterior: historialItem.estadoAnterior,
+        estado_nuevo: historialItem.estadoNuevo,
+        origen: historialItem.origen,
+        observaciones: historialItem.observaciones,
+      });
+    }
+
+    return true;
+  } catch (err) {
+    console.warn('Excepción en updateOrderTrackingInSupabase:', err);
+    return false;
   }
 };
 

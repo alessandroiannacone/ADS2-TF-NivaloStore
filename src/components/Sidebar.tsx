@@ -7,6 +7,7 @@ import {
   AlertCircle,
   Database,
   ChevronRight,
+  PackagePlus,
 } from 'lucide-react';
 import { isSupabaseConfigured } from '../lib/supabase';
 
@@ -20,7 +21,7 @@ export const Sidebar: React.FC = () => {
     .filter((pg) => pg.estadoPago === 'POR_REVISAR').length;
 
   const navItems: Array<{
-    id: 'P1' | 'P2' | 'P3' | 'P4';
+    id: 'P1' | 'P2' | 'P3' | 'P4' | 'P5';
     label: string;
     sublabel: string;
     icon: React.ComponentType<{ size?: number; className?: string }>;
@@ -44,7 +45,7 @@ export const Sidebar: React.FC = () => {
     {
       id: 'P3',
       label: 'Lista de pedidos',
-      sublabel: 'Control y reservas 24h',
+      sublabel: 'Control, reservas y tracking',
       icon: ListOrdered,
     },
     {
@@ -54,6 +55,14 @@ export const Sidebar: React.FC = () => {
       icon: AlertCircle,
       badge: observedCount > 0 ? observedCount : undefined,
       badgeColor: 'bg-[#DE6978] text-white animate-pulse',
+    },
+    {
+      id: 'P5',
+      label: 'Catálogo & Fotos',
+      sublabel: 'Agregar productos y BD',
+      icon: PackagePlus,
+      badge: productos.length,
+      badgeColor: 'bg-[#F4A7C1] text-white',
     },
   ];
 

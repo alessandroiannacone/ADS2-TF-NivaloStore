@@ -265,6 +265,37 @@ export const CustomerAccountPage: React.FC<{ onBackToStore?: () => void }> = ({
                         </div>
                       </div>
 
+                      {/* Seguimiento de Envío (si existe tracking asignado) */}
+                      {pedido.envio && (
+                        <div className="p-2.5 rounded-2xl bg-purple-50/70 border border-purple-100 flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">🚚</span>
+                            <div>
+                              <span className="font-bold text-[#742284]">
+                                {pedido.envio.empresa}: {pedido.envio.numeroSeguimiento || 'En asignación'}
+                              </span>
+                              <span className="text-[11px] text-[#8E7C94] block">
+                                Estado:{' '}
+                                <strong className="text-[#343047]">
+                                  {pedido.envio.estadoEnvio === 'ENTREGADO'
+                                    ? '🌸 ¡Entregado!'
+                                    : pedido.envio.estadoEnvio === 'DESPACHADO'
+                                    ? '🚚 Despachado en agencia'
+                                    : pedido.envio.estadoEnvio === 'EN_CAMINO'
+                                    ? '🛵 En camino a tu domicilio'
+                                    : '📦 En preparación'}
+                                </strong>
+                              </span>
+                            </div>
+                          </div>
+                          {pedido.envio.destino && (
+                            <span className="text-[10px] text-[#746E8B] bg-white px-2 py-0.5 rounded-lg border border-purple-100 shrink-0">
+                              📍 {pedido.envio.destino}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
                       {/* Lista de productos del pedido con imagen */}
                       <div className="divide-y divide-gray-50 text-xs">
                         {pedido.detalles.map((det) => {

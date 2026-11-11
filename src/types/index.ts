@@ -103,6 +103,24 @@ export interface Pago {
   resultadoReembolso?: 'Exitoso' | 'Fallido' | 'Pendiente';
 }
 
+export type EstadoEnvio = 'PENDIENTE_ENVIO' | 'EN_PREPARACION' | 'DESPACHADO' | 'EN_CAMINO' | 'ENTREGADO';
+export type EmpresaEnvio = 'Olva Courier' | 'Shalom' | 'Motorizado Express' | 'Recojo en Almacén' | 'Otro';
+
+export interface TrackingEnvio {
+  empresa: EmpresaEnvio;
+  numeroSeguimiento?: string;
+  estadoEnvio: EstadoEnvio;
+  fechaDespacho?: string;
+  fechaEntregaEstimada?: string;
+  destino?: string;
+  observaciones?: string;
+  historialEnvio?: Array<{
+    fechaHora: string;
+    titulo: string;
+    descripcion: string;
+  }>;
+}
+
 export interface Pedido {
   id: string; // Código único (ej. PED-000120)
   userId?: string; // UUID de usuario autenticado en Supabase Auth
@@ -112,6 +130,7 @@ export interface Pedido {
   costoEnvio?: number;
   total: number;
   estado: EstadoPedido;
+  envio?: TrackingEnvio;
   motivoCancelacion?: string; // ej: "Cancelado (sin pago 24 h)"
   fechaCreacion: string;
   fechaVencimientoReserva: string; // 24h desde creación
