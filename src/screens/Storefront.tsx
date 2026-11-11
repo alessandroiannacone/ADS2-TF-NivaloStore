@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -101,8 +101,34 @@ export const Storefront: React.FC = () => {
   const [sortBy, setSortBy] = useState<'novedades' | 'precio-asc' | 'precio-desc' | 'puntos'>('novedades');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Reproductor simulado Nivalo Music
+  // Reproductor oficial Nivalo Music: NewJeans - Super Shy
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
+  const [musicProgress, setMusicProgress] = useState(0);
+  const [musicDuration, setMusicDuration] = useState(30);
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    if (isPlayingMusic) {
+      audioRef.current.pause();
+      setIsPlayingMusic(false);
+    } else {
+      audioRef.current.play().then(() => {
+        setIsPlayingMusic(true);
+      }).catch((err) => {
+        console.warn('Audio play error:', err);
+      });
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setMusicProgress(audioRef.current.currentTime);
+      if (audioRef.current.duration) {
+        setMusicDuration(audioRef.current.duration);
+      }
+    }
+  };
 
   // Modales
   const [selectedProductQuickView, setSelectedProductQuickView] = useState<Producto | null>(null);
@@ -269,21 +295,19 @@ export const Storefront: React.FC = () => {
     });
   }, [productos, topSearch, catalogSearch, selectedCategories, selectedSizes, selectedColors, sortBy]);
 
-  // Secciones específicas para la Pantalla Principal (Inicio)
-  const novedadesHome = useMemo(() => {
-    return productos.filter((p) => ['PROD-12', 'PROD-13', 'PROD-14', 'PROD-15'].includes(p.id));
-  }, [productos]);
-
-  const favoritosHome = useMemo(() => {
-    return productos.filter((p) => p.esFavorito || ['PROD-20', 'PROD-21', 'PROD-31', 'PROD-32'].includes(p.id));
+  // Secciones limpias y seleccionadas para la Pantalla Principal (Inicio)
+  const masVendidosHome = useMemo(() => {
+    // 4 productos estrella que más se venden
+    return productos
+      .filter((p) => p.badge === 'TOP' || p.esFavorito || ['PROD-12', 'PROD-13', 'PROD-15', 'PROD-39'].includes(p.id))
+      .slice(0, 4);
   }, [productos]);
 
   const ofertasHome = useMemo(() => {
-    return productos.filter((p) => p.esOferta || ['PROD-33', 'PROD-34', 'PROD-35', 'PROD-36'].includes(p.id));
-  }, [productos]);
-
-  const recomendadosHome = useMemo(() => {
-    return productos.filter((p) => p.esRecomendado || ['PROD-37', 'PROD-38', 'PROD-39', 'PROD-40'].includes(p.id));
+    // 4 productos con ofertas y descuentos destacados
+    return productos
+      .filter((p) => p.esOferta || p.badge === 'OFERTA' || p.descuento || ['PROD-28', 'PROD-31', 'PROD-02', 'PROD-33'].includes(p.id))
+      .slice(0, 4);
   }, [productos]);
 
   const totalCartItems = cart.reduce((acc, curr) => acc + curr.cantidad, 0);
@@ -647,18 +671,18 @@ export const Storefront: React.FC = () => {
             <button
               onClick={() => {
                 if (currentView === 'inicio') {
-                  const el = document.getElementById('seccion-novedades');
+                  const el = document.getElementById('seccion-mas-vendidos');
                   el?.scrollIntoView({ behavior: 'smooth' });
                 } else {
                   setCurrentView('inicio');
                   setTimeout(() => {
-                    document.getElementById('seccion-novedades')?.scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('seccion-mas-vendidos')?.scrollIntoView({ behavior: 'smooth' });
                   }, 100);
                 }
               }}
               className="hover:text-[#E2678D] transition-colors cursor-pointer"
             >
-              Novedades ✨
+              Más Vendidos 👑
             </button>
 
             <button
@@ -898,42 +922,17 @@ export const Storefront: React.FC = () => {
             </div>
           </section>
 
-          {/* 4. SECCIÓN: NOVEDADES RECIÉN LLEGADAS (Fila 1 de Imagen 2) */}
-          <section id="seccion-novedades" className="max-w-[1440px] mx-auto px-4 sm:px-8 pt-4">
+          {/* 4. SECCIÓN: LO QUE MÁS SE VENDE (Best Sellers Destacados) */}
+          <section id="seccion-mas-vendidos" className="max-w-[1440px] mx-auto px-4 sm:px-8 pt-4">
             <div className="flex items-center justify-between pb-3 mb-6 border-b border-[#FCE1ED]">
               <div className="text-left">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFF0F6] text-[#DE6978] text-[10px] font-bold uppercase tracking-wider mb-1">
+                  <span>👑 Top Ventas</span>
+                </div>
                 <h3 className="font-display text-xl sm:text-2xl font-bold text-[#4A3B4E] flex items-center gap-2">
-                  <span>🌸</span>
-                  <span>Novedades recién llegadas</span>
+                  <span>Lo que más se vende</span>
+                  <span className="text-sm font-normal text-[#8E7C94] hidden sm:inline">• Los favoritos de la comunidad</span>
                 </h3>
-                <p className="text-xs text-[#8E7C94]">Colecciones virales importadas para ti</p>
-              </div>
-              <button
-                onClick={() => {
-                  setCurrentView('tienda');
-                  setSortBy('novedades');
-                }}
-                className="text-xs font-semibold text-[#E2678D] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <span>Ver todas las novedades</span>
-                <ArrowRight size={13} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {novedadesHome.map((prod) => renderProductCard(prod))}
-            </div>
-          </section>
-
-          {/* 5. SECCIÓN: LOS FAVORITOS DE LOS NIVALOLOVERS (Fila 2 de Imagen 2) */}
-          <section className="max-w-[1440px] mx-auto px-4 sm:px-8 pt-4">
-            <div className="flex items-center justify-between pb-3 mb-6 border-b border-[#FCE1ED]">
-              <div className="text-left">
-                <h3 className="font-display text-xl sm:text-2xl font-bold text-[#4A3B4E] flex items-center gap-2">
-                  <span>👑</span>
-                  <span className="text-[#E2678D]">Los favoritos de los NivaloLovers</span>
-                </h3>
-                <p className="text-xs text-[#8E7C94]">Las cositas que están conquistando la comunidad</p>
               </div>
               <button
                 onClick={() => {
@@ -942,25 +941,27 @@ export const Storefront: React.FC = () => {
                 }}
                 className="text-xs font-semibold text-[#E2678D] hover:underline flex items-center gap-1 cursor-pointer"
               >
-                <span>Ver favoritos</span>
+                <span>Ver catálogo completo</span>
                 <ArrowRight size={13} />
               </button>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {favoritosHome.map((prod) => renderProductCard(prod))}
+              {masVendidosHome.map((prod) => renderProductCard(prod))}
             </div>
           </section>
 
-          {/* 6. SECCIÓN: COSITAS EN OFERTA (Fila 1 de Imagen 3) */}
+          {/* 5. SECCIÓN: OFERTAS DESTACADAS (Precios Rebajados) */}
           <section id="seccion-ofertas" className="max-w-[1440px] mx-auto px-4 sm:px-8 pt-4">
             <div className="flex items-center justify-between pb-3 mb-6 border-b border-[#FCE1ED]">
               <div className="text-left">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFF0F6] text-[#DE6978] text-[10px] font-bold uppercase tracking-wider mb-1">
+                  <span>🏷️ Descuentos Especiales</span>
+                </div>
                 <h3 className="font-display text-xl sm:text-2xl font-bold text-[#4A3B4E] flex items-center gap-2">
-                  <span>🏷️ 🎀</span>
-                  <span>Cositas en oferta</span>
+                  <span>Ofertas Imperdibles</span>
+                  <span className="text-sm font-normal text-[#8E7C94] hidden sm:inline">• Hasta agotar stock</span>
                 </h3>
-                <p className="text-xs text-[#8E7C94]">Descuentos de hasta el 26% por tiempo limitado</p>
               </div>
               <button
                 onClick={() => {
@@ -969,7 +970,7 @@ export const Storefront: React.FC = () => {
                 }}
                 className="text-xs font-semibold text-[#E2678D] hover:underline flex items-center gap-1 cursor-pointer"
               >
-                <span>Ver ofertas</span>
+                <span>Ver todas las ofertas</span>
                 <ArrowRight size={13} />
               </button>
             </div>
@@ -979,67 +980,118 @@ export const Storefront: React.FC = () => {
             </div>
           </section>
 
-          {/* 7. SECCIÓN: RECOMENDADOS PARA TI (Fila 2 de Imagen 3) */}
-          <section className="max-w-[1440px] mx-auto px-4 sm:px-8 pt-4">
-            <div className="flex items-center justify-between pb-3 mb-6 border-b border-[#FCE1ED]">
-              <div className="text-left">
-                <h3 className="font-display text-xl sm:text-2xl font-bold text-[#4A3B4E] flex items-center gap-2">
-                  <span>💫</span>
-                  <span>Recomendados para ti</span>
+          {/* 6. BANNER DESTACADO: EXPLORAR TODO EL CATÁLOGO */}
+          <section className="max-w-[1440px] mx-auto px-4 sm:px-8 pt-2">
+            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#FFF5F8] via-[#FFF0F6] to-[#FCEBF2] border border-[#FCDCE7] flex flex-col sm:flex-row items-center justify-between gap-5 text-center sm:text-left shadow-xs">
+              <div className="space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#DE6978]">
+                  ✨ Catálogo Completo Nivalo Store
+                </span>
+                <h3 className="font-display text-xl sm:text-2xl font-extrabold text-[#4A3B4E]">
+                  ¿Buscas más cositas lindas? 💖
                 </h3>
-                <p className="text-xs text-[#8E7C94]">Creemos que estos te van a encantar</p>
+                <p className="text-xs text-[#8E7C94] max-w-xl">
+                  Tenemos más de 30 productos organizados por Sanrio, K-pop, Papelería, Ropa, Maquillaje y Hogar esperando por ti.
+                </p>
               </div>
               <button
                 onClick={() => {
                   setCurrentView('tienda');
                   clearAllFilters();
                 }}
-                className="text-xs font-semibold text-[#E2678D] hover:underline flex items-center gap-1 cursor-pointer"
+                className="px-6 py-3 rounded-full bg-gradient-to-r from-[#F4A7C1] to-[#DE6978] hover:opacity-95 text-white text-xs font-bold shadow-kawaii flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shrink-0"
               >
-                <span>Ver más</span>
-                <ArrowRight size={13} />
+                <ShoppingBag size={15} />
+                <span>Explorar todo el catálogo</span>
+                <ArrowRight size={14} />
               </button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {recomendadosHome.map((prod) => renderProductCard(prod))}
             </div>
           </section>
 
-          {/* 8. WIDGETS INTERACTIVOS DE COMUNIDAD (Exacto a Imagen 4) */}
-          <section className="max-w-[1440px] mx-auto px-4 sm:px-8 pt-6 space-y-4">
-            {/* Widget 1: Nivalo Music */}
-            <div className="bg-gradient-to-r from-[#FFF0F6] via-[#FFEAF2] to-[#FFF0F6] border border-[#FCDCE7] rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs text-left">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-white text-[#E2678D] flex items-center justify-center shadow-xs border border-[#FCDCE7] shrink-0">
-                  <Music size={20} className={isPlayingMusic ? 'animate-spin' : ''} />
+          {/* 7. WIDGETS INTERACTIVOS: REPRODUCTOR NEWJEANS SUPER SHY Y WHATSAPP */}
+          <section className="max-w-[1440px] mx-auto px-4 sm:px-8 pt-4 space-y-4">
+            {/* Audio nativo para NewJeans - Super Shy */}
+            <audio
+              ref={audioRef}
+              src="https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/a0/0c/47/a00c4790-3bbe-c669-fc8b-d8779508b512/mzaf_4170831274187670095.plus.aac.p.m4a"
+              loop
+              onTimeUpdate={handleTimeUpdate}
+              onPlay={() => setIsPlayingMusic(true)}
+              onPause={() => setIsPlayingMusic(false)}
+            />
+
+            {/* Widget Oficial Nivalo Music: NewJeans - Super Shy */}
+            <div className="bg-gradient-to-r from-[#FFF0F6] via-[#FFEAF2] to-[#FFF0F6] border border-[#FCDCE7] rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm text-left relative overflow-hidden">
+              {/* Adorno superior sutil */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#DE6978] via-[#F4A7C1] to-[#C9B6F2]" />
+
+              <div className="flex items-center gap-3.5 w-full md:w-auto">
+                {/* Carátula del Single Super Shy de NewJeans */}
+                <div className="relative group shrink-0">
+                  <img
+                    src="https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/63/e5/e2/63e5e2e4-829b-924d-a1dc-8058a1d69bd4/196922462702_Cover.jpg/120x120bb.jpg"
+                    alt="NewJeans - Super Shy"
+                    className="w-14 h-14 rounded-2xl object-cover shadow-sm border border-[#FCDCE7]"
+                  />
+                  {isPlayingMusic && (
+                    <div className="absolute inset-0 bg-black/25 rounded-2xl flex items-center justify-center">
+                      <div className="flex items-end gap-0.5 h-4">
+                        <span className="w-1 bg-white rounded-full animate-[bounce_0.6s_ease-in-out_infinite] h-3" />
+                        <span className="w-1 bg-white rounded-full animate-[bounce_0.8s_ease-in-out_infinite] h-4" />
+                        <span className="w-1 bg-white rounded-full animate-[bounce_0.5s_ease-in-out_infinite] h-2" />
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-[#E2678D] tracking-wider">
-                    Nivalo Music
-                  </span>
-                  <h4 className="font-display font-bold text-sm sm:text-base text-[#4A3B4E]">
-                    Tu compra necesita soundtrack ✨
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="text-[9px] uppercase font-bold text-white px-2 py-0.5 rounded-full bg-[#E2678D] tracking-wider">
+                      🎧 Nivalo Soundtrack
+                    </span>
+                    <span className="text-[10px] text-[#8E7C94] font-medium hidden sm:inline">
+                      K-Pop Vibes
+                    </span>
+                  </div>
+                  <h4 className="font-display font-bold text-sm sm:text-base text-[#4A3B4E] truncate flex items-center gap-2">
+                    <span>Super Shy</span>
+                    <span className="text-xs font-normal text-[#8E7C94]">— NewJeans (뉴진스)</span>
                   </h4>
-                  <p className="text-xs text-[#8E7C94]">
-                    {isPlayingMusic ? 'Reproduciendo: NewJeans - Super Shy (Kawaii Lofi Beats)' : 'Sonando playlist relajante para comprar'}
+                  <p className="text-xs text-[#8E7C94] flex items-center gap-1.5">
+                    {isPlayingMusic ? (
+                      <span className="text-[#DE6978] font-semibold flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-[#DE6978] animate-ping" />
+                        Reproduciendo ahora mientras compras ✨
+                      </span>
+                    ) : (
+                      <span>Dale play para escuchar música mientras recorres la tienda 🎶</span>
+                    )}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              {/* Controles de Reproducción */}
+              <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                {/* Barra de progreso */}
+                <div className="hidden sm:flex flex-col items-end gap-1 w-32">
+                  <div className="w-full bg-pink-100 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-[#DE6978] h-full transition-all duration-300 rounded-full"
+                      style={{ width: `${(musicProgress / (musicDuration || 30)) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-[#BAA0AC] font-mono">
+                    0:{Math.floor(musicProgress).toString().padStart(2, '0')} / 0:{Math.floor(musicDuration).toString().padStart(2, '0')}
+                  </span>
+                </div>
+
                 <button
-                  onClick={() => setIsPlayingMusic(!isPlayingMusic)}
-                  className="px-4 py-2 rounded-2xl bg-[#F4A7C1] hover:bg-[#EE8EAF] text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 transition-transform active:scale-95 cursor-pointer"
+                  type="button"
+                  onClick={toggleMusic}
+                  className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#F4A7C1] to-[#DE6978] hover:opacity-95 text-white text-xs font-bold shadow-kawaii flex items-center gap-2 transition-transform active:scale-95 cursor-pointer shrink-0"
                 >
-                  {isPlayingMusic ? <Pause size={14} /> : <Play size={14} />}
-                  <span>{isPlayingMusic ? 'Pausar' : 'Escuchar'}</span>
-                </button>
-                <button
-                  onClick={() => setShowIdeaModal(true)}
-                  className="px-4 py-2 rounded-2xl bg-white hover:bg-[#FFF0F6] border border-[#FCDCE7] text-[#4A3B4E] text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-                >
-                  + Añadir canción
+                  {isPlayingMusic ? <Pause size={15} /> : <Play size={15} />}
+                  <span>{isPlayingMusic ? 'Pausar Música' : 'Escuchar "Super Shy"'}</span>
                 </button>
               </div>
             </div>
@@ -1130,7 +1182,7 @@ export const Storefront: React.FC = () => {
                   <h5 className="font-bold text-white uppercase text-[11px] tracking-wider">COMPRAR</h5>
                   <ul className="space-y-1.5 text-[#D3C1CB]">
                     <li><button onClick={() => { setCurrentView('tienda'); clearAllFilters(); }} className="hover:text-white transition-colors cursor-pointer">Catálogo general</button></li>
-                    <li><button onClick={() => { setCurrentView('inicio'); document.getElementById('seccion-novedades')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors cursor-pointer">Novedades</button></li>
+                    <li><button onClick={() => { setCurrentView('inicio'); document.getElementById('seccion-mas-vendidos')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors cursor-pointer">Más Vendidos</button></li>
                     <li><button onClick={() => { setCurrentView('inicio'); document.getElementById('seccion-ofertas')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors cursor-pointer">Ofertas especiales</button></li>
                     <li><button onClick={() => { setCurrentView('inicio'); document.getElementById('seccion-categorias')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors cursor-pointer">Colecciones</button></li>
                   </ul>
