@@ -431,6 +431,19 @@ export const P3OrdersList: React.FC = () => {
                       {/* Acciones */}
                       <td className="py-3 px-2 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          {/* Botón Ver Trazabilidad Olva Courier (P6) */}
+                          <button
+                            onClick={() => {
+                              setSelectedOrderId(pedido.id);
+                              setActiveScreen('P6');
+                            }}
+                            className="p-1.5 rounded-xl bg-blue-50 hover:bg-[#002F6C] text-[#002F6C] hover:text-white transition cursor-pointer flex items-center gap-1 text-[11px] font-bold border border-blue-200"
+                            title="Ver trazabilidad completa en Olva Courier (P6)"
+                          >
+                            <Truck size={13} />
+                            <span>Ver Olva</span>
+                          </button>
+
                           {/* Botón Gestión de Tracking y Envío */}
                           <button
                             onClick={() => handleOpenTrackingModal(pedido)}

@@ -8,6 +8,7 @@ import {
   Database,
   ChevronRight,
   PackagePlus,
+  Truck,
 } from 'lucide-react';
 import { isSupabaseConfigured } from '../lib/supabase';
 
@@ -21,11 +22,11 @@ export const Sidebar: React.FC = () => {
     .filter((pg) => pg.estadoPago === 'POR_REVISAR').length;
 
   const navItems: Array<{
-    id: 'P1' | 'P2' | 'P3' | 'P4' | 'P5';
+    id: 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6';
     label: string;
     sublabel: string;
     icon: React.ComponentType<{ size?: number; className?: string }>;
-    badge?: number;
+    badge?: number | string;
     badgeColor?: string;
   }> = [
     {
@@ -63,6 +64,14 @@ export const Sidebar: React.FC = () => {
       icon: PackagePlus,
       badge: productos.length,
       badgeColor: 'bg-[#F4A7C1] text-white',
+    },
+    {
+      id: 'P6',
+      label: 'Tracking Olva',
+      sublabel: 'Consulta y trazabilidad',
+      icon: Truck,
+      badge: 'Olva',
+      badgeColor: 'bg-[#002F6C] text-white',
     },
   ];
 

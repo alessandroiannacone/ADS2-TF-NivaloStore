@@ -13,6 +13,7 @@ import {
   Shield,
   ArrowLeft,
   Package,
+  Truck,
 } from 'lucide-react';
 import { getAssetUrl, INITIAL_PRODUCTOS } from '../data/mockData';
 
@@ -252,6 +253,15 @@ export const CustomerAccountPage: React.FC<{ onBackToStore?: () => void }> = ({
                             {isPending && '⏳ Pendiente de Pago'}
                             {isCancelled && '✕ Cancelado'}
                           </span>
+
+                          <a
+                            href={`#/tracking?id=${pedido.id}`}
+                            className="py-1 px-2.5 rounded-xl bg-white border border-[#002F6C]/30 text-[#002F6C] hover:bg-[#002F6C] hover:text-white text-xs font-bold transition flex items-center gap-1 shadow-2xs"
+                            title="Ver seguimiento detallado con Olva Courier"
+                          >
+                            <Truck size={12} />
+                            <span>Tracking Olva</span>
+                          </a>
 
                           {isPending && (
                             <a

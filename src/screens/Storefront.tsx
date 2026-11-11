@@ -571,6 +571,16 @@ export const Storefront: React.FC = () => {
           {/* Enlaces de acceso al extremo derecho */}
           <div className="flex items-center justify-center md:justify-end gap-3 shrink-0 lg:flex-1 w-full md:w-auto">
             <button
+              onClick={() => {
+                window.location.hash = '#/tracking';
+              }}
+              className="font-bold text-[#002F6C] hover:text-[#E30613] flex items-center gap-1 cursor-pointer transition-colors"
+              title="Rastrear pedido con Olva Courier"
+            >
+              <span>🚚 Rastrear Pedido (Olva)</span>
+            </button>
+            <span className="opacity-30">•</span>
+            <button
               onClick={() => setShowSheinModal(true)}
               className="hover:text-[#D4547B] transition-colors cursor-pointer"
             >

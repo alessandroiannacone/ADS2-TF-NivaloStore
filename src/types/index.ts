@@ -106,19 +106,27 @@ export interface Pago {
 export type EstadoEnvio = 'PENDIENTE_ENVIO' | 'EN_PREPARACION' | 'DESPACHADO' | 'EN_CAMINO' | 'ENTREGADO';
 export type EmpresaEnvio = 'Olva Courier' | 'Shalom' | 'Motorizado Express' | 'Recojo en Almacén' | 'Otro';
 
+export interface TrackingHistorialItem {
+  fechaHora: string;
+  titulo: string;
+  descripcion: string;
+  ubicacion?: string;
+  estado?: 'completado' | 'actual' | 'pendiente';
+}
+
 export interface TrackingEnvio {
   empresa: EmpresaEnvio;
   numeroSeguimiento?: string;
+  ordenEntrega?: string; // ej: ORD-OLVA-2026-089
   estadoEnvio: EstadoEnvio;
   fechaDespacho?: string;
   fechaEntregaEstimada?: string;
   destino?: string;
+  destinatario?: string;
+  dniCliente?: string;
   observaciones?: string;
-  historialEnvio?: Array<{
-    fechaHora: string;
-    titulo: string;
-    descripcion: string;
-  }>;
+  ubicacionActual?: string;
+  historialEnvio?: TrackingHistorialItem[];
 }
 
 export interface Pedido {

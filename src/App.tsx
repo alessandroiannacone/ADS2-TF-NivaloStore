@@ -8,6 +8,7 @@ import { P2GenerateCharge } from './screens/P2GenerateCharge';
 import { P3OrdersList } from './screens/P3OrdersList';
 import { P4ReviewPayments } from './screens/P4ReviewPayments';
 import { P5CatalogManagement } from './screens/P5CatalogManagement';
+import { P6TrackingOlva } from './screens/P6TrackingOlva';
 import { HistoryModal } from './components/HistoryModal';
 import { NotificationToast } from './components/NotificationToast';
 import { Storefront } from './screens/Storefront';
@@ -148,6 +149,25 @@ const MainLayout: React.FC = () => {
     );
   }
 
+  // 4.5. Consulta y Tracking de Envíos Olva Courier (#/tracking o #/consultar-pedido)
+  if (currentRoute.startsWith('#/tracking') || currentRoute.startsWith('#/consultar-pedido')) {
+    const urlParams = new URLSearchParams(currentRoute.split('?')[1] || '');
+    const queryOrderId = urlParams.get('id') || undefined;
+
+    return (
+      <div className="min-h-screen bg-[#FFF8FA] text-[#4A3E4E] p-4 lg:p-8">
+        <P6TrackingOlva
+          initialOrderId={queryOrderId}
+          onBackToStore={() => {
+            window.location.hash = '#/';
+          }}
+          isPublicPortal={true}
+        />
+        <NotificationToast />
+      </div>
+    );
+  }
+
   // 5. Login Administrativo Exclusivo (#/admin/login)
   if (currentRoute === '#/admin/login') {
     if (user && isAdmin) {
@@ -198,6 +218,7 @@ const MainLayout: React.FC = () => {
             {activeScreen === 'P3' && <P3OrdersList />}
             {activeScreen === 'P4' && <P4ReviewPayments />}
             {activeScreen === 'P5' && <P5CatalogManagement />}
+            {activeScreen === 'P6' && <P6TrackingOlva />}
           </main>
         </div>
         <HistoryModal />

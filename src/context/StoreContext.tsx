@@ -30,8 +30,8 @@ interface StoreContextType {
   pedidos: Pedido[];
   productos: Producto[];
   notificaciones: NotificacionSistema[];
-  activeScreen: 'P1' | 'P2' | 'P3' | 'P4' | 'P5';
-  setActiveScreen: (screen: 'P1' | 'P2' | 'P3' | 'P4' | 'P5') => void;
+  activeScreen: 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6';
+  setActiveScreen: (screen: 'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6') => void;
   selectedOrderId: string | null;
   setSelectedOrderId: (id: string | null) => void;
   historyModalOrderId: string | null;
@@ -154,7 +154,7 @@ const STORAGE_KEY_NOTIFS = 'nivalo_v2_notificaciones';
 
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [vendedor] = useState<Vendedor>(INITIAL_VENDEDOR);
-  const [activeScreen, setActiveScreen] = useState<'P1' | 'P2' | 'P3' | 'P4' | 'P5'>('P1');
+  const [activeScreen, setActiveScreen] = useState<'P1' | 'P2' | 'P3' | 'P4' | 'P5' | 'P6'>('P1');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [historyModalOrderId, setHistoryModalOrderId] = useState<string | null>(null);
   const [paymentSimulatorOpen, setPaymentSimulatorOpen] = useState<boolean>(false);
