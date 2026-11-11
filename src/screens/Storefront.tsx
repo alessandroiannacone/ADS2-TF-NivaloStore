@@ -105,7 +105,14 @@ export const Storefront: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
   const [musicProgress, setMusicProgress] = useState(0);
-  const [musicDuration, setMusicDuration] = useState(30);
+  const [musicDuration, setMusicDuration] = useState(155);
+
+  const formatMusicTime = (seconds: number) => {
+    if (isNaN(seconds) || seconds < 0) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const toggleMusic = () => {
     if (!audioRef.current) return;
@@ -467,6 +474,16 @@ export const Storefront: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FFF5F8] text-[#4A3B4E] font-['Poppins',sans-serif] selection:bg-[#FCDCE7] selection:text-[#C74872]">
+      {/* Reproductor de audio persistente global: NewJeans - Super Shy (canción completa) */}
+      <audio
+        ref={audioRef}
+        src={getAssetUrl('super_shy.mp3')}
+        loop
+        onTimeUpdate={handleTimeUpdate}
+        onPlay={() => setIsPlayingMusic(true)}
+        onPause={() => setIsPlayingMusic(false)}
+      />
+
       {/* 1. TOP ANNOUNCEMENT BAR */}
       <div className="bg-gradient-to-r from-[#FFF0F6] via-[#FFEAF2] to-[#FFF0F6] border-b border-[#FCDCE7] text-[11px] py-1.5 px-4 text-[#A85B77]">
         <div className="max-w-[1440px] mx-auto flex items-center justify-between">
@@ -1010,16 +1027,6 @@ export const Storefront: React.FC = () => {
 
           {/* 7. WIDGETS INTERACTIVOS: REPRODUCTOR NEWJEANS SUPER SHY Y WHATSAPP */}
           <section className="max-w-[1440px] mx-auto px-4 sm:px-8 pt-4 space-y-4">
-            {/* Audio nativo para NewJeans - Super Shy */}
-            <audio
-              ref={audioRef}
-              src="https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/a0/0c/47/a00c4790-3bbe-c669-fc8b-d8779508b512/mzaf_4170831274187670095.plus.aac.p.m4a"
-              loop
-              onTimeUpdate={handleTimeUpdate}
-              onPlay={() => setIsPlayingMusic(true)}
-              onPause={() => setIsPlayingMusic(false)}
-            />
-
             {/* Widget Oficial Nivalo Music: NewJeans - Super Shy */}
             <div className="bg-gradient-to-r from-[#FFF0F6] via-[#FFEAF2] to-[#FFF0F6] border border-[#FCDCE7] rounded-3xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm text-left relative overflow-hidden">
               {/* Adorno superior sutil */}
@@ -1050,7 +1057,7 @@ export const Storefront: React.FC = () => {
                       🎧 Nivalo Soundtrack
                     </span>
                     <span className="text-[10px] text-[#8E7C94] font-medium hidden sm:inline">
-                      K-Pop Vibes
+                      K-Pop Vibes (Canción Completa)
                     </span>
                   </div>
                   <h4 className="font-display font-bold text-sm sm:text-base text-[#4A3B4E] truncate flex items-center gap-2">
@@ -1064,7 +1071,7 @@ export const Storefront: React.FC = () => {
                         Reproduciendo ahora mientras compras ✨
                       </span>
                     ) : (
-                      <span>Dale play para escuchar música mientras recorres la tienda 🎶</span>
+                      <span>Dale play para escuchar música continua mientras recorres la tienda 🎶</span>
                     )}
                   </p>
                 </div>
@@ -1077,11 +1084,11 @@ export const Storefront: React.FC = () => {
                   <div className="w-full bg-pink-100 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-[#DE6978] h-full transition-all duration-300 rounded-full"
-                      style={{ width: `${(musicProgress / (musicDuration || 30)) * 100}%` }}
+                      style={{ width: `${(musicProgress / (musicDuration || 155)) * 100}%` }}
                     />
                   </div>
                   <span className="text-[10px] text-[#BAA0AC] font-mono">
-                    0:{Math.floor(musicProgress).toString().padStart(2, '0')} / 0:{Math.floor(musicDuration).toString().padStart(2, '0')}
+                    {formatMusicTime(musicProgress)} / {formatMusicTime(musicDuration || 155)}
                   </span>
                 </div>
 
@@ -1969,6 +1976,39 @@ export const Storefront: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ================= REPRODUCTOR FLOTANTE PERSISTENTE EN TIENDA ================= */}
+      {(isPlayingMusic || currentView === 'tienda') && (
+        <div className="fixed bottom-5 left-5 z-40 bg-white/95 backdrop-blur-md border border-[#FCDCE7] rounded-full py-1.5 pl-2 pr-3 shadow-kawaii flex items-center gap-2.5 animate-in slide-in-from-bottom duration-300">
+          <div className="relative shrink-0">
+            <img
+              src="https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/63/e5/e2/63e5e2e4-829b-924d-a1dc-8058a1d69bd4/196922462702_Cover.jpg/120x120bb.jpg"
+              alt="Super Shy"
+              className="w-8 h-8 rounded-full object-cover border border-[#FCDCE7]"
+            />
+            {isPlayingMusic && (
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#E2678D] animate-ping" />
+            )}
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-[11px] font-bold text-[#4A3B4E] leading-tight flex items-center gap-1">
+              <span>Super Shy</span>
+              <span className="text-[9px] text-[#E2678D] font-normal">뉴진스</span>
+            </span>
+            <span className="text-[9px] text-[#8E7C94] font-mono leading-tight">
+              {formatMusicTime(musicProgress)} / {formatMusicTime(musicDuration || 155)}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={toggleMusic}
+            className="w-8 h-8 rounded-full bg-gradient-to-r from-[#F4A7C1] to-[#DE6978] hover:opacity-95 text-white flex items-center justify-center shadow-xs cursor-pointer active:scale-95 transition-transform"
+            title={isPlayingMusic ? 'Pausar música' : 'Reproducir Super Shy'}
+          >
+            {isPlayingMusic ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}
+          </button>
         </div>
       )}
 
