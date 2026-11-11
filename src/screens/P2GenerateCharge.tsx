@@ -10,7 +10,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { WhatsAppIcon } from '../components/WhatsAppIcon';
-import { NIVALO_STORE_CONTACT } from '../data/mockData';
+import { NIVALO_STORE_CONTACT, getAssetUrl } from '../data/mockData';
 
 const InstagramIcon: React.FC<{ size?: number; className?: string }> = ({ size = 16, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -390,22 +390,13 @@ export const P2GenerateCharge: React.FC = () => {
 
               {/* QR y Teléfono */}
               <div className="flex items-center gap-4 bg-white/10 p-3 rounded-2xl backdrop-blur-xs border border-white/10">
-                {/* QR Ilustrativo */}
-                <div className="bg-white p-1.5 rounded-xl shrink-0 shadow-sm">
-                  <svg width="64" height="64" viewBox="0 0 120 120" className="rounded-md">
-                    <rect width="120" height="120" fill="white" />
-                    <rect x="10" y="10" width="30" height="30" fill="#742284" rx="3" />
-                    <rect x="15" y="15" width="20" height="20" fill="white" rx="1" />
-                    <rect x="20" y="20" width="10" height="10" fill="#742284" />
-                    <rect x="80" y="10" width="30" height="30" fill="#742284" rx="3" />
-                    <rect x="85" y="15" width="20" height="20" fill="white" rx="1" />
-                    <rect x="90" y="20" width="10" height="10" fill="#742284" />
-                    <rect x="10" y="80" width="30" height="30" fill="#742284" rx="3" />
-                    <rect x="15" y="85" width="20" height="20" fill="white" rx="1" />
-                    <rect x="20" y="90" width="10" height="10" fill="#742284" />
-                    <rect x="45" y="45" width="30" height="30" fill="#00D4B2" rx="4" />
-                    <text x="60" y="65" fontSize="18" fontWeight="bold" fill="#742284" textAnchor="middle">Y</text>
-                  </svg>
+                {/* QR Oficial Yape */}
+                <div className="bg-white p-1 rounded-xl shrink-0 shadow-sm">
+                  <img
+                    src={getAssetUrl('qr_yape.jpg')}
+                    alt="Yape QR"
+                    className="w-16 h-16 object-contain rounded-lg"
+                  />
                 </div>
 
                 {/* Número y Titular */}

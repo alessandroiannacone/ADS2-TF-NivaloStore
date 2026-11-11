@@ -257,43 +257,15 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
 
                 {/* QR y Datos */}
                 <div className="flex flex-col sm:flex-row items-center gap-6 justify-center py-2">
-                  {/* Código QR Ilustrativo de Yape */}
+                  {/* Código QR Oficial de Yape */}
                   <div className="p-3 bg-gradient-to-br from-[#742284] to-[#50155E] rounded-3xl shadow-lg shrink-0 flex flex-col items-center">
-                    <div className="bg-white p-3 rounded-2xl shadow-inner flex flex-col items-center justify-center">
-                      <svg width="150" height="150" viewBox="0 0 120 120" className="rounded-lg">
-                        <rect width="120" height="120" fill="white" />
-                        {/* Esquinas QR */}
-                        <rect x="10" y="10" width="30" height="30" fill="#742284" rx="4" />
-                        <rect x="15" y="15" width="20" height="20" fill="white" rx="2" />
-                        <rect x="20" y="20" width="10" height="10" fill="#742284" />
-
-                        <rect x="80" y="10" width="30" height="30" fill="#742284" rx="4" />
-                        <rect x="85" y="15" width="20" height="20" fill="white" rx="2" />
-                        <rect x="90" y="20" width="10" height="10" fill="#742284" />
-
-                        <rect x="10" y="80" width="30" height="30" fill="#742284" rx="4" />
-                        <rect x="15" y="85" width="20" height="20" fill="white" rx="2" />
-                        <rect x="20" y="90" width="10" height="10" fill="#742284" />
-
-                        {/* Patrones de datos */}
-                        <rect x="45" y="15" width="8" height="8" fill="#742284" />
-                        <rect x="58" y="25" width="8" height="8" fill="#742284" />
-                        <rect x="68" y="15" width="6" height="6" fill="#742284" />
-
-                        <rect x="45" y="45" width="30" height="30" fill="#00D4B2" rx="6" />
-                        <text x="60" y="65" fontSize="18" fontWeight="bold" fill="#742284" textAnchor="middle">Y</text>
-
-                        <rect x="15" y="55" width="8" height="8" fill="#742284" />
-                        <rect x="28" y="48" width="8" height="8" fill="#742284" />
-                        <rect x="85" y="55" width="8" height="8" fill="#742284" />
-                        <rect x="98" y="48" width="8" height="8" fill="#742284" />
-
-                        <rect x="48" y="85" width="8" height="8" fill="#742284" />
-                        <rect x="62" y="95" width="8" height="8" fill="#742284" />
-                        <rect x="75" y="85" width="8" height="8" fill="#742284" />
-                        <rect x="88" y="95" width="8" height="8" fill="#742284" />
-                      </svg>
-                      <span className="text-[10px] font-bold text-[#742284] mt-1.5 flex items-center gap-1">
+                    <div className="bg-white p-2.5 rounded-2xl shadow-inner flex flex-col items-center justify-center">
+                      <img
+                        src={getAssetUrl('qr_yape.jpg')}
+                        alt="Código QR Yape Nivalo Store"
+                        className="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-xl"
+                      />
+                      <span className="text-[11px] font-bold text-[#742284] mt-2 flex items-center gap-1">
                         <span>💜</span> Escanea con tu app Yape
                       </span>
                     </div>
