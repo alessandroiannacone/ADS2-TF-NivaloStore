@@ -85,6 +85,8 @@ export const Storefront: React.FC = () => {
     wishlist,
     toggleWishlist,
     transferCartToP1,
+    createOrder,
+    clearCart,
   } = useStore();
 
   const { user, profile, isAdmin, signOut } = useAuth();
@@ -147,6 +149,69 @@ export const Storefront: React.FC = () => {
   const [ideaText, setIdeaText] = useState('');
   const [ideaSubmitted, setIdeaSubmitted] = useState(false);
   const [showNivieBotModal, setShowNivieBotModal] = useState(false);
+
+  // Modal de checkout directo con Yape / Plin desde el carrito
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [checkoutNombre, setCheckoutNombre] = useState('');
+  const [checkoutTelefono, setCheckoutTelefono] = useState('');
+  const [checkoutError, setCheckoutError] = useState('');
+  const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
+
+  const handleOpenCheckout = () => {
+    if (user) {
+      setCheckoutNombre(profile?.nombres || user.email?.split('@')[0] || '');
+      setCheckoutTelefono(profile?.telefono || '');
+    }
+    setCheckoutError('');
+    setShowCheckoutModal(true);
+  };
+
+  const handleConfirmDirectPayment = () => {
+    if (!checkoutNombre.trim()) {
+      setCheckoutError('Por favor ingresa tu nombre o usuario.');
+      return;
+    }
+    if (!checkoutTelefono.trim() || checkoutTelefono.trim().length < 8) {
+      setCheckoutError('Ingresa un número de celular/WhatsApp válido (mínimo 8 dígitos).');
+      return;
+    }
+    if (cart.length === 0) {
+      setCheckoutError('Tu bolsa kawaii está vacía.');
+      return;
+    }
+
+    setIsProcessingCheckout(true);
+    setCheckoutError('');
+
+    const detalles = cart.map((item, idx) => ({
+      id: `DET-${Date.now()}-${idx}`,
+      productoId: item.producto.id,
+      productoNombre: item.producto.nombre,
+      precioUnitario: item.producto.precio,
+      cantidad: item.cantidad,
+      subtotal: item.producto.precio * item.cantidad,
+    }));
+
+    const res = createOrder({
+      clienteNombre: checkoutNombre.trim(),
+      clienteTelefono: checkoutTelefono.trim(),
+      canal: 'WhatsApp',
+      detalles,
+    });
+
+    setIsProcessingCheckout(false);
+
+    if (res.success && res.pedido) {
+      clearCart();
+      setIsCartOpen(false);
+      setShowCheckoutModal(false);
+      // Redirigir directamente a la pantalla de pago seguro con código QR de Yape
+      window.location.hash = `#/pago/${res.pedido.id.replace('PED-', '')}`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setCheckoutError(res.error || 'Ocurrió un error al generar tu pedido.');
+    }
+  };
 
   // Lista de categorías para filtros y explorador
   const CATEGORIES = [
@@ -1585,37 +1650,53 @@ export const Storefront: React.FC = () => {
                       <span>S/ {cartSubtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-[#8E7C94]">
-                      <span>Envío (Olva Courier)</span>
-                      <span>{cartSubtotal >= 80 ? 'GRATIS' : 'S/ 10.00'}</span>
+                      <span>Envío (Olva Courier / Shalom)</span>
+                      <span className="font-semibold text-emerald-600">GRATIS</span>
                     </div>
                     <div className="flex justify-between text-sm font-bold text-[#4A3B4E] pt-2 border-t border-[#FCDCE7]">
-                      <span>Total Estimado</span>
-                      <span className="text-base text-[#E2678D]">
-                        S/ {(cartSubtotal + (cartSubtotal >= 80 ? 0 : 10)).toFixed(2)}
+                      <span>Total a Pagar</span>
+                      <span className="text-base text-[#742284] font-extrabold">
+                        S/ {cartSubtotal.toFixed(2)}
                       </span>
                     </div>
                   </div>
+
+                  {/* Botón Principal: Pagar con Yape / Plin / Boleta de Pago */}
+                  <button
+                    onClick={handleOpenCheckout}
+                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#742284] via-[#631B72] to-[#50155E] hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-md transition-all active:scale-98 cursor-pointer group"
+                  >
+                    <img
+                      src={getAssetUrl('yape_logo.png')}
+                      alt="Yape"
+                      className="w-5 h-5 rounded-md object-contain bg-white p-0.5"
+                    />
+                    <span>Comprar con Yape / Plin (Pagar Aquí)</span>
+                    <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
 
                   <a
                     href={`https://wa.me/51998167789?text=${generateWhatsAppMessage()}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full py-3 rounded-2xl bg-[#25D366] hover:bg-[#20BD5A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-transform active:scale-98"
+                    className="w-full py-2.5 rounded-2xl bg-[#25D366] hover:bg-[#20BD5A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-transform active:scale-98"
                   >
-                    <WhatsAppIcon size={16} />
-                    <span>Pedir por WhatsApp (Atención Inmediata)</span>
+                    <WhatsAppIcon size={15} />
+                    <span>Pedir por WhatsApp (Atención Asistida)</span>
                   </a>
 
-                  <button
-                    onClick={() => {
-                      transferCartToP1();
-                      setIsCartOpen(false);
-                    }}
-                    className="w-full py-2.5 rounded-2xl bg-white hover:bg-[#FFF0F6] border border-[#F4A7C1] text-[#E2678D] font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <Sparkles size={14} />
-                    <span>Cargar en Panel Vendedor (Registrar en P1)</span>
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => {
+                        transferCartToP1();
+                        setIsCartOpen(false);
+                      }}
+                      className="w-full py-2 rounded-2xl bg-white hover:bg-[#FFF0F6] border border-[#F4A7C1] text-[#E2678D] font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Sparkles size={13} />
+                      <span>Cargar en Panel Vendedor (P1)</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -2040,6 +2121,104 @@ export const Storefront: React.FC = () => {
           <WhatsAppIcon size={26} />
         </a>
       </div>
+
+      {/* ================= MODAL DE CHECKOUT DIRECTO (DATOS PARA PAGO) ================= */}
+      {showCheckoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-md w-full border border-[#FCDCE7] shadow-2xl p-6 text-left relative overflow-hidden space-y-4">
+            {/* Franja superior kawaii */}
+            <div className="absolute top-0 left-0 right-0 h-2 bg-[#F4A7C1]" />
+
+            <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🛍️</span>
+                <h3 className="font-display font-bold text-base text-[#4A3B4E]">
+                  Finalizar Compra Directa
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowCheckoutModal(false)}
+                className="p-1.5 rounded-full text-[#8E7C94] hover:bg-[#FFF0F6] cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#8E7C94]">
+              Ingresa tus datos de contacto para emitir tu boleta con el <strong>código QR de Yape</strong> y reservar tu stock por 24 horas:
+            </p>
+
+            {checkoutError && (
+              <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-600 font-medium">
+                ⚠️ {checkoutError}
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-bold text-[#4A3B4E] uppercase tracking-wider mb-1">
+                  Tu Nombre o Usuario <span className="text-[#DE6978]">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. Valeria Mendoza o @sakura_peru"
+                  value={checkoutNombre}
+                  onChange={(e) => setCheckoutNombre(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-[#FFF5F8] border border-[#FCDCE7] text-xs text-[#4A3B4E] placeholder:text-[#BAA0AC] focus:outline-none focus:border-[#F4A7C1] focus:ring-2 focus:ring-[#F4A7C1]/30 transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#4A3B4E] uppercase tracking-wider mb-1">
+                  Celular / WhatsApp <span className="text-[#DE6978]">*</span>
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Ej. 998167789"
+                  value={checkoutTelefono}
+                  onChange={(e) => setCheckoutTelefono(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-[#FFF5F8] border border-[#FCDCE7] text-xs text-[#4A3B4E] placeholder:text-[#BAA0AC] focus:outline-none focus:border-[#F4A7C1] focus:ring-2 focus:ring-[#F4A7C1]/30 transition"
+                />
+                <span className="text-[10px] text-[#BAA0AC] block mt-1">
+                  Te contactaremos aquí para coordinar la entrega por Olva Courier o Shalom.
+                </span>
+              </div>
+            </div>
+
+            {/* Resumen express */}
+            <div className="p-3.5 rounded-2xl bg-[#FFF0F6] border border-[#FCDCE7] flex items-center justify-between">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#8E7C94] block">
+                  Total a Pagar ({cart.reduce((a, c) => a + c.cantidad, 0)} items)
+                </span>
+                <span className="text-base font-extrabold text-[#742284]">
+                  S/ {cartSubtotal.toFixed(2)}
+                </span>
+              </div>
+              <span className="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">
+                Envío Gratis ✨
+              </span>
+            </div>
+
+            <button
+              onClick={handleConfirmDirectPayment}
+              disabled={isProcessingCheckout}
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#742284] via-[#631B72] to-[#50155E] hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-98 cursor-pointer disabled:opacity-60"
+            >
+              <img
+                src={getAssetUrl('yape_logo.png')}
+                alt="Yape"
+                className="w-5 h-5 rounded-md object-contain bg-white p-0.5"
+              />
+              <span>
+                {isProcessingCheckout
+                  ? 'Generando tu boleta...'
+                  : 'Ver Boleta y Código QR de Yape ➔'}
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Niviebot Chat Interactivo */}
       <NivieBotChat
