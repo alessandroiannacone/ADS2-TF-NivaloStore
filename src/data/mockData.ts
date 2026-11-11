@@ -2,9 +2,9 @@ import type { Producto, Pedido, Vendedor } from '../types';
 
 export const INITIAL_VENDEDOR: Vendedor = {
   id: 'VEND-001',
-  nombre: 'Camila Villavicencio',
-  usuario: '@camila_nivalo',
-  rol: 'Vendedora Principal & Administradora',
+  nombre: 'Alessandro Iannacone',
+  usuario: '@alessandro_nivalo',
+  rol: 'Vendedor Principal & Administrador',
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
 };
 
@@ -12,6 +12,7 @@ export const INITIAL_VENDEDOR: Vendedor = {
 export const NIVALO_STORE_CONTACT = {
   telefono: '998167789',
   telefonoDisplay: '+51 998 167 789',
+  titularYape: 'Nivalo Store (Alessandro Iannacone)',
   whatsappUrl: 'https://wa.me/51998167789',
   email: 'nivalostore@gmail.com',
   instagram: '@nivalo_store',

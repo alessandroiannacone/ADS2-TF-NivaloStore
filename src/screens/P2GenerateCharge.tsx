@@ -112,7 +112,7 @@ export const P2GenerateCharge: React.FC = () => {
 
   // Mensaje para WhatsApp con datos de Yape y enlace
   const whatsappText = currentPedido
-    ? `🌸 ¡Hola ${currentPedido.cliente.nombreOIdentificador}! Gracias por comprar en *Nivalo Store*.\n\nAquí tienes las opciones de pago para tu pedido *${currentPedido.id}* por un total de *S/ ${currentPedido.total.toFixed(2)}*:\n\n💜 *1. YAPE / PLIN (Directo):*\n📱 Número: *${NIVALO_STORE_CONTACT.telefonoDisplay}*\n👤 Titular: *Nivalo Store (Camila Villavicencio)*\n\n💳 *2. O PAGA EN LÍNEA CON QR Y TARJETAS:*\n👉 ${finalLink}\n\n⚠️ Recuerda que tu stock está reservado durante *24 horas*. Por favor envíanos la captura de tu comprobante por aquí. ¡Muchas gracias! 💕`
+    ? `🌸 ¡Hola ${currentPedido.cliente.nombreOIdentificador}! Gracias por comprar en *Nivalo Store*.\n\nAquí tienes las opciones de pago para tu pedido *${currentPedido.id}* por un total de *S/ ${currentPedido.total.toFixed(2)}*:\n\n💜 *1. YAPE / PLIN (Directo):*\n📱 Número: *${NIVALO_STORE_CONTACT.telefonoDisplay}*\n👤 Titular: *Nivalo Store (Alessandro Iannacone)*\n\n💳 *2. O PAGA EN LÍNEA CON QR Y TARJETAS:*\n👉 ${finalLink}\n\n⚠️ Recuerda que tu stock está reservado durante *24 horas*. Por favor envíanos la captura de tu comprobante por aquí. ¡Muchas gracias! 💕`
     : '';
 
   // Mensaje para Instagram
@@ -430,7 +430,7 @@ export const P2GenerateCharge: React.FC = () => {
                 type="button"
                 onClick={() =>
                   copyToClipboard(
-                    `💜 Datos de Pago por Yape:\n📱 Celular: ${NIVALO_STORE_CONTACT.telefonoDisplay}\n👤 Titular: Nivalo Store (Camila Villavicencio)\n💰 Total: S/ ${currentPedido.total.toFixed(2)}\n🔗 Enlace seguro: ${finalLink}`,
+                    `💜 Datos de Pago por Yape:\n📱 Celular: ${NIVALO_STORE_CONTACT.telefonoDisplay}\n👤 Titular: Nivalo Store (Alessandro Iannacone)\n💰 Total: S/ ${currentPedido.total.toFixed(2)}\n🔗 Enlace seguro: ${finalLink}`,
                     'yape'
                   )
                 }

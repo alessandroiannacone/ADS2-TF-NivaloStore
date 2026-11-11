@@ -324,7 +324,7 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                         Titular de la cuenta:
                       </span>
                       <span className="text-xs font-bold text-[#343047] block">
-                        Nivalo Store (Camila Villavicencio)
+                        Nivalo Store (Alessandro Iannacone)
                       </span>
                     </div>
 
@@ -403,7 +403,7 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                     </button>
                   </div>
                   <span className="text-xs text-[#746E8B] block pt-1">
-                    Titular: <strong>Nivalo Store (Camila Villavicencio)</strong>
+                    Titular: <strong>Nivalo Store (Alessandro Iannacone)</strong>
                   </span>
                 </div>
 
