@@ -144,6 +144,7 @@ export const P1RegisterOrder: React.FC = () => {
         id: `DET-${Date.now()}`,
         productoId: selectedProduct.id,
         productoNombre: selectedProduct.nombre,
+        productoImagen: selectedProduct.imagen,
         precioUnitario: selectedProduct.precio,
         cantidad: cantidadInput,
         subtotal: cantidadInput * selectedProduct.precio,

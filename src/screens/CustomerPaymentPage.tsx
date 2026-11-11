@@ -11,7 +11,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { WhatsAppIcon } from '../components/WhatsAppIcon';
-import { NIVALO_STORE_CONTACT, getAssetUrl } from '../data/mockData';
+import { NIVALO_STORE_CONTACT, getAssetUrl, INITIAL_PRODUCTOS } from '../data/mockData';
 
 interface CustomerPaymentPageProps {
   pedidoId: string;
@@ -73,6 +73,34 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
     navigator.clipboard.writeText(pedido.total.toFixed(2));
     setCopiedTotal(true);
     setTimeout(() => setCopiedTotal(false), 2000);
+  };
+
+  // Helper para resolver la imagen oficial del producto en la boleta
+  const getItemImage = (item: { productoId: string; productoNombre: string; productoImagen?: string }) => {
+    if (item.productoImagen) {
+      return getAssetUrl(item.productoImagen);
+    }
+    const foundInState = productos.find((p) => p.id === item.productoId);
+    if (foundInState?.imagen) {
+      return getAssetUrl(foundInState.imagen);
+    }
+    const foundInMock = INITIAL_PRODUCTOS.find((p) => p.id === item.productoId);
+    if (foundInMock?.imagen) {
+      return getAssetUrl(foundInMock.imagen);
+    }
+    const nameClean = item.productoNombre.toLowerCase().trim();
+    const foundByName =
+      productos.find((p) => p.nombre.toLowerCase().trim() === nameClean) ||
+      INITIAL_PRODUCTOS.find((p) => p.nombre.toLowerCase().trim() === nameClean) ||
+      INITIAL_PRODUCTOS.find(
+        (p) =>
+          nameClean.includes(p.nombre.toLowerCase().trim()) ||
+          p.nombre.toLowerCase().trim().includes(nameClean)
+      );
+    if (foundByName?.imagen) {
+      return getAssetUrl(foundByName.imagen);
+    }
+    return 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=150&q=80';
   };
 
   if (!pedido) {
@@ -444,26 +472,24 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                 </div>
               </div>
 
-              {/* Items */}
+              {/* Items con foto respectiva del producto */}
               <div className="divide-y divide-gray-100 max-h-60 overflow-y-auto pr-1">
                 {pedido.detalles.map((item, idx) => {
-                  const prod = productos.find((p) => p.id === item.productoId);
+                  const itemImg = getItemImage(item);
                   return (
-                    <div key={idx} className="py-2.5 flex items-center justify-between gap-2 text-xs">
+                    <div key={idx} className="py-2.5 flex items-center justify-between gap-2.5 text-xs">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-10 h-10 rounded-xl bg-pink-50 overflow-hidden shrink-0 border border-pink-100">
-                          {prod?.imagen ? (
-                            <img
-                              src={getAssetUrl(prod.imagen)}
-                              alt={item.productoNombre}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="%23FFF0F6"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="20">🌸</text></svg>';
-                              }}
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-sm">🌸</div>
-                          )}
+                        <div className="w-11 h-11 rounded-2xl bg-pink-50 overflow-hidden shrink-0 border border-pink-100 shadow-xs">
+                          <img
+                            src={itemImg}
+                            alt={item.productoNombre}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.onerror = null;
+                              target.src = 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=150&q=80';
+                            }}
+                          />
                         </div>
                         <div>
                           <span className="font-semibold text-[#343047] block line-clamp-1">
@@ -474,7 +500,7 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                           </span>
                         </div>
                       </div>
-                      <span className="font-bold text-[#343047] shrink-0">
+                      <span className="font-bold text-[#343047] shrink-0 font-mono">
                         S/ {item.subtotal.toFixed(2)}
                       </span>
                     </div>

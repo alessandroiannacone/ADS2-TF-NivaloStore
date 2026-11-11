@@ -56,6 +56,7 @@ export interface DetallePedido {
   precioUnitario: number;
   cantidad: number;
   subtotal: number;
+  productoImagen?: string;
 }
 
 export interface ReservaStock {

@@ -32,7 +32,7 @@ import {
 import { WhatsAppIcon } from '../components/WhatsAppIcon';
 import { NivieBotChat } from '../components/NivieBotChat';
 import { getAssetUrl } from '../data/mockData';
-import type { Producto } from '../types';
+import type { Producto, DetallePedido } from '../types';
 
 // Mascota oficial kawaii de Nivalo Store (Pastel Pink Ultra Kawaii)
 const NivaloCatMascot: React.FC<{ className?: string }> = ({ className = 'w-9 h-9' }) => (
@@ -183,10 +183,11 @@ export const Storefront: React.FC = () => {
     setIsProcessingCheckout(true);
     setCheckoutError('');
 
-    const detalles = cart.map((item, idx) => ({
+    const detalles: DetallePedido[] = cart.map((item, idx) => ({
       id: `DET-${Date.now()}-${idx}`,
       productoId: item.producto.id,
       productoNombre: item.producto.nombre,
+      productoImagen: item.producto.imagen,
       precioUnitario: item.producto.precio,
       cantidad: item.cantidad,
       subtotal: item.producto.precio * item.cantidad,
