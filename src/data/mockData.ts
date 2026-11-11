@@ -19,13 +19,40 @@ export const NIVALO_STORE_CONTACT = {
   ubicacion: 'Lima, Perú (Envíos a nivel nacional)',
 };
 
-// Helper para resolver rutas de assets con compatibilidad para GitHub Pages
+// Helper para resolver rutas de assets con compatibilidad para GitHub Pages (idempotente y autorreparable)
 export const getAssetUrl = (path: string): string => {
   if (!path) return '';
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
-  const cleanPath = path.replace(/^\.?\//, '');
+  // URLs externas o data URIs no requieren prefijo de asset local
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) {
+    return path;
+  }
+
   const base = import.meta.env.BASE_URL || '/';
-  const cleanBase = base.endsWith('/') ? base : `${base}/`;
+  const cleanBase = base.endsWith('/') ? base : `${base}/`; // Ej: "/ADS2-TF-NivaloStore/"
+  const baseName = cleanBase.replace(/^\/|\/$/g, ''); // "ADS2-TF-NivaloStore"
+
+  // Si ya tiene bases duplicadas (ej: "/ADS2-TF-NivaloStore/ADS2-TF-NivaloStore/prod.jpg"), repararlas
+  if (baseName) {
+    const doubleBaseRegex = new RegExp(`^(\\/?)(${baseName}\\/)+`, 'i');
+    if (doubleBaseRegex.test(path)) {
+      const stripped = path.replace(doubleBaseRegex, '');
+      return `/${baseName}/${stripped}`;
+    }
+  }
+
+  // Si ya empieza con cleanBase, devolverlo tal cual
+  if (path.startsWith(cleanBase)) {
+    return path;
+  }
+
+  // Quitar puntos y slashes redundantes al inicio
+  const cleanPath = path.replace(/^(\.\/|\/)+/, '');
+
+  // Si después de limpiar ya empieza con el baseName
+  if (baseName && (cleanPath === baseName || cleanPath.startsWith(`${baseName}/`))) {
+    return `/${cleanPath}`;
+  }
+
   return `${cleanBase}${cleanPath}`;
 };
 

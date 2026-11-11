@@ -8,16 +8,13 @@ import {
   LogOut,
   Save,
   CheckCircle2,
-  Clock,
   ExternalLink,
-  MapPin,
-  Phone,
   Mail,
   Shield,
   ArrowLeft,
   Package,
 } from 'lucide-react';
-import { getAssetUrl } from '../data/mockData';
+import { getAssetUrl, INITIAL_PRODUCTOS } from '../data/mockData';
 
 export const CustomerAccountPage: React.FC<{ onBackToStore?: () => void }> = ({
   onBackToStore,
@@ -268,18 +265,38 @@ export const CustomerAccountPage: React.FC<{ onBackToStore?: () => void }> = ({
                         </div>
                       </div>
 
-                      {/* Lista de productos del pedido */}
+                      {/* Lista de productos del pedido con imagen */}
                       <div className="divide-y divide-gray-50 text-xs">
-                        {pedido.detalles.map((det) => (
-                          <div key={det.id} className="py-2 flex items-center justify-between">
-                            <span className="text-[#4A3B4E] font-medium">
-                              {det.cantidad}x {det.productoNombre}
-                            </span>
-                            <span className="font-mono font-bold text-[#4A3B4E]">
-                              S/ {det.subtotal.toFixed(2)}
-                            </span>
-                          </div>
-                        ))}
+                        {pedido.detalles.map((det) => {
+                          const prodMatch =
+                            INITIAL_PRODUCTOS.find((p) => p.id === det.productoId) ||
+                            INITIAL_PRODUCTOS.find(
+                              (p) => p.nombre.toLowerCase().trim() === det.productoNombre.toLowerCase().trim()
+                            );
+                          const imgUrl = getAssetUrl(det.productoImagen || prodMatch?.imagen || 'prod_memopads.jpg');
+                          return (
+                            <div key={det.id} className="py-2 flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <img
+                                  src={imgUrl}
+                                  alt={det.productoNombre}
+                                  className="w-8 h-8 rounded-lg object-cover border border-[#FCDCE7] shrink-0 bg-pink-50"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.onerror = null;
+                                    target.src = getAssetUrl('prod_memopads.jpg');
+                                  }}
+                                />
+                                <span className="text-[#4A3B4E] font-medium truncate">
+                                  {det.cantidad}x {det.productoNombre}
+                                </span>
+                              </div>
+                              <span className="font-mono font-bold text-[#4A3B4E] shrink-0">
+                                S/ {det.subtotal.toFixed(2)}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
 
                       {/* Total */}

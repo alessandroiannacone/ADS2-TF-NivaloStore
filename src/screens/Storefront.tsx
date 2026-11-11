@@ -21,7 +21,6 @@ import {
   Gift,
   ShieldCheck,
   Shield,
-  Music,
   Lightbulb,
   ExternalLink,
   Play,
@@ -1596,9 +1595,14 @@ export const Storefront: React.FC = () => {
                       className="p-3 rounded-2xl bg-[#FFF8FA] border border-[#FCE1ED] flex items-center gap-3"
                     >
                       <img
-                        src={item.producto.imagen}
+                        src={getAssetUrl(item.producto.imagen)}
                         alt={item.producto.nombre}
-                        className="w-14 h-14 rounded-xl object-cover border border-[#FCDCE7] shrink-0"
+                        className="w-14 h-14 rounded-xl object-cover border border-[#FCDCE7] shrink-0 bg-pink-50"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.onerror = null;
+                          target.src = getAssetUrl('prod_memopads.jpg');
+                        }}
                       />
                       <div className="flex-1 min-w-0">
                         <h5 className="text-xs font-bold text-[#4A3B4E] truncate">
@@ -2183,6 +2187,42 @@ export const Storefront: React.FC = () => {
                 <span className="text-[10px] text-[#BAA0AC] block mt-1">
                   Te contactaremos aquí para coordinar la entrega por Olva Courier o Shalom.
                 </span>
+              </div>
+            </div>
+
+            {/* Lista de productos a comprar con fotos respectivas */}
+            <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1 border border-[#FCDCE7] rounded-2xl p-2.5 bg-[#FFFDFE]">
+              <span className="text-[10px] uppercase font-bold text-[#8E7C94] tracking-wider block mb-1">
+                Artículos en tu orden ({cart.reduce((a, c) => a + c.cantidad, 0)} items):
+              </span>
+              <div className="divide-y divide-[#FCE6F0]">
+                {cart.map((item) => (
+                  <div key={item.producto.id} className="py-1.5 flex items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <img
+                        src={getAssetUrl(item.producto.imagen)}
+                        alt={item.producto.nombre}
+                        className="w-10 h-10 rounded-xl object-cover border border-[#FCDCE7] shrink-0 bg-pink-50"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.onerror = null;
+                          target.src = getAssetUrl('prod_memopads.jpg');
+                        }}
+                      />
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-bold text-[#4A3B4E] truncate">
+                          {item.producto.nombre}
+                        </p>
+                        <p className="text-[10px] text-[#8E7C94]">
+                          {item.cantidad} x S/ {item.producto.precio.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-[#742284] font-mono shrink-0">
+                      S/ {(item.producto.precio * item.cantidad).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 

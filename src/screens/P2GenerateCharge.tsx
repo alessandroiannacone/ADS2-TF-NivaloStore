@@ -24,6 +24,7 @@ const InstagramIcon: React.FC<{ size?: number; className?: string }> = ({ size =
 export const P2GenerateCharge: React.FC = () => {
   const {
     pedidos,
+    productos,
     selectedOrderId,
     setSelectedOrderId,
     generatePaymentLink,
@@ -257,17 +258,33 @@ export const P2GenerateCharge: React.FC = () => {
                 <h4 className="text-xs font-semibold text-[#746E8B] mb-2">
                   Artículos incluidos en el cobro:
                 </h4>
-                <div className="divide-y divide-gray-100 border border-gray-100 rounded-2xl p-2 max-h-36 overflow-y-auto">
-                  {currentPedido.detalles.map((d) => (
-                    <div key={d.id} className="py-1.5 flex items-center justify-between text-xs">
-                      <span className="text-[#343047] font-medium">
-                        {d.cantidad}x {d.productoNombre}
-                      </span>
-                      <span className="text-[#746E8B] font-mono">
-                        S/ {d.subtotal.toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
+                <div className="divide-y divide-gray-100 border border-gray-100 rounded-2xl p-2 max-h-44 overflow-y-auto">
+                  {currentPedido.detalles.map((d) => {
+                    const prodMatch = productos.find((p) => p.id === d.productoId);
+                    const imgUrl = getAssetUrl(d.productoImagen || prodMatch?.imagen || 'prod_memopads.jpg');
+                    return (
+                      <div key={d.id} className="py-2 flex items-center justify-between text-xs gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <img
+                            src={imgUrl}
+                            alt={d.productoNombre}
+                            className="w-9 h-9 rounded-xl object-cover border border-[#FCDCE7] shrink-0 bg-pink-50"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.onerror = null;
+                              target.src = getAssetUrl('prod_memopads.jpg');
+                            }}
+                          />
+                          <span className="text-[#343047] font-medium truncate">
+                            {d.cantidad}x {d.productoNombre}
+                          </span>
+                        </div>
+                        <span className="text-[#746E8B] font-mono shrink-0">
+                          S/ {d.subtotal.toFixed(2)}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

@@ -189,7 +189,21 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [pedidos, setPedidos] = useState<Pedido[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_PEDIDOS);
-      return saved ? JSON.parse(saved) : INITIAL_PEDIDOS;
+      const rawPedidos: Pedido[] = saved ? JSON.parse(saved) : INITIAL_PEDIDOS;
+      return rawPedidos.map((ped) => ({
+        ...ped,
+        detalles: (ped.detalles || []).map((det) => {
+          const matchProd =
+            INITIAL_PRODUCTOS.find((p) => p.id === det.productoId) ||
+            INITIAL_PRODUCTOS.find(
+              (p) => p.nombre.toLowerCase().trim() === det.productoNombre.toLowerCase().trim()
+            );
+          return {
+            ...det,
+            productoImagen: det.productoImagen || matchProd?.imagen || '',
+          };
+        }),
+      }));
     } catch {
       return INITIAL_PEDIDOS;
     }
@@ -511,6 +525,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       observaciones: 'Pedido registrado desde P1. Stock reservado temporalmente durante 24 horas.',
     };
 
+    const sanitizedDetalles: DetallePedido[] = data.detalles.map((item) => {
+      const prod =
+        productos.find((p) => p.id === item.productoId) ||
+        INITIAL_PRODUCTOS.find((p) => p.id === item.productoId) ||
+        INITIAL_PRODUCTOS.find(
+          (p) => p.nombre.toLowerCase().trim() === item.productoNombre.toLowerCase().trim()
+        );
+      return {
+        ...item,
+        productoImagen: item.productoImagen || prod?.imagen || '',
+      };
+    });
+
     const newPedido: Pedido = {
       id: pedidoId,
       cliente: {
@@ -519,7 +546,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         telefono: data.clienteTelefono.trim(),
         canal: data.canal,
       },
-      detalles: data.detalles,
+      detalles: sanitizedDetalles,
       total,
       estado: 'PENDIENTE_PAGO',
       fechaCreacion: now.toISOString(),

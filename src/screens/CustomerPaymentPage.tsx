@@ -77,7 +77,7 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
 
   // Helper para resolver la imagen oficial del producto en la boleta
   const getItemImage = (item: { productoId: string; productoNombre: string; productoImagen?: string }) => {
-    if (item.productoImagen) {
+    if (item.productoImagen && item.productoImagen.trim() !== '') {
       return getAssetUrl(item.productoImagen);
     }
     const foundInState = productos.find((p) => p.id === item.productoId);
@@ -88,19 +88,30 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
     if (foundInMock?.imagen) {
       return getAssetUrl(foundInMock.imagen);
     }
-    const nameClean = item.productoNombre.toLowerCase().trim();
+    const norm = (s: string) =>
+      (s || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+    const nameClean = norm(item.productoNombre);
     const foundByName =
-      productos.find((p) => p.nombre.toLowerCase().trim() === nameClean) ||
-      INITIAL_PRODUCTOS.find((p) => p.nombre.toLowerCase().trim() === nameClean) ||
+      productos.find((p) => norm(p.nombre) === nameClean) ||
+      INITIAL_PRODUCTOS.find((p) => norm(p.nombre) === nameClean) ||
+      productos.find(
+        (p) =>
+          norm(p.nombre).includes(nameClean) ||
+          nameClean.includes(norm(p.nombre))
+      ) ||
       INITIAL_PRODUCTOS.find(
         (p) =>
-          nameClean.includes(p.nombre.toLowerCase().trim()) ||
-          p.nombre.toLowerCase().trim().includes(nameClean)
+          norm(p.nombre).includes(nameClean) ||
+          nameClean.includes(norm(p.nombre))
       );
     if (foundByName?.imagen) {
       return getAssetUrl(foundByName.imagen);
     }
-    return 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=150&q=80';
+    return getAssetUrl('prod_memopads.jpg');
   };
 
   if (!pedido) {
@@ -479,7 +490,7 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                   return (
                     <div key={idx} className="py-2.5 flex items-center justify-between gap-2.5 text-xs">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-11 h-11 rounded-2xl bg-pink-50 overflow-hidden shrink-0 border border-pink-100 shadow-xs">
+                        <div className="w-11 h-11 rounded-2xl bg-pink-50 overflow-hidden shrink-0 border border-pink-100 shadow-xs flex items-center justify-center">
                           <img
                             src={itemImg}
                             alt={item.productoNombre}
@@ -487,7 +498,7 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.onerror = null;
-                              target.src = 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=150&q=80';
+                              target.src = getAssetUrl('prod_memopads.jpg');
                             }}
                           />
                         </div>

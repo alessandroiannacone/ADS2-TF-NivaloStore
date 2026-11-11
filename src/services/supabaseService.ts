@@ -1,5 +1,6 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import type { Producto, Pedido, Pago, HistorialEstado, UserProfile } from '../types';
+import { INITIAL_PRODUCTOS } from '../data/mockData';
 
 /**
  * Servicio para sincronizar datos con Supabase Backend (PostgreSQL)
@@ -207,14 +208,22 @@ export const fetchOrdersFromSupabase = async (): Promise<Pedido[] | null> => {
       fechaVencimientoReserva: p.fecha_vencimiento_reserva,
       enlacePagoActivo: p.enlace_pago_activo,
       intentosCobro: [],
-      detalles: (p.detalles || []).map((d: any) => ({
-        id: d.id,
-        productoId: d.producto_id,
-        productoNombre: d.producto_nombre,
-        precioUnitario: Number(d.precio_unitario),
-        cantidad: d.cantidad,
-        subtotal: Number(d.subtotal),
-      })),
+      detalles: (p.detalles || []).map((d: any) => {
+        const prod =
+          INITIAL_PRODUCTOS.find((pr) => pr.id === d.producto_id) ||
+          INITIAL_PRODUCTOS.find(
+            (pr) => pr.nombre.toLowerCase().trim() === (d.producto_nombre || '').toLowerCase().trim()
+          );
+        return {
+          id: d.id,
+          productoId: d.producto_id,
+          productoNombre: d.producto_nombre,
+          productoImagen: prod?.imagen,
+          precioUnitario: Number(d.precio_unitario),
+          cantidad: d.cantidad,
+          subtotal: Number(d.subtotal),
+        };
+      }),
       pagos: (p.pagos || []).map((pg: any) => ({
         id: pg.id,
         pedidoId: pg.pedido_id,
@@ -338,14 +347,22 @@ export const fetchOrdersForUser = async (userId: string): Promise<Pedido[] | nul
       fechaVencimientoReserva: p.fecha_vencimiento_reserva,
       enlacePagoActivo: p.enlace_pago_activo,
       intentosCobro: [],
-      detalles: (p.detalles || []).map((d: any) => ({
-        id: d.id,
-        productoId: d.producto_id,
-        productoNombre: d.producto_nombre,
-        precioUnitario: Number(d.precio_unitario),
-        cantidad: d.cantidad,
-        subtotal: Number(d.subtotal),
-      })),
+      detalles: (p.detalles || []).map((d: any) => {
+        const prod =
+          INITIAL_PRODUCTOS.find((pr) => pr.id === d.producto_id) ||
+          INITIAL_PRODUCTOS.find(
+            (pr) => pr.nombre.toLowerCase().trim() === (d.producto_nombre || '').toLowerCase().trim()
+          );
+        return {
+          id: d.id,
+          productoId: d.producto_id,
+          productoNombre: d.producto_nombre,
+          productoImagen: prod?.imagen,
+          precioUnitario: Number(d.precio_unitario),
+          cantidad: d.cantidad,
+          subtotal: Number(d.subtotal),
+        };
+      }),
       pagos: (p.pagos || []).map((pg: any) => ({
         id: pg.id,
         pedidoId: pg.pedido_id,
