@@ -146,8 +146,8 @@ export const CustomerAuthPage: React.FC<CustomerAuthPageProps> = ({
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FFF5F8] via-[#FFF9FB] to-white flex flex-col justify-center items-center p-4 font-['Poppins',sans-serif]">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-kawaii border border-[#FCDCE7] p-6 sm:p-8 space-y-5 relative overflow-hidden">
-        {/* Adorno estético superior */}
-        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#F4A7C1] via-[#C9B6F2] to-[#F4A7C1]" />
+        {/* Adorno estético superior (mismo rosado pastel que el botón) */}
+        <div className="absolute top-0 left-0 right-0 h-2 bg-[#F4A7C1]" />
 
         {/* Botón de volver */}
         {onCancel && (
