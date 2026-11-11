@@ -484,16 +484,22 @@ export const Storefront: React.FC = () => {
         onPause={() => setIsPlayingMusic(false)}
       />
 
-      {/* 1. TOP ANNOUNCEMENT BAR */}
-      <div className="bg-gradient-to-r from-[#FFF0F6] via-[#FFEAF2] to-[#FFF0F6] border-b border-[#FCDCE7] text-[11px] py-1.5 px-4 text-[#A85B77]">
-        <div className="max-w-[1440px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      {/* 1. TOP ANNOUNCEMENT BAR (Ancho completo, mensaje central y enlaces al extremo derecho) */}
+      <div className="bg-gradient-to-r from-[#FFF0F6] via-[#FFEAF2] to-[#FFF0F6] border-b border-[#FCDCE7] text-[11px] py-1.5 px-3 sm:px-6 text-[#A85B77] w-full">
+        <div className="w-full flex flex-col md:flex-row items-center justify-between gap-2">
+          {/* Espaciador invisible para centrado matemático en desktop */}
+          <div className="hidden lg:flex flex-1" />
+
+          {/* Mensaje principal centrado */}
+          <div className="flex items-center justify-center gap-2 text-center shrink-0">
             <span>🌸</span>
             <span>
               ¡Envíos a todo el Perú por <strong>Olva Courier & Shalom</strong>! Regalito sorpresa en todas tus compras kawaii ✨
             </span>
           </div>
-          <div className="flex items-center gap-3">
+
+          {/* Enlaces de acceso al extremo derecho */}
+          <div className="flex items-center justify-center md:justify-end gap-3 shrink-0 lg:flex-1 w-full md:w-auto">
             <button
               onClick={() => setShowSheinModal(true)}
               className="hover:text-[#D4547B] transition-colors cursor-pointer"
