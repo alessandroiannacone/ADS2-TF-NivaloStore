@@ -30,6 +30,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { WhatsAppIcon } from '../components/WhatsAppIcon';
+import { NivieBotChat } from '../components/NivieBotChat';
 import { getAssetUrl } from '../data/mockData';
 import type { Producto } from '../types';
 
@@ -1942,63 +1943,15 @@ export const Storefront: React.FC = () => {
         </a>
       </div>
 
-      {/* Niviebot Mini Chat Popup */}
-      {showNivieBotModal && (
-        <div className="fixed bottom-20 right-5 z-50 w-80 bg-white rounded-3xl border border-[#FCDCE7] shadow-2xl p-4 text-left animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#FCE1ED]">
-            <div className="flex items-center gap-2">
-              <NivaloCatMascot className="w-6 h-6" />
-              <div>
-                <h4 className="text-xs font-bold text-[#4A3B4E]">Niviebot Asistente</h4>
-                <p className="text-[10px] text-[#3E8E62] flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#25D366]" /> En línea
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowNivieBotModal(false)}
-              className="p-1 rounded-full text-[#8E7C94] hover:bg-[#FFF0F6]"
-            >
-              <X size={14} />
-            </button>
-          </div>
-
-          <div className="space-y-2 text-xs">
-            <div className="p-2.5 rounded-2xl bg-[#FFF0F6] text-[#4A3B4E]">
-              ¡Hola NivaloLover! 🌸 ¿Tienes alguna duda sobre tus envíos por Olva, reservas de 24h o pedidos Shein?
-            </div>
-            <div className="space-y-1 pt-1">
-              <button
-                onClick={() => {
-                  setShowNivieBotModal(false);
-                  setShowSheinModal(true);
-                }}
-                className="w-full text-left p-1.5 px-2.5 rounded-xl bg-[#FFF5F8] text-[11px] text-[#E2678D] hover:bg-[#FFE8F1] transition-colors"
-              >
-                🛍️ ¿Cómo funciona el pedido de Shein?
-              </button>
-              <button
-                onClick={() => {
-                  setShowNivieBotModal(false);
-                  setShowNivaPointsModal(true);
-                }}
-                className="w-full text-left p-1.5 px-2.5 rounded-xl bg-[#FFF5F8] text-[11px] text-[#E2678D] hover:bg-[#FFE8F1] transition-colors"
-              >
-                ✨ ¿Cómo acumulo NivaPuntos?
-              </button>
-              <a
-                href="https://wa.me/51998167789"
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-[#25D366] hover:bg-[#20BD5A] text-white text-[11px] font-bold transition-colors"
-              >
-                <WhatsAppIcon size={14} />
-                <span>Hablar con un asesor humano por WhatsApp</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Niviebot Chat Interactivo */}
+      <NivieBotChat
+        isOpen={showNivieBotModal}
+        onClose={() => setShowNivieBotModal(false)}
+        productos={productos}
+        onOpenSheinModal={() => setShowSheinModal(true)}
+        onOpenNivaPointsModal={() => setShowNivaPointsModal(true)}
+        onAddToCart={addToCart}
+      />
     </div>
   );
 };
