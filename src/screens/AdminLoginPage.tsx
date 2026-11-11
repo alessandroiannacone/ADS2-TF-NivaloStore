@@ -173,11 +173,12 @@ export const AdminLoginPage: React.FC<AdminLoginPageProps> = ({
         </form>
 
         {/* Separador */}
-        <div className="relative flex items-center justify-center py-0.5">
-          <div className="border-t border-white/10 w-full" />
-          <span className="bg-[#251D2B] px-3 text-[10px] text-white/40 uppercase font-bold tracking-wider">
+        <div className="flex items-center gap-3 my-2 w-full">
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-[10px] text-white/40 uppercase font-bold tracking-wider shrink-0">
             o acceder con
           </span>
+          <div className="flex-1 h-px bg-white/10" />
         </div>
 
         {/* Botón de Google OAuth para Administrador */}

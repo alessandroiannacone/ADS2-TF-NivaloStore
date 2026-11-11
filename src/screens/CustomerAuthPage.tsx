@@ -339,7 +339,7 @@ export const CustomerAuthPage: React.FC<CustomerAuthPageProps> = ({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#F4A7C1] to-[#DE6978] hover:opacity-95 text-white font-bold text-xs shadow-kawaii-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full py-3 rounded-2xl bg-[#F4A7C1] hover:bg-[#F296B5] active:scale-[0.99] text-white font-bold text-xs shadow-kawaii-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
               <>
@@ -362,11 +362,12 @@ export const CustomerAuthPage: React.FC<CustomerAuthPageProps> = ({
         {/* Separador */}
         {mode !== 'forgot' && (
           <>
-            <div className="relative flex items-center justify-center py-1">
-              <div className="border-t border-pink-100 w-full" />
-              <span className="bg-white px-3 text-[10px] text-[#BAA0AC] uppercase font-bold tracking-wider">
+            <div className="flex items-center gap-3 my-2 w-full">
+              <div className="flex-1 h-px bg-pink-100" />
+              <span className="text-[10px] text-[#BAA0AC] uppercase font-bold tracking-wider shrink-0">
                 o continúa con
               </span>
+              <div className="flex-1 h-px bg-pink-100" />
             </div>
 
             {/* Botón de Google OAuth */}
