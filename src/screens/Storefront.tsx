@@ -79,6 +79,8 @@ export const Storefront: React.FC = () => {
     removeFromCart,
     updateCartQuantity,
     cartSubtotal,
+    cartShippingCost,
+    cartTotal,
     isCartOpen,
     setIsCartOpen,
     wishlist,
@@ -197,6 +199,7 @@ export const Storefront: React.FC = () => {
       clienteTelefono: checkoutTelefono.trim(),
       canal: 'WhatsApp',
       detalles,
+      costoEnvio: cartShippingCost,
     });
 
     setIsProcessingCheckout(false);
@@ -391,8 +394,10 @@ export const Storefront: React.FC = () => {
     cart.forEach((item, index) => {
       msg += `${index + 1}. ${item.producto.nombre} x${item.cantidad} - S/ ${(item.producto.precio * item.cantidad).toFixed(2)}\n`;
     });
+    const envioTxt = cartSubtotal >= 80 ? 'GRATIS ✨' : 'S/ 15.00';
     msg += `\n*Subtotal:* S/ ${cartSubtotal.toFixed(2)}`;
-    msg += '\n*Envío:* Olva Courier / Shalom 🚚';
+    msg += `\n*Envío:* ${envioTxt} (Olva Courier / Shalom 🚚)`;
+    msg += `\n*Total a Pagar:* S/ ${cartTotal.toFixed(2)}`;
     msg += '\n\n¿Tienen disponibilidad para enviarlo hoy? ✨';
     return encodeURIComponent(msg);
   };
@@ -1654,14 +1659,22 @@ export const Storefront: React.FC = () => {
                       <span>Subtotal</span>
                       <span>S/ {cartSubtotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-[#8E7C94]">
+                    <div className="flex justify-between text-[#8E7C94] items-center">
                       <span>Envío (Olva Courier / Shalom)</span>
-                      <span className="font-semibold text-emerald-600">GRATIS</span>
+                      {cartSubtotal >= 80 ? (
+                        <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-[11px]">
+                          GRATIS ✨
+                        </span>
+                      ) : (
+                        <span className="font-bold text-[#4A3B4E] font-mono">
+                          S/ 15.00
+                        </span>
+                      )}
                     </div>
                     <div className="flex justify-between text-sm font-bold text-[#4A3B4E] pt-2 border-t border-[#FCDCE7]">
                       <span>Total a Pagar</span>
-                      <span className="text-base text-[#742284] font-extrabold">
-                        S/ {cartSubtotal.toFixed(2)}
+                      <span className="text-base text-[#742284] font-extrabold font-mono">
+                        S/ {cartTotal.toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -2226,19 +2239,45 @@ export const Storefront: React.FC = () => {
               </div>
             </div>
 
-            {/* Resumen express */}
-            <div className="p-3.5 rounded-2xl bg-[#FFF0F6] border border-[#FCDCE7] flex items-center justify-between">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-[#8E7C94] block">
-                  Total a Pagar ({cart.reduce((a, c) => a + c.cantidad, 0)} items)
-                </span>
-                <span className="text-base font-extrabold text-[#742284]">
-                  S/ {cartSubtotal.toFixed(2)}
-                </span>
+            {/* Resumen express con cálculo exacto de subtotal, envío y total */}
+            <div className="p-3.5 rounded-2xl bg-[#FFF0F6] border border-[#FCDCE7] space-y-2">
+              <div className="flex items-center justify-between text-xs text-[#8E7C94]">
+                <span>Subtotal ({cart.reduce((a, c) => a + c.cantidad, 0)} items):</span>
+                <span className="font-mono font-semibold text-[#4A3B4E]">S/ {cartSubtotal.toFixed(2)}</span>
               </div>
-              <span className="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">
-                Envío Gratis ✨
-              </span>
+              <div className="flex items-center justify-between text-xs text-[#8E7C94] items-center">
+                <span>Envío (Olva Courier / Shalom):</span>
+                {cartSubtotal >= 80 ? (
+                  <span className="text-[11px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">
+                    Envío Gratis ✨
+                  </span>
+                ) : (
+                  <span className="font-mono font-bold text-[#4A3B4E]">
+                    S/ 15.00
+                  </span>
+                )}
+              </div>
+              {cartSubtotal < 80 && (
+                <div className="text-[10px] text-[#E2678D] font-medium bg-white/80 p-2 rounded-xl border border-pink-100 flex items-center gap-1.5">
+                  <span>💡</span>
+                  <span>¡Te faltan <strong>S/ {(80 - cartSubtotal).toFixed(2)}</strong> para que tu <strong>envío sea GRATIS</strong>!</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between pt-2 border-t border-[#FCDCE7]">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-[#8E7C94] block">
+                    Total a Pagar
+                  </span>
+                  <span className="text-base sm:text-lg font-extrabold text-[#742284] font-mono">
+                    S/ {cartTotal.toFixed(2)}
+                  </span>
+                </div>
+                {cartSubtotal >= 80 && (
+                  <span className="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">
+                    Ahorraste S/ 15 🎉
+                  </span>
+                )}
+              </div>
             </div>
 
             <button

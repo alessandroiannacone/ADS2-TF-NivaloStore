@@ -50,6 +50,8 @@ interface StoreContextType {
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
   cartSubtotal: number;
+  cartShippingCost: number;
+  cartTotal: number;
   wishlist: string[];
   toggleWishlist: (productoId: string) => void;
   transferCartToP1: () => void;
@@ -60,6 +62,7 @@ interface StoreContextType {
     clienteTelefono: string;
     canal: CanalVenta;
     detalles: DetallePedido[];
+    costoEnvio?: number;
   }) => { success: boolean; pedido?: Pedido; error?: string };
 
   generatePaymentLink: (pedidoId: string, simulateFailure?: boolean) => {
@@ -461,6 +464,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const cartSubtotal = cart.reduce((acc, curr) => acc + curr.producto.precio * curr.cantidad, 0);
+  const cartShippingCost = cartSubtotal >= 80 || cart.length === 0 ? 0 : 15;
+  const cartTotal = cartSubtotal + cartShippingCost;
 
   const transferCartToP1 = () => {
     setViewMode('admin');
@@ -478,6 +483,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     clienteTelefono: string;
     canal: CanalVenta;
     detalles: DetallePedido[];
+    costoEnvio?: number;
   }) => {
     // Validaciones Regla 1
     if (!data.clienteNombre.trim()) {
@@ -513,7 +519,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const now = new Date();
     const fechaVencimiento = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
 
-    const total = data.detalles.reduce((acc, curr) => acc + curr.subtotal, 0);
+    const subtotal = data.detalles.reduce((acc, curr) => acc + curr.subtotal, 0);
+    // Regla de envío: Si subtotal >= 80 es GRATIS (0 soles). Si es menor a 80, costo de envío es S/ 15.00
+    const costoEnvio = data.costoEnvio !== undefined ? data.costoEnvio : (subtotal >= 80 ? 0 : 15);
+    const total = subtotal + costoEnvio;
 
     const initialHistory: HistorialEstado = {
       id: `HIST-${Date.now()}-1`,
@@ -522,7 +531,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       estadoAnterior: 'Nuevo',
       estadoNuevo: 'Pendiente de pago',
       origen: 'Vendedor',
-      observaciones: 'Pedido registrado desde P1. Stock reservado temporalmente durante 24 horas.',
+      observaciones: `Pedido registrado. Subtotal: S/ ${subtotal.toFixed(2)}, Envío: ${costoEnvio === 0 ? 'GRATIS' : `S/ ${costoEnvio.toFixed(2)}`}, Total: S/ ${total.toFixed(2)}. Reserva temporal de stock por 24 horas.`,
     };
 
     const sanitizedDetalles: DetallePedido[] = data.detalles.map((item) => {
@@ -547,6 +556,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         canal: data.canal,
       },
       detalles: sanitizedDetalles,
+      subtotal,
+      costoEnvio,
       total,
       estado: 'PENDIENTE_PAGO',
       fechaCreacion: now.toISOString(),
@@ -1270,6 +1281,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         isCartOpen,
         setIsCartOpen,
         cartSubtotal,
+        cartShippingCost,
+        cartTotal,
         wishlist,
         toggleWishlist,
         transferCartToP1,

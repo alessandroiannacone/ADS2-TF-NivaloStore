@@ -81,6 +81,8 @@ export const P1RegisterOrder: React.FC = () => {
   // Total del pedido en tiempo real
   const totalPedido = detalles.reduce((acc, curr) => acc + curr.subtotal, 0);
   const totalUnidades = detalles.reduce((acc, curr) => acc + curr.cantidad, 0);
+  const envioCosto = totalPedido >= 80 || totalPedido === 0 ? 0 : 15;
+  const totalConEnvio = totalPedido + envioCosto;
 
   // Manejar selección de producto
   const handleSelectProduct = (prod: Producto) => {
@@ -218,6 +220,7 @@ export const P1RegisterOrder: React.FC = () => {
       clienteTelefono,
       canal,
       detalles,
+      costoEnvio: envioCosto,
     });
 
     if (result.success && result.pedido) {
@@ -682,19 +685,32 @@ export const P1RegisterOrder: React.FC = () => {
               </div>
             )}
 
-            {/* Total Destacado */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-[#FFF0F6] to-[#F3EEFF] border border-[#F4A7C1]/30 flex items-center justify-between">
-              <div>
-                <span className="text-xs text-[#746E8B] block font-medium">
-                  Resumen de compra ({totalUnidades} {totalUnidades === 1 ? 'unidad' : 'unidades'})
+            {/* Total Destacado con Desglose */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-[#FFF0F6] to-[#F3EEFF] border border-[#F4A7C1]/30 space-y-2">
+              <div className="flex items-center justify-between text-xs text-[#746E8B]">
+                <span>Subtotal ({totalUnidades} {totalUnidades === 1 ? 'unidad' : 'unidades'}):</span>
+                <span className="font-mono font-bold text-[#343047]">S/ {totalPedido.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-[#746E8B]">
+                <span>Envío (Olva / Shalom):</span>
+                {envioCosto === 0 ? (
+                  <span className="font-bold text-emerald-600 bg-white/80 px-2 py-0.5 rounded-full text-[11px] border border-emerald-200">
+                    GRATIS ✨
+                  </span>
+                ) : (
+                  <span className="font-mono font-bold text-[#DE6978]">
+                    S/ 15.00
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-[#F4A7C1]/20">
+                <span className="text-sm font-bold text-[#343047] font-['Quicksand',sans-serif]">
+                  Total a Cobrar: <span className="text-[#DE6978] text-base font-extrabold font-mono">S/ {totalConEnvio.toFixed(2)}</span>
                 </span>
-                <span className="text-lg font-bold text-[#343047] font-['Quicksand',sans-serif]">
-                  Total del pedido: <span className="text-[#F4A7C1]">S/ {totalPedido.toFixed(2)}</span>
+                <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-white text-[#C9B6F2] border border-[#C9B6F2]/40 shadow-xs">
+                  🌸 PEN
                 </span>
               </div>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white text-[#C9B6F2] border border-[#C9B6F2]/40 shadow-xs">
-                🌸 PEN (Soles)
-              </span>
             </div>
           </div>
         </div>

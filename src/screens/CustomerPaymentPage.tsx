@@ -62,6 +62,19 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
     return () => clearInterval(interval);
   }, [pedido]);
 
+  // Subtotal de artículos y costo de envío calculado/almacenado
+  const itemsSubtotal = pedido ? (pedido.detalles || []).reduce((acc, curr) => acc + curr.subtotal, 0) : 0;
+  const shippingCost = pedido
+    ? (pedido.costoEnvio !== undefined
+        ? pedido.costoEnvio
+        : pedido.total > itemsSubtotal
+        ? Math.round((pedido.total - itemsSubtotal) * 100) / 100
+        : itemsSubtotal >= 80
+        ? 0
+        : 15)
+    : 0;
+  const totalExacto = pedido ? (pedido.total > 0 ? pedido.total : itemsSubtotal + shippingCost) : 0;
+
   const copyNumber = () => {
     navigator.clipboard.writeText(NIVALO_STORE_CONTACT.telefono);
     setCopiedNumber(true);
@@ -70,7 +83,7 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
 
   const copyTotalAmount = () => {
     if (!pedido) return;
-    navigator.clipboard.writeText(pedido.total.toFixed(2));
+    navigator.clipboard.writeText(totalExacto.toFixed(2));
     setCopiedTotal(true);
     setTimeout(() => setCopiedTotal(false), 2000);
   };
@@ -142,7 +155,7 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
   const isPaid = pedido.estado === 'PAGADO';
   const isCancelled = pedido.estado === 'CANCELADO' || timeLeft.isExpired;
 
-  const waMessage = `🌸 ¡Hola Nivalo Store! Ya realicé mi pago de *S/ ${pedido.total.toFixed(2)}* por *Yape* para el pedido *${pedido.id}*. Adjunto mi comprobante de pago 📸`;
+  const waMessage = `🌸 ¡Hola Nivalo Store! Ya realicé mi pago de *S/ ${totalExacto.toFixed(2)}* por *Yape* para el pedido *${pedido.id}*. Adjunto mi comprobante de pago 📸`;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FFF5F8] via-[#FFF9FB] to-white text-[#4A3B4E] font-['Poppins',sans-serif] pb-12">
@@ -346,8 +359,8 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                         <span className="text-[10px] uppercase font-bold text-[#DE6978] tracking-wider block">
                           Total Exacto a Yapear:
                         </span>
-                        <span className="text-lg font-bold text-[#DE6978]">
-                          S/ {pedido.total.toFixed(2)}
+                        <span className="text-lg font-bold text-[#DE6978] font-mono">
+                          S/ {totalExacto.toFixed(2)}
                         </span>
                       </div>
                       <button
@@ -369,7 +382,7 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                   <ol className="list-decimal list-inside space-y-1 text-[11px] leading-relaxed">
                     <li>Abre tu aplicación <strong>Yape</strong> en tu teléfono.</li>
                     <li>Escanea el código QR de arriba o yapea a <strong>{NIVALO_STORE_CONTACT.telefonoDisplay}</strong>.</li>
-                    <li>Ingresa el monto exacto: <strong>S/ {pedido.total.toFixed(2)}</strong>.</li>
+                    <li>Ingresa el monto exacto: <strong className="font-mono text-[#742284]">S/ {totalExacto.toFixed(2)}</strong>.</li>
                     <li>Toma una captura del comprobante y presiona el botón verde de abajo para enviárnosla.</li>
                   </ol>
                 </div>
@@ -519,20 +532,28 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                 })}
               </div>
 
-              {/* Total Final */}
+              {/* Total Final con Desglose */}
               <div className="pt-3 border-t border-gray-100 space-y-2">
                 <div className="flex items-center justify-between text-xs text-[#746E8B]">
                   <span>Subtotal</span>
-                  <span>S/ {pedido.total.toFixed(2)}</span>
+                  <span className="font-mono">S/ {itemsSubtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex items-center justify-between text-xs text-[#746E8B]">
-                  <span>Envío</span>
-                  <span className="text-emerald-600 font-semibold">Gratis</span>
+                <div className="flex items-center justify-between text-xs text-[#746E8B] items-center">
+                  <span>Envío (Olva Courier / Shalom)</span>
+                  {shippingCost === 0 ? (
+                    <span className="text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full text-[11px]">
+                      Gratis ✨
+                    </span>
+                  ) : (
+                    <span className="font-mono font-bold text-[#4A3B4E]">
+                      S/ {shippingCost.toFixed(2)}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center justify-between text-base font-bold text-[#343047] pt-2 border-t border-gray-100">
                   <span>Total a Pagar</span>
-                  <span className="text-[#DE6978] text-xl font-extrabold">
-                    S/ {pedido.total.toFixed(2)}
+                  <span className="text-[#DE6978] text-xl font-extrabold font-mono">
+                    S/ {totalExacto.toFixed(2)}
                   </span>
                 </div>
               </div>

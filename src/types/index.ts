@@ -108,6 +108,8 @@ export interface Pedido {
   userId?: string; // UUID de usuario autenticado en Supabase Auth
   cliente: Cliente;
   detalles: DetallePedido[];
+  subtotal?: number;
+  costoEnvio?: number;
   total: number;
   estado: EstadoPedido;
   motivoCancelacion?: string; // ej: "Cancelado (sin pago 24 h)"
