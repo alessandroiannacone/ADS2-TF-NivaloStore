@@ -346,7 +346,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 20,
     stockReservado: 2,
     stockTotalFisico: 22,
-    imagen: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=500&q=80',
+    imagen: 'https://casadejapon.com/cdn/shop/files/llavero-japones-conejo-cascabel-777.jpg?v=1775650746&width=800',
     descripcion: 'Llavero acrílico importado con dije de conejito kawaii y cascabel en tonos pastel.',
   },
   {
@@ -568,7 +568,7 @@ const RAW_PRODUCTOS: Producto[] = [
     stockDisponible: 12,
     stockReservado: 0,
     stockTotalFisico: 12,
-    imagen: 'https://casadejapon.com/cdn/shop/files/llavero-japones-conejo-cascabel-777.jpg?v=1775650746&width=800',
+    imagen: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=500&q=80',
     descripcion: 'Hoodie abrigadora con forro polar ultrasuave, orejitas de conejito en la capucha y bolsillo canguro.',
     esFavorito: true,
     esRecomendado: true,
