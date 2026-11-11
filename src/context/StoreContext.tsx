@@ -59,7 +59,7 @@ interface StoreContextType {
   wishlist: string[];
   toggleWishlist: (productoId: string) => void;
   transferCartToP1: () => void;
-  
+
   // Acciones de negocio (ICONIX)
   createOrder: (data: {
     clienteNombre: string;
@@ -107,6 +107,17 @@ interface StoreContextType {
     success: boolean;
     error?: string;
   };
+
+  confirmOrderPayment: (
+    pedidoId: string,
+    referencia?: string,
+    metodo?: string
+  ) => { success: boolean; error?: string };
+
+  cancelOrder: (
+    pedidoId: string,
+    motivo?: string
+  ) => { success: boolean; error?: string };
 
   // Gestión de Catálogo y Productos (P5)
   addProduct: (productoData: {
@@ -286,10 +297,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         // Limpiar cualquier notificación técnica o de bienvenida antigua
         return Array.isArray(parsed)
           ? parsed.filter(
-              (n) =>
-                n.titulo !== 'Backend Supabase Conectado' &&
-                n.titulo !== 'Bienvenida a Nivalo Store Iteración 2'
-            )
+            (n) =>
+              n.titulo !== 'Backend Supabase Conectado' &&
+              n.titulo !== 'Bienvenida a Nivalo Store Iteración 2'
+          )
           : [];
       }
       return [];
@@ -677,10 +688,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         prev.map((p) =>
           p.id === pedidoId
             ? {
-                ...p,
-                intentosCobro: [...(p.intentosCobro || []), failedAttempt],
-                historial: [...p.historial, updatedHistory],
-              }
+              ...p,
+              intentosCobro: [...(p.intentosCobro || []), failedAttempt],
+              historial: [...p.historial, updatedHistory],
+            }
             : p
         )
       );
@@ -721,11 +732,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       prev.map((p) =>
         p.id === pedidoId
           ? {
-              ...p,
-              enlacePagoActivo: enlace,
-              intentosCobro: [...(p.intentosCobro || []), newAttempt],
-              historial: [...p.historial, updatedHistory],
-            }
+            ...p,
+            enlacePagoActivo: enlace,
+            intentosCobro: [...(p.intentosCobro || []), newAttempt],
+            historial: [...p.historial, updatedHistory],
+          }
           : p
       )
     );
@@ -804,10 +815,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         prev.map((p) =>
           p.id === pedido.id
             ? {
-                ...p,
-                pagos: [...(p.pagos || []), nuevoPago],
-                historial: [...p.historial, newHistory],
-              }
+              ...p,
+              pagos: [...(p.pagos || []), nuevoPago],
+              historial: [...p.historial, newHistory],
+            }
             : p
         )
       );
@@ -856,10 +867,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         prev.map((p) =>
           p.id === pedido.id
             ? {
-                ...p,
-                pagos: [...(p.pagos || []), nuevoPago],
-                historial: [...p.historial, newHistory],
-              }
+              ...p,
+              pagos: [...(p.pagos || []), nuevoPago],
+              historial: [...p.historial, newHistory],
+            }
             : p
         )
       );
@@ -921,11 +932,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       prev.map((p) =>
         p.id === pedido.id
           ? {
-              ...p,
-              estado: 'PAGADO',
-              pagos: [...(p.pagos || []), nuevoPago],
-              historial: [...p.historial, newHistory],
-            }
+            ...p,
+            estado: 'PAGADO',
+            pagos: [...(p.pagos || []), nuevoPago],
+            historial: [...p.historial, newHistory],
+          }
           : p
       )
     );
@@ -1127,18 +1138,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         prev.map((p) =>
           p.id === targetPedido!.id
             ? {
-                ...p,
-                pagos: p.pagos.map((pg) =>
-                  pg.id === pagoId
-                    ? {
-                        ...pg,
-                        resultadoReembolso: 'Fallido',
-                        motivoRechazo: motivo,
-                      }
-                    : pg
-                ),
-                historial: [...p.historial, errorHistory],
-              }
+              ...p,
+              pagos: p.pagos.map((pg) =>
+                pg.id === pagoId
+                  ? {
+                    ...pg,
+                    resultadoReembolso: 'Fallido',
+                    motivoRechazo: motivo,
+                  }
+                  : pg
+              ),
+              historial: [...p.historial, errorHistory],
+            }
             : p
         )
       );
@@ -1167,19 +1178,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       prev.map((p) =>
         p.id === targetPedido!.id
           ? {
-              ...p,
-              pagos: p.pagos.map((pg) =>
-                pg.id === pagoId
-                  ? {
-                      ...pg,
-                      estadoPago: 'RECHAZADO',
-                      motivoRechazo: motivo,
-                      resultadoReembolso: 'Exitoso',
-                    }
-                  : pg
-              ),
-              historial: [...p.historial, refundHistory],
-            }
+            ...p,
+            pagos: p.pagos.map((pg) =>
+              pg.id === pagoId
+                ? {
+                  ...pg,
+                  estadoPago: 'RECHAZADO',
+                  motivoRechazo: motivo,
+                  resultadoReembolso: 'Exitoso',
+                }
+                : pg
+            ),
+            historial: [...p.historial, refundHistory],
+          }
           : p
       )
     );
@@ -1200,6 +1211,167 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       'Reintento de reembolso tras error inicial de conexión',
       !forceSuccess
     );
+  };
+
+  // Confirmación manual de pago para pedidos PENDIENTE_PAGO (P4 / P3)
+  const confirmOrderPayment = (
+    pedidoId: string,
+    referencia?: string,
+    metodo: string = 'Yape'
+  ): { success: boolean; error?: string } => {
+    const targetPedido = pedidos.find((p) => p.id === pedidoId);
+    if (!targetPedido) {
+      return { success: false, error: 'Pedido no encontrado.' };
+    }
+
+    if (targetPedido.estado === 'PAGADO') {
+      return { success: false, error: 'Este pedido ya se encuentra pagado.' };
+    }
+
+    if (targetPedido.estado === 'CANCELADO') {
+      return { success: false, error: 'No se puede aprobar un pedido cancelado. Requiere crear una nueva orden.' };
+    }
+
+    const now = new Date();
+    const ref = referencia?.trim() || `REF-${metodo.toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const nuevoPago: Pago = {
+      id: `PAG-${Date.now()}`,
+      pedidoId: targetPedido.id,
+      referenciaExterna: ref,
+      fechaPago: now.toISOString(),
+      totalPedido: targetPedido.total,
+      montoRecibido: targetPedido.total,
+      diferencia: 0,
+      estadoPago: 'APROBADO',
+    };
+
+    const newHistory: HistorialEstado = {
+      id: `HIST-${Date.now()}`,
+      pedidoId: targetPedido.id,
+      fechaHora: now.toISOString(),
+      estadoAnterior: targetPedido.estado,
+      estadoNuevo: 'Pagado',
+      origen: 'Vendedor',
+      observaciones: `Abono confirmado manualmente vía ${metodo} (Ref: ${ref}) por S/ ${targetPedido.total.toFixed(2)}. Stock rebajado definitivamente.`,
+    };
+
+    // Actualizar stock: Al confirmarse el pago se decrementa stockReservado y stockTotalFisico
+    setProductos((prev) =>
+      prev.map((prod) => {
+        const item = targetPedido.detalles.find((d) => d.productoId === prod.id);
+        if (item) {
+          return {
+            ...prod,
+            stockReservado: Math.max(0, prod.stockReservado - item.cantidad),
+            stockTotalFisico: Math.max(0, prod.stockTotalFisico - item.cantidad),
+          };
+        }
+        return prod;
+      })
+    );
+
+    // Actualizar pedido
+    setPedidos((prev) =>
+      prev.map((p) =>
+        p.id === targetPedido.id
+          ? {
+              ...p,
+              estado: 'PAGADO',
+              pagos: [...(p.pagos || []), nuevoPago],
+              historial: [...p.historial, newHistory],
+              envio: p.envio || {
+                empresa: 'Olva Courier',
+                numeroSeguimiento: `TRK-OLVA-${Math.floor(100000 + Math.random() * 900000)}`,
+                ordenEntrega: `ORD-OLVA-2026-${p.id.replace('PED-', '')}`,
+                estadoEnvio: 'EN_PREPARACION',
+                destino: 'Dirección del cliente',
+                fechaDespacho: now.toLocaleDateString('es-PE'),
+              },
+            }
+          : p
+      )
+    );
+
+    if (isSupabaseConfigured) {
+      updateOrderStatusInSupabase(targetPedido.id, 'PAGADO', newHistory).catch(console.error);
+      savePaymentToSupabase(nuevoPago).catch(console.error);
+    }
+
+    addNotification(
+      'success',
+      '¡Pago Confirmado con Éxito! 💜',
+      `El pedido ${targetPedido.id} fue marcado como PAGADO. Se confirmó el abono de S/ ${targetPedido.total.toFixed(2)} por ${metodo}.`
+    );
+
+    return { success: true };
+  };
+
+  // Cancelación manual de pedido (P4 / P3)
+  const cancelOrder = (
+    pedidoId: string,
+    motivo: string = 'Cancelado por vendedor'
+  ): { success: boolean; error?: string } => {
+    const targetPedido = pedidos.find((p) => p.id === pedidoId);
+    if (!targetPedido) {
+      return { success: false, error: 'Pedido no encontrado.' };
+    }
+
+    if (targetPedido.estado === 'CANCELADO') {
+      return { success: false, error: 'Este pedido ya está cancelado.' };
+    }
+
+    const now = new Date();
+
+    // Restituir stock al cancelar: se decrementa stockReservado y se devuelve a stockDisponible
+    setProductos((prev) =>
+      prev.map((prod) => {
+        const item = targetPedido.detalles.find((d) => d.productoId === prod.id);
+        if (item) {
+          return {
+            ...prod,
+            stockDisponible: prod.stockDisponible + item.cantidad,
+            stockReservado: Math.max(0, prod.stockReservado - item.cantidad),
+          };
+        }
+        return prod;
+      })
+    );
+
+    const newHistory: HistorialEstado = {
+      id: `HIST-${Date.now()}`,
+      pedidoId: targetPedido.id,
+      fechaHora: now.toISOString(),
+      estadoAnterior: targetPedido.estado,
+      estadoNuevo: 'Cancelado',
+      origen: 'Vendedor',
+      observaciones: `${motivo}. Reserva temporal liberada y restituida al catálogo.`,
+    };
+
+    setPedidos((prev) =>
+      prev.map((p) =>
+        p.id === targetPedido.id
+          ? {
+              ...p,
+              estado: 'CANCELADO',
+              motivoCancelacion: motivo,
+              historial: [...p.historial, newHistory],
+            }
+          : p
+      )
+    );
+
+    if (isSupabaseConfigured) {
+      updateOrderStatusInSupabase(targetPedido.id, 'CANCELADO', newHistory).catch(console.error);
+    }
+
+    addNotification(
+      'warning',
+      'Pedido Cancelado & Stock Restituido',
+      `El pedido ${targetPedido.id} fue cancelado y las unidades reservadas volvieron a estar disponibles.`
+    );
+
+    return { success: true };
   };
 
   // Gestión de Catálogo (P5): Agregar nuevo producto y guardar en BD
@@ -1449,6 +1621,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         approveObservedPayment,
         rejectObservedPayment,
         retryRefund,
+        confirmOrderPayment,
+        cancelOrder,
         addProduct,
         deleteProduct,
         updateOrderTracking,

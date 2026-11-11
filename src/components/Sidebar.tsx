@@ -51,10 +51,10 @@ export const Sidebar: React.FC = () => {
     },
     {
       id: 'P4',
-      label: 'Pagos por revisar',
-      sublabel: 'Conciliación de pagos',
+      label: 'Validar y Conciliar',
+      sublabel: 'Pagos y pendientes',
       icon: AlertCircle,
-      badge: observedCount > 0 ? observedCount : undefined,
+      badge: pendingCount + observedCount > 0 ? pendingCount + observedCount : undefined,
       badgeColor: 'bg-[#DE6978] text-white animate-pulse',
     },
     {
