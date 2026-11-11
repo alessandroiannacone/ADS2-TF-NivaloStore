@@ -211,20 +211,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   });
 
-  // Notificaciones
+  // Notificaciones del sistema
   const [notificaciones, setNotificaciones] = useState<NotificacionSistema[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_NOTIFS);
-      return saved ? JSON.parse(saved) : [
-        {
-          id: 'NOT-1',
-          tipo: 'info',
-          titulo: 'Bienvenida a Nivalo Store Iteración 2',
-          mensaje: 'Sistema administrativo listo. Stock en tiempo real y reservas automáticas de 24h activas.',
-          fechaHora: new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
-          leida: false,
-        },
-      ];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Limpiar cualquier notificación técnica o de bienvenida antigua
+        return Array.isArray(parsed)
+          ? parsed.filter(
+              (n) =>
+                n.titulo !== 'Backend Supabase Conectado' &&
+                n.titulo !== 'Bienvenida a Nivalo Store Iteración 2'
+            )
+          : [];
+      }
+      return [];
     } catch {
       return [];
     }
@@ -272,11 +274,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       });
 
-      addNotification(
-        'info',
-        'Backend Supabase Conectado',
-        'Datos sincronizados en tiempo real desde tu base de datos PostgreSQL en Supabase.'
-      );
+      console.log('✅ Supabase conectado en tiempo real.');
     }
   }, []);
 

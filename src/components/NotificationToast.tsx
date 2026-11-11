@@ -1,12 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { CheckCircle2, AlertTriangle, XCircle, Info, X } from 'lucide-react';
 
 export const NotificationToast: React.FC = () => {
   const { notificaciones, markNotificationAsRead } = useStore();
 
-  // Mostrar la notificación más reciente no leída
-  const latestUnread = notificaciones.find((n) => !n.leida);
+  // Filtrar notificaciones técnicas o del sistema para que no molesten al usuario
+  const latestUnread = notificaciones.find(
+    (n) =>
+      !n.leida &&
+      !n.titulo.toLowerCase().includes('backend') &&
+      !n.titulo.toLowerCase().includes('supabase') &&
+      !n.titulo.toLowerCase().includes('bienvenida') &&
+      !n.titulo.toLowerCase().includes('cancelación')
+  );
+
+  // Auto-cerrar la notificación después de 3.5 segundos
+  useEffect(() => {
+    if (!latestUnread) return;
+    const timer = setTimeout(() => {
+      markNotificationAsRead(latestUnread.id);
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, [latestUnread, markNotificationAsRead]);
+
   if (!latestUnread) return null;
 
   return (
