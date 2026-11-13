@@ -10,6 +10,7 @@ import type {
   Pago,
   IntentoCobro,
   TrackingEnvio,
+  OrigenCambio,
 } from '../types';
 import { INITIAL_PEDIDOS, INITIAL_PRODUCTOS, INITIAL_VENDEDOR } from '../data/mockData';
 import {
@@ -113,7 +114,14 @@ interface StoreContextType {
   confirmOrderPayment: (
     pedidoId: string,
     referencia?: string,
-    metodo?: string
+    metodo?: string,
+    origen?: OrigenCambio,
+    detallesCulqi?: {
+      chargeId?: string;
+      cardBrand?: string;
+      last4?: string;
+      authCode?: string;
+    }
   ) => { success: boolean; error?: string };
 
   cancelOrder: (
@@ -1190,11 +1198,18 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
-  // Confirmación manual de pago para pedidos PENDIENTE_PAGO (P4 / P3)
+  // Confirmación de pago para pedidos PENDIENTE_PAGO (Pasarela Culqi / Vendedora / Webhook)
   const confirmOrderPayment = (
     pedidoId: string,
     referencia?: string,
-    metodo: string = 'Yape'
+    metodo: string = 'Yape',
+    origen: OrigenCambio = 'Vendedor',
+    detallesCulqi?: {
+      chargeId?: string;
+      cardBrand?: string;
+      last4?: string;
+      authCode?: string;
+    }
   ): { success: boolean; error?: string } => {
     const targetPedido = pedidos.find((p) => p.id === pedidoId);
     if (!targetPedido) {
@@ -1210,7 +1225,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     const now = new Date();
-    const ref = referencia?.trim() || `REF-${metodo.toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`;
+    const isCulqi = metodo.toLowerCase().includes('culqi') || !!detallesCulqi;
+    const finalOrigen: OrigenCambio = isCulqi ? 'Servicio de Pago' : origen;
+    const ref = referencia?.trim() || (isCulqi ? `CULQI-${targetPedido.id.replace('PED-', '')}-${Math.floor(100000 + Math.random() * 900000)}` : `REF-${metodo.toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`);
 
     const nuevoPago: Pago = {
       id: `PAG-${Date.now()}`,
@@ -1221,7 +1238,17 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       montoRecibido: targetPedido.total,
       diferencia: 0,
       estadoPago: 'APROBADO',
+      metodo: isCulqi ? `Culqi (${detallesCulqi?.cardBrand || 'Tarjeta'})` : metodo,
+      pasarela: isCulqi ? 'Culqi' : 'Manual',
+      culqiChargeId: detallesCulqi?.chargeId,
+      culqiCardBrand: detallesCulqi?.cardBrand,
+      culqiCardLast4: detallesCulqi?.last4,
+      culqiAuthCode: detallesCulqi?.authCode,
     };
+
+    const observaciones = isCulqi
+      ? `Pago en línea procesado exitosamente mediante Pasarela Culqi (${detallesCulqi?.cardBrand || 'En línea'} **** ${detallesCulqi?.last4 || ''}). ID Cargo: ${detallesCulqi?.chargeId || ref}. Autorización: ${detallesCulqi?.authCode || 'AUT-CULQI'}. Total S/ ${targetPedido.total.toFixed(2)}. Stock rebajado definitivamente.`
+      : `Abono confirmado manualmente vía ${metodo} (Ref: ${ref}) por S/ ${targetPedido.total.toFixed(2)}. Stock rebajado definitivamente.`;
 
     const newHistory: HistorialEstado = {
       id: `HIST-${Date.now()}`,
@@ -1229,8 +1256,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       fechaHora: now.toISOString(),
       estadoAnterior: targetPedido.estado,
       estadoNuevo: 'Pagado',
-      origen: 'Vendedor',
-      observaciones: `Abono confirmado manualmente vía ${metodo} (Ref: ${ref}) por S/ ${targetPedido.total.toFixed(2)}. Stock rebajado definitivamente.`,
+      origen: finalOrigen,
+      observaciones,
     };
 
     // Actualizar stock: Al confirmarse el pago se decrementa stockReservado y stockTotalFisico (StockService)
@@ -1265,8 +1292,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     addNotification(
       'success',
-      '¡Pago Confirmado con Éxito! 💜',
-      `El pedido ${targetPedido.id} fue marcado como PAGADO. Se confirmó el abono de S/ ${targetPedido.total.toFixed(2)} por ${metodo}.`
+      isCulqi ? '¡Pago Aprobado por Pasarela Culqi! 💳' : '¡Pago Confirmado con Éxito! 💜',
+      isCulqi
+        ? `El pedido ${targetPedido.id} fue aprobado mediante Culqi (${detallesCulqi?.cardBrand || 'Tarjeta'}). Despacho Olva Courier activado.`
+        : `El pedido ${targetPedido.id} fue marcado como PAGADO. Se confirmó el abono de S/ ${targetPedido.total.toFixed(2)} por ${metodo}.`
     );
 
     return { success: true };

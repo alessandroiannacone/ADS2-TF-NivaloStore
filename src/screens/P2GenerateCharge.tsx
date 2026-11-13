@@ -113,12 +113,12 @@ export const P2GenerateCharge: React.FC = () => {
 
   // Mensaje para WhatsApp con datos de Yape y enlace
   const whatsappText = currentPedido
-    ? `🌸 ¡Hola ${currentPedido.cliente.nombreOIdentificador}! Gracias por comprar en *Nivalo Store*.\n\nAquí tienes las opciones de pago para tu pedido *${currentPedido.id}* por un total de *S/ ${currentPedido.total.toFixed(2)}*:\n\n💜 *1. YAPE / PLIN (Directo):*\n📱 Número: *${NIVALO_STORE_CONTACT.telefonoDisplay}*\n👤 Titular: *Nivalo Store (Alessandro Iannacone)*\n\n💳 *2. O PAGA EN LÍNEA CON QR Y TARJETAS:*\n👉 ${finalLink}\n\n⚠️ Recuerda que tu stock está reservado durante *24 horas*. Por favor envíanos la captura de tu comprobante por aquí. ¡Muchas gracias! 💕`
+    ? `🌸 ¡Hola ${currentPedido.cliente.nombreOIdentificador}! Gracias por comprar en *Nivalo Store*.\n\nAquí tienes las opciones de pago para tu pedido *${currentPedido.id}* por un total de *S/ ${currentPedido.total.toFixed(2)}*:\n\n💜 *1. YAPE / PLIN (Directo):*\n📱 Número: *${NIVALO_STORE_CONTACT.telefonoDisplay}*\n👤 Titular: *Nivalo Store (Alessandro Iannacone)*\n\n💳 *2. O PAGA EN LÍNEA CON PASARELA CULQI (TARJETAS VISA / MASTERCARD / YAPE QR):*\n👉 ${finalLink}\n\n⚠️ Recuerda que tu stock está reservado durante *24 horas*. Por favor envíanos la captura de tu comprobante por aquí. ¡Muchas gracias! 💕`
     : '';
 
   // Mensaje para Instagram
   const instagramText = currentPedido
-    ? `Hola ${currentPedido.cliente.nombreOIdentificador} 💖 Tu pedido ${currentPedido.id} en Nivalo Store está listo para pago por S/ ${currentPedido.total.toFixed(2)}.\n\n💜 Yapea al número: ${NIVALO_STORE_CONTACT.telefonoDisplay} (Nivalo Store)\n💳 O paga en línea: ${finalLink}\n\n(Tu stock está reservado por 24 horas ✨)`
+    ? `Hola ${currentPedido.cliente.nombreOIdentificador} 💖 Tu pedido ${currentPedido.id} en Nivalo Store está listo para pago por S/ ${currentPedido.total.toFixed(2)}.\n\n💜 Yapea al número: ${NIVALO_STORE_CONTACT.telefonoDisplay} (Nivalo Store)\n💳 O paga en línea con pasarela Culqi (Tarjetas / Yape): ${finalLink}\n\n(Tu stock está reservado por 24 horas ✨)`
     : '';
 
   const copyToClipboard = (text: string, type: 'link' | 'wa' | 'ig' | 'yape') => {
@@ -314,7 +314,7 @@ export const P2GenerateCharge: React.FC = () => {
               ) : (
                 <div className="space-y-3">
                   <p className="text-xs text-[#746E8B] leading-relaxed">
-                    Al generar el enlace seguro, se creará el acceso único para que el cliente pague su pedido dentro de las 24 horas de reserva.
+                    Al generar el enlace seguro, se creará el acceso único para que el cliente pague su pedido mediante la <strong>pasarela Culqi</strong> (Tarjetas de Débito/Crédito Visa, Mastercard, Diners o Yape) dentro de las 24 horas de reserva.
                   </p>
 
                   <button

@@ -92,12 +92,18 @@ export interface HistorialEstado {
 export interface Pago {
   id: string;
   pedidoId: string;
-  referenciaExterna: string; // Código de pasarela (ej. REF-984321)
+  referenciaExterna: string; // Código de pasarela (ej. REF-984321 o CULQI-chr_test_...)
   fechaPago: string;
   totalPedido: number;
   montoRecibido: number;
   diferencia: number; // Monto recibido - Total pedido
   estadoPago: EstadoPago;
+  metodo?: string; // ej. 'Culqi (Visa)', 'Culqi (Yape)', 'Yape Manual', 'Plin', 'Transferencia'
+  pasarela?: 'Culqi' | 'Manual';
+  culqiChargeId?: string;
+  culqiCardBrand?: string;
+  culqiCardLast4?: string;
+  culqiAuthCode?: string;
   motivoObservacion?: string;
   motivoRechazo?: string;
   resultadoReembolso?: 'Exitoso' | 'Fallido' | 'Pendiente';

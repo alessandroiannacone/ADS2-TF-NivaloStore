@@ -2168,7 +2168,7 @@ export const Storefront: React.FC = () => {
                 <li>✉️ nivalostore@gmail.com</li>
                 <li>📞 +51 998 167 789</li>
                 <li>📍 Lima, Perú (Envíos a nivel nacional)</li>
-                <li>💳 Yape • Plin • Visa • Mastercard</li>
+                <li>💳 Pasarela Culqi • Visa • Mastercard • Diners • Yape • Plin</li>
               </ul>
             </div>
           </div>
@@ -2638,7 +2638,7 @@ export const Storefront: React.FC = () => {
             </div>
 
             <p className="text-xs text-[#8E7C94]">
-              Ingresa tus datos de contacto para emitir tu boleta con el <strong>código QR de Yape</strong> y reservar tu stock por 24 horas:
+              Ingresa tus datos de contacto para acceder a la pasarela de pago seguro (Culqi: Tarjetas Débito/Crédito y Yape) y reservar tu stock por 24 horas:
             </p>
 
             {checkoutError && (
@@ -2758,17 +2758,13 @@ export const Storefront: React.FC = () => {
             <button
               onClick={handleConfirmDirectPayment}
               disabled={isProcessingCheckout}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#742284] via-[#631B72] to-[#50155E] hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-98 cursor-pointer disabled:opacity-60"
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00A9E0] via-[#742284] to-[#50155E] hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-98 cursor-pointer disabled:opacity-60"
             >
-              <img
-                src={getAssetUrl('yape_logo.png')}
-                alt="Yape"
-                className="w-5 h-5 rounded-md object-contain bg-white p-0.5"
-              />
+              <span>💳</span>
               <span>
                 {isProcessingCheckout
-                  ? 'Generando tu boleta...'
-                  : 'Ver Boleta y Código QR de Yape ➔'}
+                  ? 'Generando tu orden...'
+                  : 'Continuar a Pagar con Culqi / Yape ➔'}
               </span>
             </button>
           </div>
