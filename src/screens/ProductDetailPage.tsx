@@ -190,27 +190,40 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
       {/* Navegación y Botón Retroceder */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-5 pb-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
-          {/* Botón Retroceder explícito */}
+          {/* Botón Retroceder explícito a la sección Tienda */}
           <button
-            onClick={onBackToStore}
+            onClick={() => {
+              window.location.hash = '#/tienda';
+            }}
             className="group px-4 py-2 rounded-full bg-white border border-[#FCDCE7] text-xs font-bold text-[#4A3B4E] hover:text-[#E2678D] hover:bg-[#FFF0F6] transition-all shadow-xs flex items-center gap-2 cursor-pointer"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform text-[#E2678D]" />
             <span>Volver a la tienda</span>
           </button>
 
-          {/* Breadcrumb */}
+          {/* Breadcrumb con navegación a Inicio y Tienda */}
           <div className="text-[11px] text-[#8E7C94] flex items-center gap-1.5 overflow-hidden">
             <span
-              onClick={onBackToStore}
-              className="hover:text-[#E2678D] cursor-pointer"
+              onClick={() => {
+                window.location.hash = '#/';
+              }}
+              className="hover:text-[#E2678D] cursor-pointer transition-colors"
+            >
+              Inicio
+            </span>
+            <span>/</span>
+            <span
+              onClick={() => {
+                window.location.hash = '#/tienda';
+              }}
+              className="hover:text-[#E2678D] font-semibold text-[#E2678D] cursor-pointer transition-colors"
             >
               Tienda
             </span>
             <span>/</span>
-            <span className="font-semibold text-[#DE6978]">{product.categoria}</span>
+            <span className="font-medium text-[#7E5E6E]">{product.categoria}</span>
             <span>/</span>
-            <span className="text-[#4A3B4E] font-medium truncate max-w-[200px] sm:max-w-xs">
+            <span className="text-[#4A3B4E] font-semibold truncate max-w-[180px] sm:max-w-xs">
               {product.nombre}
             </span>
           </div>
@@ -523,7 +536,9 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({
                 </h3>
               </div>
               <button
-                onClick={onBackToStore}
+                onClick={() => {
+                  window.location.hash = '#/tienda';
+                }}
                 className="text-xs font-semibold text-[#E2678D] hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <span>Ver catálogo completo</span>

@@ -49,7 +49,18 @@ const MainLayout: React.FC = () => {
       // Si se navega explícitamente a #/admin
       if (hash.startsWith('#/admin') && !hash.includes('/login')) {
         setViewMode('admin');
-      } else if (hash === '#/' || hash === '' || hash.startsWith('#/tienda') || hash.startsWith('#/producto')) {
+      } else if (
+        hash === '#/' ||
+        hash === '' ||
+        hash.startsWith('#/inicio') ||
+        hash.startsWith('#/tienda') ||
+        hash.startsWith('#/mas-vendidos') ||
+        hash.startsWith('#/ofertas') ||
+        hash.startsWith('#/colecciones') ||
+        hash.startsWith('#/nivalo') ||
+        hash.startsWith('#/nivapuntos') ||
+        hash.startsWith('#/producto')
+      ) {
         setViewMode('storefront');
       }
     };
@@ -108,11 +119,8 @@ const MainLayout: React.FC = () => {
         <ProductDetailPage
           productId={productDetailId}
           onBackToStore={() => {
-            if (window.history.length > 1) {
-              window.history.back();
-            } else {
-              window.location.hash = '#/';
-            }
+            // Regresar explícitamente a la sección de tienda / catálogo de productos
+            window.location.hash = '#/tienda';
           }}
         />
         <NotificationToast />

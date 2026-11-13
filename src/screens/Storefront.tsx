@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../hooks';
@@ -25,6 +25,12 @@ import {
   Pause,
   Send,
   LogOut,
+  Crown,
+  Tag,
+  Layers,
+  Star,
+  Clock,
+  CheckCircle2,
 } from 'lucide-react';
 import { WhatsAppIcon } from '../components/WhatsAppIcon';
 import { NivieBotChat } from '../components/NivieBotChat';
@@ -89,8 +95,46 @@ export const Storefront: React.FC = () => {
 
   const { user, profile, isAdmin, signOut } = useAuth();
 
-  // Control de vista: 'inicio' (Pantalla Principal scrollable completa) vs 'tienda' (Catálogo con filtros laterales)
-  const [currentView, setCurrentView] = useState<'inicio' | 'tienda'>('inicio');
+  // 6 Vistas Exclusivas dedicadas según requerimiento de usuario
+  type StorefrontView = 'inicio' | 'tienda' | 'mas-vendidos' | 'ofertas' | 'colecciones' | 'nivalo';
+
+  // Helper para sincronizar la vista activa con el hash de la URL
+  const getViewFromHash = (): StorefrontView => {
+    const hash = window.location.hash || '';
+    if (hash.startsWith('#/tienda')) return 'tienda';
+    if (hash.startsWith('#/mas-vendidos')) return 'mas-vendidos';
+    if (hash.startsWith('#/ofertas')) return 'ofertas';
+    if (hash.startsWith('#/colecciones')) return 'colecciones';
+    if (hash.startsWith('#/nivalo') || hash.startsWith('#/nivapuntos')) return 'nivalo';
+    return 'inicio';
+  };
+
+  const [currentView, setCurrentView] = useState<StorefrontView>(getViewFromHash);
+
+  useEffect(() => {
+    const handleHashSync = () => {
+      const v = getViewFromHash();
+      setCurrentView(v);
+    };
+    window.addEventListener('hashchange', handleHashSync);
+    return () => window.removeEventListener('hashchange', handleHashSync);
+  }, []);
+
+  const navigateToView = (view: StorefrontView) => {
+    setCurrentView(view);
+    if (view === 'inicio') {
+      window.location.hash = '#/';
+    } else {
+      window.location.hash = `#/${view}`;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Estados específicos para las vistas exclusivas
+  const [masVendidosCategory, setMasVendidosCategory] = useState<string>('Todos');
+  const [ofertasCategory, setOfertasCategory] = useState<string>('Todos');
+  const [activeCollectionId, setActiveCollectionId] = useState<string | null>(null);
+  const [nivaCalcAmount, setNivaCalcAmount] = useState<number>(80);
 
   // Estados de búsqueda y filtros
   const [topSearch, setTopSearch] = useState('');
@@ -382,6 +426,132 @@ export const Storefront: React.FC = () => {
       .slice(0, 4);
   }, [productos]);
 
+  // Colecciones Temáticas Oficiales de Nivalo Store
+  const THEMATIC_COLLECTIONS = useMemo(() => [
+    {
+      id: 'sanrio',
+      name: 'Sanrio World & Amigos',
+      emoji: '🎀',
+      badge: 'Popularidad Máxima 💖',
+      desc: 'El universo oficial de Hello Kitty, Kuromi, Cinnamoroll, My Melody y Pompompurin.',
+      coverImage: getAssetUrl('prod_kuromi.jpg'),
+      categoryFilter: 'Sanrio',
+      color: 'from-[#FFF0F6] to-[#FFE2EC]',
+      border: 'border-[#F8B6CC]',
+      accent: 'text-[#E2678D]',
+    },
+    {
+      id: 'papeleria',
+      name: 'Papelería Coreana & Bujo',
+      emoji: '🌸',
+      badge: 'Aesthetic & Studio ✍️',
+      desc: 'Memopads, washi tapes holográficos, bolígrafos gel pastel y notas adhesivas para journaling.',
+      coverImage: getAssetUrl('prod_memopads.jpg'),
+      categoryFilter: 'Papelería',
+      color: 'from-[#FFF7FA] to-[#FCE7F1]',
+      border: 'border-[#FCDCE7]',
+      accent: 'text-[#DE6978]',
+    },
+    {
+      id: 'kpop',
+      name: 'K-pop & Idol Lifestyle',
+      emoji: '🎶',
+      badge: 'Fan Club Edition 🌟',
+      desc: 'Binders A5 para photocards, llaveros acrílicos, top loaders decorados y photobooks.',
+      coverImage: getAssetUrl('prod_binder.jpg'),
+      categoryFilter: 'K-pop',
+      color: 'from-[#F5EEFB] to-[#E9DCF8]',
+      border: 'border-[#DEC7F5]',
+      accent: 'text-[#A064D8]',
+    },
+    {
+      id: 'moda',
+      name: 'Moda & Outfits Kawaii',
+      emoji: '👗',
+      badge: 'Harajuku Street 🎀',
+      desc: 'Sudaderas oversize con orejitas, calcetines con volantes, gorritos y mochilas cute.',
+      coverImage: getAssetUrl('prod_sudadera.jpg'),
+      categoryFilter: 'Ropa',
+      color: 'from-[#FFF5F8] to-[#FEDCE6]',
+      border: 'border-[#FBAFC5]',
+      accent: 'text-[#DE6978]',
+    },
+    {
+      id: 'belleza',
+      name: 'Belleza & Skincare Pastel',
+      emoji: '💄',
+      badge: 'Glow Up Kawaii 🫧',
+      desc: 'Bálsamos hidratantes patita de gato, cosmetiqueros acolchados y espejitos de bolsillo.',
+      coverImage: getAssetUrl('prod_balsamo.jpg'),
+      categoryFilter: 'Maquillaje',
+      color: 'from-[#FFF6F0] to-[#FFE8DF]',
+      border: 'border-[#FCD2C0]',
+      accent: 'text-[#E07252]',
+    },
+    {
+      id: 'peluches',
+      name: 'Plushies & Peluches Suaves',
+      emoji: '🧸',
+      badge: 'Ultra Esponjoso ☁️',
+      desc: 'Peluches gigantes apachurrables, cojines de felpa y mini charms para tu bolso.',
+      coverImage: getAssetUrl('prod_peluche.jpg'),
+      categoryFilter: 'Peluches',
+      color: 'from-[#FFF9EC] to-[#FEF0D0]',
+      border: 'border-[#FCE1A4]',
+      accent: 'text-[#C99026]',
+    },
+  ], []);
+
+  // Lista exclusiva de Más Vendidos
+  const masVendidosList = useMemo(() => {
+    const base = productos.filter(
+      (p) =>
+        p.badge === 'TOP' ||
+        p.esFavorito ||
+        p.badge === 'MÁS VENDIDO' ||
+        ['PROD-12', 'PROD-13', 'PROD-15', 'PROD-39', 'PROD-01', 'PROD-05', 'PROD-09', 'PROD-14', 'PROD-18', 'PROD-22', 'PROD-25', 'PROD-27', 'PROD-02', 'PROD-11', 'PROD-08', 'PROD-16'].includes(p.id)
+    );
+    if (masVendidosCategory === 'Todos') return base;
+    return base.filter(
+      (p) =>
+        p.categoria.toLowerCase().includes(masVendidosCategory.toLowerCase()) ||
+        p.nombre.toLowerCase().includes(masVendidosCategory.toLowerCase()) ||
+        p.marca?.toLowerCase().includes(masVendidosCategory.toLowerCase())
+    );
+  }, [productos, masVendidosCategory]);
+
+  // Lista exclusiva de Ofertas y Rebajas
+  const ofertasList = useMemo(() => {
+    const base = productos.filter(
+      (p) =>
+        p.esOferta ||
+        p.badge === 'OFERTA' ||
+        p.descuento ||
+        ['PROD-28', 'PROD-31', 'PROD-02', 'PROD-33', 'PROD-04', 'PROD-07', 'PROD-12', 'PROD-15', 'PROD-20'].includes(p.id)
+    );
+    if (ofertasCategory === 'Todos') return base;
+    if (ofertasCategory === 'Menos de S/ 25.00') return base.filter((p) => p.precio < 25);
+    return base.filter(
+      (p) =>
+        p.categoria.toLowerCase().includes(ofertasCategory.toLowerCase()) ||
+        p.nombre.toLowerCase().includes(ofertasCategory.toLowerCase()) ||
+        p.marca?.toLowerCase().includes(ofertasCategory.toLowerCase())
+    );
+  }, [productos, ofertasCategory]);
+
+  // Lista exclusiva de Colecciones
+  const coleccionesProducts = useMemo(() => {
+    if (!activeCollectionId) return productos;
+    const coll = THEMATIC_COLLECTIONS.find((c) => c.id === activeCollectionId);
+    if (!coll) return productos;
+    return productos.filter((p) => {
+      const matchCat = p.categoria.toLowerCase().includes(coll.categoryFilter.toLowerCase());
+      const matchName = p.nombre.toLowerCase().includes(coll.categoryFilter.toLowerCase());
+      const matchBrand = p.marca?.toLowerCase().includes(coll.categoryFilter.toLowerCase());
+      return matchCat || matchName || matchBrand;
+    });
+  }, [productos, activeCollectionId, THEMATIC_COLLECTIONS]);
+
   const totalCartItems = cart.reduce((acc, curr) => acc + curr.cantidad, 0);
 
   // Renderizador unificado de Card de Producto (Componente ProductCard desacoplado)
@@ -476,7 +646,7 @@ export const Storefront: React.FC = () => {
           {/* Logo */}
           <div
             onClick={() => {
-              setCurrentView('inicio');
+              navigateToView('inicio');
               clearAllFilters();
             }}
             className="flex items-center gap-2.5 cursor-pointer shrink-0 group"
@@ -503,7 +673,7 @@ export const Storefront: React.FC = () => {
                 value={topSearch}
                 onChange={(e) => {
                   setTopSearch(e.target.value);
-                  if (currentView !== 'tienda') setCurrentView('tienda');
+                  if (currentView !== 'tienda') navigateToView('tienda');
                 }}
                 className="w-full bg-[#FFF0F6] border border-[#FCDCE7] rounded-full py-2.5 pl-11 pr-10 text-xs text-[#4A3B4E] placeholder:text-[#BAA0AC] focus:outline-none focus:border-[#F4A7C1] focus:ring-2 focus:ring-[#F4A7C1]/30 transition-all shadow-inner"
               />
@@ -549,7 +719,7 @@ export const Storefront: React.FC = () => {
 
             <button
               onClick={() => {
-                setCurrentView('tienda');
+                navigateToView('tienda');
                 setCatalogSearch('');
                 setTopSearch('');
               }}
@@ -581,16 +751,13 @@ export const Storefront: React.FC = () => {
           </div>
         </div>
 
-        {/* 3. SUBNAV HORIZONTAL (Conmutador Inicio vs Tienda) */}
+        {/* 3. SUBNAV HORIZONTAL (Conmutador de 6 Vistas Exclusivas) */}
         <nav className="border-t border-[#FCE1ED] bg-[#FFF7FA] py-2">
-          <div className="max-w-[1440px] mx-auto px-4 flex items-center justify-center gap-4 sm:gap-8 text-xs font-medium text-[#7E5E6E]">
-            {/* Botón Inicio: Ahora va a la pantalla principal scrollable */}
+          <div className="max-w-[1440px] mx-auto px-4 flex items-center justify-center gap-2 sm:gap-6 text-xs font-medium text-[#7E5E6E] overflow-x-auto no-scrollbar">
+            {/* 1. Inicio */}
             <button
-              onClick={() => {
-                setCurrentView('inicio');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
+              onClick={() => navigateToView('inicio')}
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap ${
                 currentView === 'inicio'
                   ? 'bg-[#F4A7C1] text-white font-bold shadow-xs'
                   : 'hover:text-[#E2678D] hover:bg-[#FFF0F6]'
@@ -599,14 +766,14 @@ export const Storefront: React.FC = () => {
               Inicio
             </button>
 
-            {/* Botón Tienda: Conmuta al catálogo completo con filtros laterales */}
+            {/* 2. Tienda */}
             <div className="relative group">
               <button
                 onClick={() => {
-                  setCurrentView('tienda');
+                  navigateToView('tienda');
                   clearAllFilters();
                 }}
-                className={`flex items-center gap-1 px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
+                className={`flex items-center gap-1 px-3.5 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap ${
                   currentView === 'tienda'
                     ? 'bg-[#F4A7C1] text-white font-bold shadow-xs'
                     : 'hover:text-[#E2678D] hover:bg-[#FFF0F6]'
@@ -615,13 +782,13 @@ export const Storefront: React.FC = () => {
                 <span>Tienda</span>
                 <ChevronDown size={13} className="opacity-70" />
               </button>
-              {/* Dropdown de categorías */}
+              {/* Dropdown de categorías rápidas */}
               <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-48 bg-white rounded-2xl border border-[#FCDCE7] shadow-kawaii p-2 hidden group-hover:block z-50">
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => {
-                      setCurrentView('tienda');
+                      navigateToView('tienda');
                       setSelectedCategories([cat]);
                       setCatalogSearch('');
                     }}
@@ -633,63 +800,52 @@ export const Storefront: React.FC = () => {
               </div>
             </div>
 
+            {/* 3. Más Vendidos */}
             <button
-              onClick={() => {
-                if (currentView === 'inicio') {
-                  const el = document.getElementById('seccion-mas-vendidos');
-                  el?.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  setCurrentView('inicio');
-                  setTimeout(() => {
-                    document.getElementById('seccion-mas-vendidos')?.scrollIntoView({ behavior: 'smooth' });
-                  }, 100);
-                }
-              }}
-              className="hover:text-[#E2678D] transition-colors cursor-pointer"
+              onClick={() => navigateToView('mas-vendidos')}
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap ${
+                currentView === 'mas-vendidos'
+                  ? 'bg-[#F4A7C1] text-white font-bold shadow-xs'
+                  : 'hover:text-[#E2678D] hover:bg-[#FFF0F6]'
+              }`}
             >
               Más Vendidos 👑
             </button>
 
+            {/* 4. Ofertas */}
             <button
-              onClick={() => {
-                if (currentView === 'inicio') {
-                  const el = document.getElementById('seccion-ofertas');
-                  el?.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  setCurrentView('inicio');
-                  setTimeout(() => {
-                    document.getElementById('seccion-ofertas')?.scrollIntoView({ behavior: 'smooth' });
-                  }, 100);
-                }
-              }}
-              className="hover:text-[#E2678D] transition-colors cursor-pointer"
+              onClick={() => navigateToView('ofertas')}
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap ${
+                currentView === 'ofertas'
+                  ? 'bg-[#F4A7C1] text-white font-bold shadow-xs'
+                  : 'hover:text-[#E2678D] hover:bg-[#FFF0F6]'
+              }`}
             >
               Ofertas 🎀
             </button>
 
+            {/* 5. Colecciones */}
             <button
-              onClick={() => {
-                if (currentView === 'inicio') {
-                  const el = document.getElementById('seccion-categorias');
-                  el?.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  setCurrentView('inicio');
-                  setTimeout(() => {
-                    document.getElementById('seccion-categorias')?.scrollIntoView({ behavior: 'smooth' });
-                  }, 100);
-                }
-              }}
-              className="hover:text-[#E2678D] transition-colors cursor-pointer"
+              onClick={() => navigateToView('colecciones')}
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap ${
+                currentView === 'colecciones'
+                  ? 'bg-[#F4A7C1] text-white font-bold shadow-xs'
+                  : 'hover:text-[#E2678D] hover:bg-[#FFF0F6]'
+              }`}
             >
-              Colecciones
+              Colecciones ✨
             </button>
 
+            {/* 6. Nivalo */}
             <button
-              onClick={() => setShowNivaPointsModal(true)}
-              className="flex items-center gap-1 hover:text-[#E2678D] transition-colors cursor-pointer text-[#E2678D] font-semibold"
+              onClick={() => navigateToView('nivalo')}
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer whitespace-nowrap ${
+                currentView === 'nivalo'
+                  ? 'bg-[#F4A7C1] text-white font-bold shadow-xs'
+                  : 'hover:text-[#E2678D] hover:bg-[#FFF0F6]'
+              }`}
             >
-              <span>Nivalo 💖</span>
-              <ChevronDown size={13} className="opacity-70" />
+              Nivalo 💖
             </button>
           </div>
         </nav>
@@ -729,7 +885,7 @@ export const Storefront: React.FC = () => {
                 <div className="flex flex-wrap items-center gap-3 pt-2">
                   <button
                     onClick={() => {
-                      setCurrentView('tienda');
+                      navigateToView('tienda');
                       clearAllFilters();
                     }}
                     className="px-6 py-3 rounded-full bg-gradient-to-r from-[#F4A7C1] to-[#EE8EAF] hover:from-[#EE8EAF] hover:to-[#E0799E] text-white font-semibold text-sm shadow-kawaii-hover flex items-center gap-2 transition-all cursor-pointer"
@@ -740,7 +896,7 @@ export const Storefront: React.FC = () => {
 
                   <button
                     onClick={() => {
-                      document.getElementById('seccion-ofertas')?.scrollIntoView({ behavior: 'smooth' });
+                      navigateToView('ofertas');
                     }}
                     className="px-5 py-3 rounded-full bg-white hover:bg-[#FFF0F6] border border-[#FCDCE7] text-[#4A3B4E] font-medium text-sm transition-all shadow-xs cursor-pointer"
                   >
@@ -824,7 +980,7 @@ export const Storefront: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white border border-[#FCDCE7] shadow-xs flex items-center gap-3 text-left cursor-pointer" onClick={() => setShowNivaPointsModal(true)}>
+              <div className="p-3.5 rounded-2xl bg-white border border-[#FCDCE7] shadow-xs flex items-center gap-3 text-left cursor-pointer" onClick={() => navigateToView('nivalo')}>
                 <div className="w-9 h-9 rounded-xl bg-[#FFF0F6] text-[#E2678D] flex items-center justify-center shrink-0">
                   <Sparkles size={18} />
                 </div>
@@ -863,7 +1019,7 @@ export const Storefront: React.FC = () => {
                 <div
                   key={`${cat.id}-${idx}`}
                   onClick={() => {
-                    setCurrentView('tienda');
+                    navigateToView('tienda');
                     setSelectedCategories([cat.id]);
                     setCatalogSearch('');
                   }}
@@ -901,12 +1057,11 @@ export const Storefront: React.FC = () => {
               </div>
               <button
                 onClick={() => {
-                  setCurrentView('tienda');
-                  clearAllFilters();
+                  navigateToView('mas-vendidos');
                 }}
                 className="text-xs font-semibold text-[#E2678D] hover:underline flex items-center gap-1 cursor-pointer"
               >
-                <span>Ver catálogo completo</span>
+                <span>Ver todos los más vendidos</span>
                 <ArrowRight size={13} />
               </button>
             </div>
@@ -930,8 +1085,7 @@ export const Storefront: React.FC = () => {
               </div>
               <button
                 onClick={() => {
-                  setCurrentView('tienda');
-                  setSortBy('precio-asc');
+                  navigateToView('ofertas');
                 }}
                 className="text-xs font-semibold text-[#E2678D] hover:underline flex items-center gap-1 cursor-pointer"
               >
@@ -1103,75 +1257,6 @@ export const Storefront: React.FC = () => {
               </button>
             </div>
           </section>
-
-          {/* 9. FOOTER COMPLETO (Exacto a Imagen 4 en Rosa Muted Suave) */}
-          <footer className="mt-16 bg-[#574450] text-[#E9DFE4] pt-12 pb-8 text-left border-t border-[#FCDCE7]">
-            <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-10 border-b border-white/10 text-xs">
-                {/* Columna Marca */}
-                <div className="lg:col-span-2 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <NivaloCatMascot className="w-9 h-9" />
-                    <span className="font-display font-extrabold text-xl text-white">NIVALO STORE</span>
-                  </div>
-                  <p className="text-[#D3C1CB] text-xs leading-relaxed max-w-sm">
-                    Tu tienda de estilo de vida kawaii en Perú. Ropa, accesorios, maquillaje, K-pop, Sanrio, anime y mucho más con stock verificado 💕
-                  </p>
-                  <div className="pt-2">
-                    <span className="text-[10px] font-bold uppercase text-[#F4A7C1] tracking-wider block mb-2">
-                      SÍGUENOS
-                    </span>
-                    <div className="flex items-center gap-2.5">
-                      <a href="https://instagram.com" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] transition-colors">
-                        Instagram @nivalo_store
-                      </a>
-                      <a href="https://tiktok.com" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] transition-colors">
-                        TikTok @nivalostore
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Columna Comprar */}
-                <div className="space-y-2">
-                  <h5 className="font-bold text-white uppercase text-[11px] tracking-wider">COMPRAR</h5>
-                  <ul className="space-y-1.5 text-[#D3C1CB]">
-                    <li><button onClick={() => { setCurrentView('tienda'); clearAllFilters(); }} className="hover:text-white transition-colors cursor-pointer">Catálogo general</button></li>
-                    <li><button onClick={() => { setCurrentView('inicio'); document.getElementById('seccion-mas-vendidos')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors cursor-pointer">Más Vendidos</button></li>
-                    <li><button onClick={() => { setCurrentView('inicio'); document.getElementById('seccion-ofertas')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors cursor-pointer">Ofertas especiales</button></li>
-                    <li><button onClick={() => { setCurrentView('inicio'); document.getElementById('seccion-categorias')?.scrollIntoView({ behavior: 'smooth' }); }} className="hover:text-white transition-colors cursor-pointer">Colecciones</button></li>
-                  </ul>
-                </div>
-
-                {/* Columna Ayuda */}
-                <div className="space-y-2">
-                  <h5 className="font-bold text-white uppercase text-[11px] tracking-wider">AYUDA</h5>
-                  <ul className="space-y-1.5 text-[#D3C1CB]">
-                    <li><span className="hover:text-white transition-colors cursor-pointer">Centro de ayuda</span></li>
-                    <li><span className="hover:text-white transition-colors cursor-pointer">Envíos Olva & Shalom</span></li>
-                    <li><span className="hover:text-white transition-colors cursor-pointer">Cambios / devoluciones</span></li>
-                    <li><a href="https://wa.me/51998167789" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Contacto directo (WhatsApp)</a></li>
-                  </ul>
-                </div>
-
-                {/* Columna Contacto */}
-                <div className="space-y-2">
-                  <h5 className="font-bold text-white uppercase text-[11px] tracking-wider">CONTACTO</h5>
-                  <ul className="space-y-1.5 text-[#D3C1CB]">
-                    <li>✉️ nivalostore@gmail.com</li>
-                    <li>📞 +51 998 167 789</li>
-                    <li>📍 Lima, Perú (Envíos a nivel nacional)</li>
-                    <li>💳 Yape • Plin • Visa • Mastercard</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#BAA0AC]">
-                <p>© 2026 Nivalo Store. Todos los derechos reservados. 💖</p>
-                <p>Hecho con 💕 en Perú para los NivaloLovers</p>
-              </div>
-            </div>
-          </footer>
         </div>
       )}
 
@@ -1395,6 +1480,705 @@ export const Storefront: React.FC = () => {
           </div>
         </main>
       )}
+
+      {/* ========================================================================= */}
+      {/* VISTA 3: LOS MÁS VENDIDOS DE NIVALO STORE (VISTA EXCLUSIVA DEDICADA)       */}
+      {/* ========================================================================= */}
+      {currentView === 'mas-vendidos' && (
+        <main className="max-w-[1440px] mx-auto px-4 sm:px-8 py-6 animate-in fade-in duration-300">
+          {/* Breadcrumb y encabezado de navegación */}
+          <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-[#8E7C94]">
+              <button onClick={() => navigateToView('inicio')} className="hover:text-[#E2678D] cursor-pointer">
+                Inicio
+              </button>
+              <span>/</span>
+              <button onClick={() => navigateToView('tienda')} className="hover:text-[#E2678D] cursor-pointer">
+                Tienda
+              </button>
+              <span>/</span>
+              <span className="font-bold text-[#E2678D]">Más Vendidos</span>
+            </div>
+
+            <button
+              onClick={() => navigateToView('tienda')}
+              className="px-4 py-2 rounded-2xl bg-white hover:bg-[#FFF0F6] border border-[#FCDCE7] text-xs font-semibold text-[#E2678D] shadow-xs cursor-pointer flex items-center gap-1.5"
+            >
+              <span>← Volver a la Tienda</span>
+            </button>
+          </div>
+
+          {/* Banner Hero Especial Más Vendidos */}
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#FFF0F6] via-[#FFF9F2] to-[#FFF0F6] border border-[#FCDCE7] p-6 sm:p-8 mb-8 shadow-xs text-left">
+            <div className="relative z-10 max-w-2xl space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold uppercase tracking-wider">
+                <Crown size={14} className="text-amber-500 fill-amber-500" />
+                <span>Top Ranking Kawaii • Best Sellers</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#4A3B4E] tracking-tight">
+                Los Más Vendidos de Nivalo Store 👑
+              </h1>
+              <p className="text-xs sm:text-sm text-[#7E5E6E] leading-relaxed">
+                Descubre los favoritos indiscutibles de nuestra comunidad en Perú. Miles de clientas felices avalan la ternura y calidad de estos productos. ¡Asegura los tuyos antes de que se agoten!
+              </p>
+              <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-semibold text-[#5D4251]">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#FCDCE7] shadow-xs">
+                  <Star size={14} className="text-amber-400 fill-amber-400" />
+                  <span>4.9 / 5 Valoración Promedio</span>
+                </span>
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#FCDCE7] shadow-xs">
+                  <Truck size={14} className="text-[#DE6978]" />
+                  <span>Envíos Olva Courier & Shalom</span>
+                </span>
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#FCDCE7] shadow-xs">
+                  <Clock size={14} className="text-[#E2678D]" />
+                  <span>Reserva protegida 24 Horas</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Filtros rápidos por categoría en Más Vendidos */}
+          <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+              {['Todos', 'Papelería', 'Peluches', 'Sanrio', 'Ropa', 'K-pop'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setMasVendidosCategory(cat)}
+                  className={`px-4 py-2 rounded-full font-medium transition cursor-pointer whitespace-nowrap ${
+                    masVendidosCategory === cat
+                      ? 'bg-[#E2678D] text-white shadow-xs font-bold'
+                      : 'bg-white text-[#7E5E6E] border border-[#FCDCE7] hover:bg-[#FFF0F6] hover:text-[#E2678D]'
+                  }`}
+                >
+                  {cat === 'Todos' ? '✨ Todos los Más Vendidos' : cat}
+                </button>
+              ))}
+            </div>
+
+            <p className="text-xs text-[#8E7C94] font-medium">
+              Mostrando <strong className="text-[#DE6978]">{masVendidosList.length}</strong> artículos top
+            </p>
+          </div>
+
+          {/* Grilla de productos Más Vendidos */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
+            {masVendidosList.map((prod) => renderProductCard(prod))}
+          </div>
+
+          {/* Call to action inferior */}
+          <div className="mt-12 p-6 rounded-3xl bg-[#FFF0F6] border border-[#FCDCE7] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-xs">
+            <div>
+              <h4 className="font-display font-bold text-base text-[#4A3B4E]">
+                ¿Quieres explorar más categorías?
+              </h4>
+              <p className="text-xs text-[#8E7C94]">
+                Visita el catálogo general con filtros de tallas, tonos y ordenamiento.
+              </p>
+            </div>
+            <button
+              onClick={() => navigateToView('tienda')}
+              className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#F4A7C1] to-[#DE6978] text-white text-xs font-bold shadow-kawaii flex items-center gap-2 cursor-pointer hover:opacity-95"
+            >
+              <span>Ir al Catálogo Completo</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </main>
+      )}
+
+      {/* ========================================================================= */}
+      {/* VISTA 4: OFERTAS & DESCUENTOS ESPECIALES (VISTA EXCLUSIVA DEDICADA)        */}
+      {/* ========================================================================= */}
+      {currentView === 'ofertas' && (
+        <main className="max-w-[1440px] mx-auto px-4 sm:px-8 py-6 animate-in fade-in duration-300">
+          {/* Breadcrumb y encabezado de navegación */}
+          <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-[#8E7C94]">
+              <button onClick={() => navigateToView('inicio')} className="hover:text-[#E2678D] cursor-pointer">
+                Inicio
+              </button>
+              <span>/</span>
+              <button onClick={() => navigateToView('tienda')} className="hover:text-[#E2678D] cursor-pointer">
+                Tienda
+              </button>
+              <span>/</span>
+              <span className="font-bold text-[#DE6978]">Ofertas</span>
+            </div>
+
+            <button
+              onClick={() => navigateToView('tienda')}
+              className="px-4 py-2 rounded-2xl bg-white hover:bg-[#FFF0F6] border border-[#FCDCE7] text-xs font-semibold text-[#E2678D] shadow-xs cursor-pointer flex items-center gap-1.5"
+            >
+              <span>← Volver a la Tienda</span>
+            </button>
+          </div>
+
+          {/* Banner Hero Especial Ofertas */}
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#FFE8F0] via-[#FFF0F6] to-[#FFE2EC] border border-[#F8B6CC] p-6 sm:p-8 mb-8 shadow-xs text-left">
+            <div className="relative z-10 max-w-2xl space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-[#DE6978] text-[11px] font-bold uppercase tracking-wider">
+                <Tag size={14} className="text-[#DE6978]" />
+                <span>Rebajas Especiales Kawaii</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#4A3B4E] tracking-tight">
+                Zona de Ofertas & Descuentos 🎀
+              </h1>
+              <p className="text-xs sm:text-sm text-[#7E5E6E] leading-relaxed">
+                Aprovecha precios rebajados por tiempo limitado en tus tesoros kawaii favoritos. Todos los pedidos incluyen regalito sorpresa y reserva de 24 horas.
+              </p>
+
+              {/* Ticker de Envío Gratis */}
+              <div className="p-3 rounded-2xl bg-white/80 border border-[#FCDCE7] flex items-center gap-3 shadow-xs">
+                <div className="w-8 h-8 rounded-xl bg-[#FFF0F6] text-[#DE6978] flex items-center justify-center shrink-0">
+                  <Truck size={16} />
+                </div>
+                <div className="text-xs">
+                  <span className="font-bold text-[#DE6978]">¡Envío GRATIS con Olva Courier!</span>{' '}
+                  <span className="text-[#7E5E6E]">En compras acumuladas a partir de <strong>S/ 80.00</strong> en todo el Perú.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Filtros rápidos por oferta */}
+          <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+              {['Todos', 'Menos de S/ 25.00', 'Sanrio', 'Papelería', 'Ropa', 'K-pop'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setOfertasCategory(cat)}
+                  className={`px-4 py-2 rounded-full font-medium transition cursor-pointer whitespace-nowrap ${
+                    ofertasCategory === cat
+                      ? 'bg-[#DE6978] text-white shadow-xs font-bold'
+                      : 'bg-white text-[#7E5E6E] border border-[#FCDCE7] hover:bg-[#FFF0F6] hover:text-[#DE6978]'
+                  }`}
+                >
+                  {cat === 'Todos' ? '🏷️ Todas las Ofertas' : cat}
+                </button>
+              ))}
+            </div>
+
+            <p className="text-xs text-[#8E7C94] font-medium">
+              Mostrando <strong className="text-[#DE6978]">{ofertasList.length}</strong> productos en promoción
+            </p>
+          </div>
+
+          {/* Grilla de productos en Oferta */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
+            {ofertasList.map((prod) => renderProductCard(prod))}
+          </div>
+
+          {/* Call to action inferior */}
+          <div className="mt-12 p-6 rounded-3xl bg-[#FFF0F6] border border-[#FCDCE7] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-xs">
+            <div>
+              <h4 className="font-display font-bold text-base text-[#4A3B4E]">
+                ¿Quieres más novedades sin descuento?
+              </h4>
+              <p className="text-xs text-[#8E7C94]">
+                Descubre los lanzamientos de temporada y artículos exclusivos recién llegados de Asia.
+              </p>
+            </div>
+            <button
+              onClick={() => navigateToView('tienda')}
+              className="px-6 py-2.5 rounded-full bg-gradient-to-r from-[#F4A7C1] to-[#DE6978] text-white text-xs font-bold shadow-kawaii flex items-center gap-2 cursor-pointer hover:opacity-95"
+            >
+              <span>Explorar Catálogo Completo</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </main>
+      )}
+
+      {/* ========================================================================= */}
+      {/* VISTA 5: COLECCIONES & UNIVERSOS KAWAII (VISTA EXCLUSIVA DEDICADA)         */}
+      {/* ========================================================================= */}
+      {currentView === 'colecciones' && (
+        <main className="max-w-[1440px] mx-auto px-4 sm:px-8 py-6 animate-in fade-in duration-300">
+          {/* Breadcrumb y encabezado de navegación */}
+          <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-[#8E7C94]">
+              <button onClick={() => navigateToView('inicio')} className="hover:text-[#E2678D] cursor-pointer">
+                Inicio
+              </button>
+              <span>/</span>
+              <button onClick={() => navigateToView('tienda')} className="hover:text-[#E2678D] cursor-pointer">
+                Tienda
+              </button>
+              <span>/</span>
+              <span className="font-bold text-[#A064D8]">Colecciones</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {activeCollectionId && (
+                <button
+                  onClick={() => setActiveCollectionId(null)}
+                  className="px-4 py-2 rounded-2xl bg-white hover:bg-[#FFF0F6] border border-[#FCDCE7] text-xs font-semibold text-[#8E7C94] shadow-xs cursor-pointer"
+                >
+                  Ver todas las colecciones
+                </button>
+              )}
+              <button
+                onClick={() => navigateToView('tienda')}
+                className="px-4 py-2 rounded-2xl bg-white hover:bg-[#FFF0F6] border border-[#FCDCE7] text-xs font-semibold text-[#E2678D] shadow-xs cursor-pointer flex items-center gap-1.5"
+              >
+                <span>← Volver a la Tienda</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Banner Hero Especial Colecciones */}
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#F6EEFA] via-[#FFF5F8] to-[#EEF2FF] border border-[#E8D7F7] p-6 sm:p-8 mb-8 shadow-xs text-left">
+            <div className="relative z-10 max-w-2xl space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-[11px] font-bold uppercase tracking-wider">
+                <Layers size={14} className="text-purple-600" />
+                <span>Líneas Temáticas Oficiales</span>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#4A3B4E] tracking-tight">
+                Colecciones & Universos Kawaii ✨
+              </h1>
+              <p className="text-xs sm:text-sm text-[#7E5E6E] leading-relaxed">
+                Explora cada rincón de nuestra tienda organizado por estéticas y personajes. Desde el mágico Sanrio World hasta la papelería japonesa y outfits Harajuku.
+              </p>
+            </div>
+          </div>
+
+          {/* Tarjetas Interactivas de las 6 Colecciones */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+            {THEMATIC_COLLECTIONS.map((coll) => {
+              const isSelected = activeCollectionId === coll.id;
+              return (
+                <div
+                  key={coll.id}
+                  onClick={() => {
+                    setActiveCollectionId(isSelected ? null : coll.id);
+                  }}
+                  className={`group relative rounded-3xl p-5 border transition-all duration-300 cursor-pointer overflow-hidden text-left flex flex-col justify-between ${
+                    isSelected
+                      ? `bg-gradient-to-br ${coll.color} border-[#E2678D] ring-2 ring-[#E2678D]/30 shadow-kawaii`
+                      : `bg-white hover:bg-gradient-to-br hover:${coll.color} ${coll.border} shadow-xs hover:shadow-md`
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <span className="text-3xl">{coll.emoji}</span>
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-white/90 border border-black/5 text-[#5D4251] shadow-2xs">
+                      {coll.badge}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1 mb-4">
+                    <h3 className="font-display font-bold text-lg text-[#4A3B4E] group-hover:text-[#DE6978] transition-colors">
+                      {coll.name}
+                    </h3>
+                    <p className="text-xs text-[#8E7C94] leading-relaxed">
+                      {coll.desc}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-black/5 text-xs font-semibold">
+                    <span className={coll.accent}>
+                      {isSelected ? '✓ Colección activa' : 'Explorar colección →'}
+                    </span>
+                    <div className="w-10 h-10 rounded-2xl overflow-hidden border border-white shadow-xs shrink-0">
+                      <img src={coll.coverImage} alt={coll.name} className="w-full h-full object-cover" />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Encabezado de la grilla de productos de la colección */}
+          <div className="flex items-center justify-between pb-3 mb-6 border-b border-[#FCE1ED] text-left">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#BA8D9E]">
+                {activeCollectionId
+                  ? `PRODUCTOS EN ${THEMATIC_COLLECTIONS.find((c) => c.id === activeCollectionId)?.name.toUpperCase()}`
+                  : 'TODOS LOS ARTÍCULOS DE COLECCIÓN'}
+              </p>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#4A3B4E]">
+                {activeCollectionId
+                  ? `${THEMATIC_COLLECTIONS.find((c) => c.id === activeCollectionId)?.emoji} ${THEMATIC_COLLECTIONS.find((c) => c.id === activeCollectionId)?.name}`
+                  : 'Catálogo por Colección'}
+              </h2>
+            </div>
+
+            <p className="text-xs text-[#8E7C94] font-medium">
+              Mostrando <strong className="text-[#DE6978]">{coleccionesProducts.length}</strong> artículos
+            </p>
+          </div>
+
+          {/* Grilla de productos filtrados por colección */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
+            {coleccionesProducts.map((prod) => renderProductCard(prod))}
+          </div>
+        </main>
+      )}
+
+      {/* ========================================================================= */}
+      {/* VISTA 6: NIVALO CLUB & PROGRAMA NIVAPUNTOS (VISTA EXCLUSIVA DEDICADA)      */}
+      {/* ========================================================================= */}
+      {currentView === 'nivalo' && (
+        <main className="max-w-[1440px] mx-auto px-4 sm:px-8 py-6 animate-in fade-in duration-300">
+          {/* Breadcrumb y encabezado de navegación */}
+          <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-[#8E7C94]">
+              <button onClick={() => navigateToView('inicio')} className="hover:text-[#E2678D] cursor-pointer">
+                Inicio
+              </button>
+              <span>/</span>
+              <button onClick={() => navigateToView('tienda')} className="hover:text-[#E2678D] cursor-pointer">
+                Tienda
+              </button>
+              <span>/</span>
+              <span className="font-bold text-[#E2678D]">Nivalo Club & Puntos</span>
+            </div>
+
+            <button
+              onClick={() => navigateToView('tienda')}
+              className="px-4 py-2 rounded-2xl bg-white hover:bg-[#FFF0F6] border border-[#FCDCE7] text-xs font-semibold text-[#E2678D] shadow-xs cursor-pointer flex items-center gap-1.5"
+            >
+              <span>← Volver a la Tienda</span>
+            </button>
+          </div>
+
+          {/* Banner Hero Especial Nivalo Club */}
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-[#FFF0F6] via-[#FFF9EC] to-[#FFF0F6] border border-[#FCDCE7] p-6 sm:p-10 mb-8 shadow-xs text-left">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-7 space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-100 text-[#DE6978] text-[11px] font-bold uppercase tracking-wider">
+                  <Sparkles size={14} className="text-[#DE6978]" />
+                  <span>Programa Oficial de Fidelidad</span>
+                </div>
+                <h1 className="text-3xl sm:text-5xl font-extrabold text-[#4A3B4E] tracking-tight leading-tight">
+                  Nivalo Club 💖 Sistema de NivaPuntos
+                </h1>
+                <p className="text-xs sm:text-sm text-[#7E5E6E] leading-relaxed">
+                  ¡Tus compras lindas tienen recompensa! Por cada S/ 1.00 ganas 5 NivaPuntos para canjear por envíos gratis, regalos exclusivos, papelería y descuentos especiales.
+                </p>
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    onClick={() => navigateToView('tienda')}
+                    className="px-6 py-3 rounded-full bg-gradient-to-r from-[#F4A7C1] to-[#DE6978] text-white text-xs font-bold shadow-kawaii flex items-center gap-2 hover:opacity-95 cursor-pointer"
+                  >
+                    <ShoppingBag size={15} />
+                    <span>Comprar y Acumular Puntos</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!user) {
+                        window.location.hash = '#/register';
+                      } else {
+                        window.location.hash = '#/mi-cuenta';
+                      }
+                    }}
+                    className="px-5 py-3 rounded-full bg-white hover:bg-[#FFF0F6] border border-[#FCDCE7] text-xs font-bold text-[#4A3B4E] shadow-xs cursor-pointer"
+                  >
+                    {user ? 'Ver Mi Saldo en Mi Cuenta' : 'Crear Cuenta Gratis (+50 Pts)'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Tarjeta Digital Nivalo Club VIP */}
+              <div className="lg:col-span-5 flex justify-center">
+                <div className="w-full max-w-sm aspect-[1.58/1] rounded-3xl p-6 bg-gradient-to-br from-[#F8B6CC] via-[#EE8EAF] to-[#E2678D] text-white shadow-2xl relative overflow-hidden flex flex-col justify-between border-2 border-white/30 transform hover:scale-105 transition-transform duration-300">
+                  {/* Patrón de brillo de fondo */}
+                  <div className="absolute -top-12 -right-12 w-40 h-40 bg-white/15 rounded-full blur-xl" />
+                  <div className="absolute -bottom-10 -left-10 w-36 h-36 bg-pink-300/30 rounded-full blur-xl" />
+
+                  {/* Header de la tarjeta */}
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2">
+                      <NivaloCatMascot className="w-8 h-8" />
+                      <span className="font-display font-extrabold text-sm tracking-wider">NIVALO CLUB</span>
+                    </div>
+                    <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-xs">
+                      MEMBRESÍA VIP
+                    </span>
+                  </div>
+
+                  {/* Chip EMV dorado y datos */}
+                  <div className="relative z-10 flex items-center gap-3 my-2">
+                    {/* Chip SVG dorado */}
+                    <div className="w-10 h-7 rounded-md bg-gradient-to-tr from-amber-300 via-amber-200 to-yellow-100 border border-amber-400 shadow-inner flex items-center justify-center">
+                      <div className="w-6 h-4 border border-amber-500/40 rounded-xs" />
+                    </div>
+                    <span className="text-[11px] font-mono tracking-widest text-pink-100">
+                      NIV-8829-4412-PERU
+                    </span>
+                  </div>
+
+                  {/* Footer de la tarjeta con nombre y saldo */}
+                  <div className="relative z-10 flex items-end justify-between pt-2 border-t border-white/20">
+                    <div>
+                      <p className="text-[9px] uppercase tracking-wider text-pink-100">Titular de Membresía</p>
+                      <p className="text-xs font-bold truncate max-w-[150px]">
+                        {profile?.nombres || user?.email?.split('@')[0] || 'Nivalo Lover'}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[9px] uppercase tracking-wider text-pink-100">NivaPuntos Disponibles</p>
+                      <p className="text-base font-extrabold text-amber-200">
+                        {user ? '340 PTS' : '+120 PTS'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sección: Cómo Funciona en 3 Pasos */}
+          <div className="mb-12">
+            <div className="text-center max-w-xl mx-auto mb-8">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#DE6978]">
+                Fácil y Automático
+              </span>
+              <h2 className="font-display text-2xl font-extrabold text-[#4A3B4E] mt-1">
+                ¿Cómo ganas y canjeas tus NivaPuntos?
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+              <div className="p-6 rounded-3xl bg-white border border-[#FCDCE7] shadow-xs space-y-3 relative overflow-hidden">
+                <div className="w-12 h-12 rounded-2xl bg-[#FFF0F6] text-[#DE6978] flex items-center justify-center font-extrabold text-lg shadow-xs">
+                  1
+                </div>
+                <h3 className="font-display font-bold text-base text-[#4A3B4E]">
+                  Compra en Nivalo Store
+                </h3>
+                <p className="text-xs text-[#8E7C94] leading-relaxed">
+                  Por cada S/ 1.00 de tu compra acumulas <strong>5 NivaPuntos</strong> automáticos en tu cuenta. ¡Aplica a todos los productos!
+                </p>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-white border border-[#FCDCE7] shadow-xs space-y-3 relative overflow-hidden">
+                <div className="w-12 h-12 rounded-2xl bg-[#FFF0F6] text-[#DE6978] flex items-center justify-center font-extrabold text-lg shadow-xs">
+                  2
+                </div>
+                <h3 className="font-display font-bold text-base text-[#4A3B4E]">
+                  Aprobación y Trazabilidad Olva
+                </h3>
+                <p className="text-xs text-[#8E7C94] leading-relaxed">
+                  Al confirmar tu pago por Yape o Plin y emitir tu guía de Olva Courier, los puntos quedan registrados en tu historial.
+                </p>
+              </div>
+
+              <div className="p-6 rounded-3xl bg-white border border-[#FCDCE7] shadow-xs space-y-3 relative overflow-hidden">
+                <div className="w-12 h-12 rounded-2xl bg-[#FFF0F6] text-[#DE6978] flex items-center justify-center font-extrabold text-lg shadow-xs">
+                  3
+                </div>
+                <h3 className="font-display font-bold text-base text-[#4A3B4E]">
+                  Canjea Recompensas Kawaii
+                </h3>
+                <p className="text-xs text-[#8E7C94] leading-relaxed">
+                  Usa tus puntos para stickers, peluches, vales de descuento de S/ 15 o cupones de envío gratuito a todo el Perú.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Calculadora Interactiva de NivaPuntos */}
+          <div className="mb-12 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#FFF5F8] to-[#FFF0F6] border border-[#FCDCE7] shadow-xs text-left">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div className="lg:col-span-7 space-y-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#DE6978]">
+                  🧮 Calculadora de Beneficios
+                </span>
+                <h3 className="font-display font-bold text-xl text-[#4A3B4E]">
+                  Calcula cuántos NivaPuntos ganarás en tu pedido
+                </h3>
+                <p className="text-xs text-[#8E7C94]">
+                  Mueve el control para simular tu presupuesto de compra y descubre los beneficios que desbloqueas:
+                </p>
+
+                <div className="pt-3 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[#4A3B4E]">
+                    <span>Monto de compra:</span>
+                    <span className="text-base text-[#DE6978] font-extrabold">S/ {nivaCalcAmount}.00</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="250"
+                    step="5"
+                    value={nivaCalcAmount}
+                    onChange={(e) => setNivaCalcAmount(Number(e.target.value))}
+                    className="w-full accent-[#DE6978] cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[10px] text-[#BAA0AC]">
+                    <span>S/ 10</span>
+                    <span>S/ 80 (Envío Gratis)</span>
+                    <span>S/ 250</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5 bg-white p-5 rounded-2xl border border-[#FCDCE7] shadow-xs space-y-3">
+                <div className="flex items-center justify-between border-b border-[#FCDCE7] pb-2">
+                  <span className="text-xs text-[#8E7C94]">NivaPuntos calculados:</span>
+                  <span className="text-xl font-extrabold text-[#DE6978]">
+                    +{nivaCalcAmount * 5} PTS ✨
+                  </span>
+                </div>
+                <div className="text-xs space-y-1.5 text-[#5D4251]">
+                  <p className="flex items-center gap-1.5">
+                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                    <span>Regalito sorpresa incluido</span>
+                  </p>
+                  <p className="flex items-center gap-1.5">
+                    {nivaCalcAmount >= 80 ? (
+                      <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                    ) : (
+                      <Clock size={14} className="text-amber-500 shrink-0" />
+                    )}
+                    <span>
+                      {nivaCalcAmount >= 80
+                        ? '¡Califica para ENVÍO GRATIS a todo el Perú!'
+                        : `Te faltan S/ ${(80 - nivaCalcAmount).toFixed(2)} para Envío Gratis`}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Catálogo de Premios Canjeables */}
+          <div className="mb-12">
+            <div className="text-left mb-6">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#DE6978]">
+                Catálogo de Canje
+              </span>
+              <h2 className="font-display text-2xl font-extrabold text-[#4A3B4E] mt-1">
+                Recompensas Disponibles para NivaloLovers
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 text-left">
+              {[
+                { name: 'Pack 50 Stickers Holo', pts: 40, img: getAssetUrl('prod_memopads.jpg'), desc: 'Vinílicos e impermeables' },
+                { name: 'Bolígrafo Gel Sakura', pts: 60, img: getAssetUrl('prod_balsamo.jpg'), desc: 'Tinta negra punta 0.5mm' },
+                { name: 'Cupón Envío Gratis', pts: 120, img: getAssetUrl('prod_calcetines.jpg'), desc: 'Olva Courier todo el Perú' },
+                { name: 'Vale Descuento S/ 15', pts: 180, img: getAssetUrl('prod_kuromi.jpg'), desc: 'Para tu siguiente compra' },
+                { name: 'Mini Peluche Sanrio', pts: 250, img: getAssetUrl('prod_peluche.jpg'), desc: 'Charm original apachurrable' },
+              ].map((reward, i) => (
+                <div key={i} className="p-4 rounded-3xl bg-white border border-[#FCDCE7] shadow-xs flex flex-col justify-between group hover:border-[#F4A7C1] transition">
+                  <div className="aspect-square rounded-2xl overflow-hidden mb-3 bg-[#FFF5F8] border border-[#FCDCE7]">
+                    <img src={reward.img} alt={reward.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-100 text-[#DE6978]">
+                      {reward.pts} NivaPuntos
+                    </span>
+                    <h4 className="font-display font-bold text-xs text-[#4A3B4E] truncate">
+                      {reward.name}
+                    </h4>
+                    <p className="text-[10px] text-[#8E7C94]">{reward.desc}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      alert(`¡Canje de ${reward.name} disponible al acumular ${reward.pts} NivaPuntos! Recuerda solicitarlo al coordinar tu orden por WhatsApp.`);
+                    }}
+                    className="mt-3 w-full py-1.5 rounded-xl bg-[#FFF0F6] hover:bg-[#F4A7C1] hover:text-white text-[#DE6978] text-[11px] font-bold transition cursor-pointer"
+                  >
+                    Canjear
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Botón Call to Action Final */}
+          <div className="p-8 rounded-3xl bg-gradient-to-r from-[#F4A7C1] via-[#EE8EAF] to-[#E2678D] text-white text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6 shadow-kawaii">
+            <div className="space-y-1">
+              <h3 className="font-display font-extrabold text-2xl">
+                ¿Lista para empezar a sumar NivaPuntos?
+              </h3>
+              <p className="text-xs text-pink-100 max-w-lg">
+                Explora el catálogo, añade tus cositas preferidas al carrito y canjea premios increíbles.
+              </p>
+            </div>
+            <button
+              onClick={() => navigateToView('tienda')}
+              className="px-8 py-3.5 rounded-full bg-white text-[#DE6978] hover:bg-pink-50 text-xs font-extrabold shadow-md transition-transform active:scale-95 cursor-pointer shrink-0"
+            >
+              Ir a la Tienda Kawaii 🌸
+            </button>
+          </div>
+        </main>
+      )}
+
+      {/* ========================================================================= */}
+      {/* FOOTER UNIFICADO GLOBAL (PRESENTES EN TODAS LAS VISTAS)                    */}
+      {/* ========================================================================= */}
+      <footer className="mt-16 bg-[#574450] text-[#E9DFE4] pt-12 pb-8 text-left border-t border-[#FCDCE7]">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-10 border-b border-white/10 text-xs">
+            {/* Columna Marca */}
+            <div className="lg:col-span-2 space-y-3">
+              <div className="flex items-center gap-2">
+                <NivaloCatMascot className="w-9 h-9" />
+                <span className="font-display font-extrabold text-xl text-white">NIVALO STORE</span>
+              </div>
+              <p className="text-[#D3C1CB] text-xs leading-relaxed max-w-sm">
+                Tu tienda de estilo de vida kawaii en Perú. Ropa, accesorios, maquillaje, K-pop, Sanrio, anime y mucho más con stock verificado 💕
+              </p>
+              <div className="pt-2">
+                <span className="text-[10px] font-bold uppercase text-[#F4A7C1] tracking-wider block mb-2">
+                  SÍGUENOS
+                </span>
+                <div className="flex items-center gap-2.5">
+                  <a href="https://instagram.com" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] transition-colors">
+                    Instagram @nivalo_store
+                  </a>
+                  <a href="https://tiktok.com" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[11px] transition-colors">
+                    TikTok @nivalostore
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Columna Comprar */}
+            <div className="space-y-2">
+              <h5 className="font-bold text-white uppercase text-[11px] tracking-wider">COMPRAR</h5>
+              <ul className="space-y-1.5 text-[#D3C1CB]">
+                <li><button onClick={() => { navigateToView('tienda'); clearAllFilters(); }} className="hover:text-white transition-colors cursor-pointer">Catálogo general</button></li>
+                <li><button onClick={() => navigateToView('mas-vendidos')} className="hover:text-white transition-colors cursor-pointer">Más Vendidos 👑</button></li>
+                <li><button onClick={() => navigateToView('ofertas')} className="hover:text-white transition-colors cursor-pointer">Ofertas especiales 🎀</button></li>
+                <li><button onClick={() => navigateToView('colecciones')} className="hover:text-white transition-colors cursor-pointer">Colecciones ✨</button></li>
+                <li><button onClick={() => navigateToView('nivalo')} className="hover:text-white transition-colors cursor-pointer">Nivalo Club & Puntos 💖</button></li>
+              </ul>
+            </div>
+
+            {/* Columna Ayuda */}
+            <div className="space-y-2">
+              <h5 className="font-bold text-white uppercase text-[11px] tracking-wider">AYUDA</h5>
+              <ul className="space-y-1.5 text-[#D3C1CB]">
+                <li><span className="hover:text-white transition-colors cursor-pointer">Centro de ayuda</span></li>
+                <li><span className="hover:text-white transition-colors cursor-pointer">Envíos Olva & Shalom</span></li>
+                <li><span className="hover:text-white transition-colors cursor-pointer">Cambios / devoluciones</span></li>
+                <li><a href="https://wa.me/51998167789" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Contacto directo (WhatsApp)</a></li>
+              </ul>
+            </div>
+
+            {/* Columna Contacto */}
+            <div className="space-y-2">
+              <h5 className="font-bold text-white uppercase text-[11px] tracking-wider">CONTACTO</h5>
+              <ul className="space-y-1.5 text-[#D3C1CB]">
+                <li>✉️ nivalostore@gmail.com</li>
+                <li>📞 +51 998 167 789</li>
+                <li>📍 Lima, Perú (Envíos a nivel nacional)</li>
+                <li>💳 Yape • Plin • Visa • Mastercard</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#BAA0AC]">
+            <p>© 2026 Nivalo Store. Todos los derechos reservados. 💖</p>
+            <p>Hecho con 💕 en Perú para los NivaloLovers</p>
+          </div>
+        </div>
+      </footer>
 
       {/* ================= DRAWER SLIDE-OUT DEL CARRITO (COMPONENTE MODULAR) ================= */}
       <CartSidebar
