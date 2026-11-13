@@ -502,8 +502,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   };
 
+  const isOnlyTestProduct = cart.length > 0 && cart.every((item) => item.producto.precio <= 1 || item.producto.id === 'PROD-TEST-1SOL');
   const cartSubtotal = cart.reduce((acc, curr) => acc + curr.producto.precio * curr.cantidad, 0);
-  const cartShippingCost = cartSubtotal >= 80 || cart.length === 0 ? 0 : 15;
+  const cartShippingCost = isOnlyTestProduct ? 0 : (cartSubtotal >= 80 || cart.length === 0 ? 0 : 15);
   const cartTotal = cartSubtotal + cartShippingCost;
 
   const transferCartToP1 = () => {

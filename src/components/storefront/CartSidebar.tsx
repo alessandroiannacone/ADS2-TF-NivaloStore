@@ -41,6 +41,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({
   if (!isOpen) return null;
 
   const totalCartItems = cart.reduce((acc, curr) => acc + curr.cantidad, 0);
+  const isOnlyTestProduct = cart.length > 0 && cart.every((item) => item.producto.precio <= 1 || item.producto.id === 'PROD-TEST-1SOL');
 
   const generateWhatsAppMessage = () => {
     if (cart.length === 0) return '';
@@ -90,7 +91,11 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({
 
           {/* Barra de envío gratis (Regla de negocio: >= 80 soles es gratis, sino 15 soles) */}
           <div className="p-3 bg-[#FFF0F6] border-b border-[#FCDCE7] text-xs text-center text-[#7E5E6E]">
-            {cartSubtotal >= 80 ? (
+            {isOnlyTestProduct ? (
+              <span className="text-[#3E8E62] font-bold flex items-center justify-center gap-1.5">
+                🧪 Modo Prueba Real Culqi • Envío Bonificado (S/ 0.00)
+              </span>
+            ) : cartSubtotal >= 80 ? (
               <span className="text-[#3E8E62] font-bold flex items-center justify-center gap-1.5">
                 🎉 ¡Felicidades! Tienes ENVÍO GRATIS a todo el Perú
               </span>
@@ -193,7 +198,7 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({
                 </div>
                 <div className="flex justify-between text-[#8E7C94] items-center">
                   <span>Envío (Olva Courier / Shalom)</span>
-                  {cartSubtotal >= 80 ? (
+                  {cartSubtotal >= 80 || isOnlyTestProduct ? (
                     <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-[11px]">
                       GRATIS ✨
                     </span>

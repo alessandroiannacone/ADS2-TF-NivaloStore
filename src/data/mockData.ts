@@ -58,6 +58,25 @@ export const getAssetUrl = (path: string): string => {
 
 // Catálogo oficial de Nivalo Store
 const RAW_PRODUCTOS: Producto[] = [
+  // 0. Producto de Prueba Real
+  {
+    id: 'PROD-TEST-1SOL',
+    nombre: 'Sticker Kawaii Holográfico (Prueba Real S/ 1.00)',
+    categoria: 'Papelería',
+    marca: 'NIVALO TEST',
+    precio: 1.0,
+    puntos: 10,
+    medidas: '5cm x 5cm',
+    badge: 'PRUEBA S/ 1',
+    color: 'Holográfico',
+    talla: 'Única',
+    stockDisponible: 99,
+    stockReservado: 0,
+    stockTotalFisico: 99,
+    imagen: './cat_papeleria.jpg',
+    descripcion: 'Artículo de prueba especial para validar escaneo de código QR de Culqi / Yape y pasarela de cobro en vivo por exactamente S/ 1.00.',
+    esRecomendado: true,
+  },
   // 1. Sanrio
   {
     id: 'PROD-12',

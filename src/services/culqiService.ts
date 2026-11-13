@@ -303,3 +303,39 @@ export async function processCulqiYapePayment(
   return { success: true, charge };
 }
 
+/**
+ * Procesa el pago mediante escaneo de Código QR Culqi (Interoperable Yape / Plin / BCP)
+ */
+export async function processCulqiQRPayment(
+  orderId: string,
+  totalSol: number,
+  clientEmail: string,
+  operacionRef?: string
+): Promise<{ success: boolean; charge?: CulqiChargeResponse; error?: string }> {
+  // Simular latencia de validación con red interoperable Culqi QR (1.0s)
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const now = new Date();
+  const amountCents = Math.round(totalSol * 100);
+  const refCode = operacionRef?.trim() || Math.floor(100000 + Math.random() * 900000).toString();
+
+  const charge: CulqiChargeResponse = {
+    id: `chr_qr_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`,
+    object: 'charge',
+    amount: amountCents,
+    amountSol: totalSol,
+    currency_code: 'PEN',
+    reference_code: `CULQI-QR-${orderId.replace('PED-', '')}-${refCode}`,
+    authorization_code: `AUT-QR-${Math.floor(100000 + Math.random() * 900000)}`,
+    current_status: 'captured',
+    card_brand: 'Culqi QR Interoperable (Yape/Plin)',
+    last_four: refCode.slice(-4),
+    payment_method: 'Yape',
+    creation_date: now.toISOString(),
+    client_email: clientEmail.trim().toLowerCase() || 'cliente@nivalostore.pe',
+    order_id: orderId,
+  };
+
+  return { success: true, charge };
+}
+

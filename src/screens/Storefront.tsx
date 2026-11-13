@@ -2722,7 +2722,7 @@ export const Storefront: React.FC = () => {
               </div>
               <div className="flex items-center justify-between text-xs text-[#8E7C94] items-center">
                 <span>Envío (Olva Courier / Shalom):</span>
-                {cartSubtotal >= 80 ? (
+                {cartSubtotal >= 80 || (cart.length > 0 && cart.every((i) => i.producto.precio <= 1 || i.producto.id === 'PROD-TEST-1SOL')) ? (
                   <span className="text-[11px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">
                     Envío Gratis ✨
                   </span>
@@ -2732,7 +2732,7 @@ export const Storefront: React.FC = () => {
                   </span>
                 )}
               </div>
-              {cartSubtotal < 80 && (
+              {cartSubtotal < 80 && !(cart.length > 0 && cart.every((i) => i.producto.precio <= 1 || i.producto.id === 'PROD-TEST-1SOL')) && (
                 <div className="text-[10px] text-[#E2678D] font-medium bg-white/80 p-2 rounded-xl border border-pink-100 flex items-center gap-1.5">
                   <span>💡</span>
                   <span>¡Te faltan <strong>S/ {(80 - cartSubtotal).toFixed(2)}</strong> para que tu <strong>envío sea GRATIS</strong>!</span>

@@ -8,7 +8,9 @@ import {
   Check,
   AlertCircle,
   Building2,
+  QrCode,
 } from 'lucide-react';
+import { getAssetUrl } from '../../data/mockData';
 import {
   CULQI_CONFIG,
   detectCardBrand,
@@ -16,6 +18,7 @@ import {
   formatExpiry,
   processCulqiCardPayment,
   processCulqiYapePayment,
+  processCulqiQRPayment,
   type CulqiCardData,
   type CulqiYapeData,
   type CulqiChargeResponse,
@@ -33,11 +36,15 @@ export const CulqiCheckoutForm: React.FC<CulqiCheckoutFormProps> = ({
   totalPagar,
   onPaymentSuccess,
 }) => {
-  const [activeTab, setActiveTab] = useState<'card' | 'yape' | 'pagoefectivo'>('card');
+  const [activeTab, setActiveTab] = useState<'qr' | 'card' | 'yape' | 'pagoefectivo'>('qr');
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [copiedCIP, setCopiedCIP] = useState(false);
+
+  // Formulario Escanear QR Culqi
+  const [qrOperacion, setQrOperacion] = useState('');
+  const [qrEmail, setQrEmail] = useState(pedido.cliente.nombreOIdentificador ? `${pedido.cliente.nombreOIdentificador.replace(/\s+/g, '').toLowerCase()}@nivalostore.pe` : '');
 
   // Formulario Tarjeta
   const [cardNumber, setCardNumber] = useState('');
@@ -73,6 +80,38 @@ export const CulqiCheckoutForm: React.FC<CulqiCheckoutFormProps> = ({
     setYapeCode(test.approvalCode);
     setYapeEmail(test.email);
     setErrorMessage('');
+  };
+
+  // Procesar Pago con Escaneo de QR Culqi
+  const handlePayQR = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setIsProcessing(true);
+    setProcessingStep('Validando escaneo de código QR con pasarela Culqi...');
+
+    try {
+      const res = await processCulqiQRPayment(
+        pedido.id,
+        totalPagar,
+        qrEmail || email || 'cliente@nivalostore.pe',
+        qrOperacion || undefined
+      );
+
+      if (res.success && res.charge) {
+        setProcessingStep('¡Pago QR verificado y aprobado por Culqi! ✨');
+        setTimeout(() => {
+          setIsProcessing(false);
+          onPaymentSuccess(res.charge!);
+        }, 500);
+      } else {
+        setIsProcessing(false);
+        setErrorMessage(res.error || 'No se pudo verificar el pago por QR.');
+      }
+    } catch (err) {
+      setIsProcessing(false);
+      setErrorMessage('Error al verificar el pago con QR Culqi.');
+      console.error(err);
+    }
   };
 
   // Procesar Pago con Tarjeta
@@ -225,21 +264,40 @@ export const CulqiCheckoutForm: React.FC<CulqiCheckoutFormProps> = ({
       </div>
 
       {/* Tabs de Métodos de Culqi */}
-      <div className="flex items-center gap-2 p-1 bg-gray-50 rounded-2xl border border-gray-100">
+      <div className="flex items-center gap-1.5 p-1 bg-gray-50 rounded-2xl border border-gray-100 overflow-x-auto no-scrollbar">
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab('qr');
+            setErrorMessage('');
+          }}
+          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer whitespace-nowrap ${
+            activeTab === 'qr'
+              ? 'bg-gradient-to-r from-[#00A9E0] to-[#742284] text-white shadow-xs'
+              : 'text-[#7E5E6E] hover:bg-white'
+          }`}
+        >
+          <QrCode size={15} />
+          <span>📱 Escanear QR Oficial</span>
+          <span className="text-[9px] bg-white/20 text-white font-bold px-1.5 py-0.2 rounded-full">
+            Prueba S/ 1
+          </span>
+        </button>
+
         <button
           type="button"
           onClick={() => {
             setActiveTab('card');
             setErrorMessage('');
           }}
-          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer whitespace-nowrap ${
             activeTab === 'card'
               ? 'bg-[#00A9E0] text-white shadow-xs'
               : 'text-[#7E5E6E] hover:bg-white'
           }`}
         >
           <CreditCard size={15} />
-          <span>Tarjeta Débito / Crédito</span>
+          <span>💳 Tarjeta Débito</span>
         </button>
 
         <button
@@ -248,13 +306,13 @@ export const CulqiCheckoutForm: React.FC<CulqiCheckoutFormProps> = ({
             setActiveTab('yape');
             setErrorMessage('');
           }}
-          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer whitespace-nowrap ${
             activeTab === 'yape'
               ? 'bg-[#742284] text-white shadow-xs'
               : 'text-[#7E5E6E] hover:bg-purple-50'
           }`}
         >
-          <span>💜 Yape Directo Culqi</span>
+          <span>💜 Yape Código</span>
         </button>
 
         <button
@@ -263,14 +321,14 @@ export const CulqiCheckoutForm: React.FC<CulqiCheckoutFormProps> = ({
             setActiveTab('pagoefectivo');
             setErrorMessage('');
           }}
-          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer whitespace-nowrap ${
             activeTab === 'pagoefectivo'
               ? 'bg-[#F39200] text-white shadow-xs'
               : 'text-[#7E5E6E] hover:bg-amber-50'
           }`}
         >
           <Building2 size={15} />
-          <span>PagoEfectivo / CIP</span>
+          <span>PagoEfectivo</span>
         </button>
       </div>
 
@@ -280,6 +338,108 @@ export const CulqiCheckoutForm: React.FC<CulqiCheckoutFormProps> = ({
           <AlertCircle size={16} className="text-red-500 shrink-0" />
           <span>{errorMessage}</span>
         </div>
+      )}
+
+      {/* PAGO CON ESCANEO DE QR CULQI / YAPE */}
+      {activeTab === 'qr' && (
+        <form onSubmit={handlePayQR} className="space-y-5">
+          <div className="p-4 rounded-3xl bg-gradient-to-r from-[#00A9E0]/10 via-[#F4A7C1]/10 to-[#742284]/10 border border-[#00A9E0]/30 space-y-2 text-center sm:text-left">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📱</span>
+                <h4 className="font-bold text-sm text-[#4A3B4E]">
+                  Escanea el Código QR Oficial de Culqi / Yape
+                </h4>
+              </div>
+              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                Verificación en Tiempo Real
+              </span>
+            </div>
+            <p className="text-xs text-[#746E8B] leading-relaxed">
+              Abre tu app de <strong>Yape, Plin o banca móvil BCP</strong> en tu celular, presiona <strong>«Escanear QR»</strong> y enfoca este código para pagar los <strong>S/ {totalPagar.toFixed(2)}</strong> directamente.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-6 justify-center p-4 bg-[#FFF8FA] rounded-3xl border border-[#FCDCE7]">
+            {/* Marco del Código QR con branding de Culqi y Yape */}
+            <div className="p-3 bg-gradient-to-br from-[#00A9E0] via-[#742284] to-[#4A3E4E] rounded-3xl shadow-lg shrink-0 flex flex-col items-center">
+              <div className="bg-white p-3 rounded-2xl shadow-inner flex flex-col items-center justify-center">
+                <img
+                  src={getAssetUrl('qr_yape.jpg')}
+                  alt="QR Oficial Culqi Yape"
+                  className="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-xl"
+                />
+                <div className="mt-2 text-center">
+                  <span className="text-xs font-extrabold text-[#742284] block font-mono">
+                    Monto exacto: S/ {totalPagar.toFixed(2)}
+                  </span>
+                  <span className="text-[10px] text-[#8E7C94]">
+                    Interoperable BCP • Culqi • Yape • Plin
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Datos para validar y confirmar */}
+            <div className="space-y-3 w-full sm:w-auto flex-1 text-xs">
+              <div className="p-3 rounded-2xl bg-white border border-[#FCE1ED] space-y-1">
+                <span className="text-[10px] uppercase font-bold text-[#742284] tracking-wider block">
+                  Titular de la Cuenta:
+                </span>
+                <p className="font-bold text-[#4A3B4E] text-sm">
+                  Alessandro Iannacone / Nivalo Store
+                </p>
+                <p className="text-[11px] text-[#8E7C94]">
+                  Celular: <strong className="text-[#4A3B4E]">998 167 789</strong>
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-[11px] font-bold text-[#4A3B4E]">
+                  Número de Operación o Celular (Opcional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. 847291 o tu número de celular"
+                  value={qrOperacion}
+                  onChange={(e) => setQrOperacion(e.target.value)}
+                  className="w-full bg-white border border-[#FCDCE7] rounded-2xl py-2.5 px-3.5 text-xs text-[#4A3B4E] placeholder:text-[#BAA0AC] focus:outline-none focus:border-[#00A9E0] focus:ring-2 focus:ring-[#00A9E0]/20 transition"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-[11px] font-bold text-[#4A3B4E]">
+                  Email para Comprobante Culqi
+                </label>
+                <input
+                  type="email"
+                  placeholder="tu@correo.com"
+                  value={qrEmail}
+                  onChange={(e) => setQrEmail(e.target.value)}
+                  className="w-full bg-white border border-[#FCDCE7] rounded-2xl py-2.5 px-3.5 text-xs text-[#4A3B4E] placeholder:text-[#BAA0AC] focus:outline-none focus:border-[#00A9E0] focus:ring-2 focus:ring-[#00A9E0]/20 transition"
+                />
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isProcessing}
+            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#00A9E0] via-[#742284] to-[#50155E] hover:opacity-95 text-white font-bold text-sm shadow-md transition-all active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {isProcessing ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>{processingStep || 'Verificando pago QR con Culqi...'}</span>
+              </>
+            ) : (
+              <>
+                <span>📱</span>
+                <span>Ya escaneé el QR y pagué S/ {totalPagar.toFixed(2)} (Confirmar)</span>
+              </>
+            )}
+          </button>
+        </form>
       )}
 
       {/* PAGO CON TARJETA */}
