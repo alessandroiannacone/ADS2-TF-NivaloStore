@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useStore } from '../context/StoreContext';
+import { useOrders } from '../hooks';
 import {
-  AlertCircle,
   CheckCircle2,
   XCircle,
   History,
@@ -12,9 +11,14 @@ import {
   ExternalLink,
   MessageCircle,
   Copy,
-  ShieldAlert,
 } from 'lucide-react';
 import type { Pago, Pedido, EstadoPedido } from '../types';
+import {
+  ConfirmPayModal,
+  CancelOrderModal,
+  ApprovePaymentModal,
+  RejectPaymentModal,
+} from '../components/modals';
 
 export const P4ReviewPayments: React.FC = () => {
   const {
@@ -24,7 +28,7 @@ export const P4ReviewPayments: React.FC = () => {
     approveObservedPayment,
     rejectObservedPayment,
     setHistoryModalOrderId,
-  } = useStore();
+  } = useOrders();
 
   // Control de pestañas: 'pendientes' | 'observados' | 'historial'
   const [activeTab, setActiveTab] = useState<'pendientes' | 'observados' | 'historial'>('pendientes');
@@ -33,11 +37,7 @@ export const P4ReviewPayments: React.FC = () => {
 
   // Estados para Modales de Acción en Pedidos Pendientes
   const [confirmPayModalOrder, setConfirmPayModalOrder] = useState<Pedido | null>(null);
-  const [payMethod, setPayMethod] = useState<'Yape' | 'Plin' | 'BCP / Transferencia' | 'Efectivo'>('Yape');
-  const [payReference, setPayReference] = useState('');
-
   const [cancelModalOrder, setCancelModalOrder] = useState<Pedido | null>(null);
-  const [cancelReason, setCancelReason] = useState('Cliente solicitó cancelación');
 
   // Estados para Modales de Pagos Observados (Conciliación CUS-03 / CUS-06)
   const [confirmApprovePago, setConfirmApprovePago] = useState<{
@@ -49,9 +49,6 @@ export const P4ReviewPayments: React.FC = () => {
     pago: Pago;
     pedido: Pedido;
   } | null>(null);
-
-  const [rejectMotivo, setRejectMotivo] = useState('');
-  const [rejectErrorMsg, setRejectErrorMsg] = useState('');
 
   // 1. Pedidos en estado PENDIENTE_PAGO
   const pendingOrders = pedidos.filter((p) => p.estado === 'PENDIENTE_PAGO');
@@ -93,37 +90,28 @@ export const P4ReviewPayments: React.FC = () => {
   };
 
   // Confirmar Pago Manual de Pedido Pendiente
-  const handleConfirmOrderPayment = () => {
-    if (!confirmPayModalOrder) return;
-    const res = confirmOrderPayment(
-      confirmPayModalOrder.id,
-      payReference.trim() || undefined,
-      payMethod
-    );
+  const handleConfirmOrderPayment = (pedidoId: string, referencia: string, metodo: string) => {
+    const res = confirmOrderPayment(pedidoId, referencia.trim() || undefined, metodo);
     if (res.success) {
       setConfirmPayModalOrder(null);
-      setPayReference('');
     } else {
       alert(res.error || 'No se pudo confirmar el pago.');
     }
   };
 
   // Confirmar Cancelación Manual de Pedido
-  const handleConfirmOrderCancellation = () => {
-    if (!cancelModalOrder) return;
-    const res = cancelOrder(cancelModalOrder.id, cancelReason.trim());
+  const handleConfirmOrderCancellation = (pedidoId: string, motivo: string) => {
+    const res = cancelOrder(pedidoId, motivo.trim());
     if (res.success) {
       setCancelModalOrder(null);
-      setCancelReason('Cliente solicitó cancelación');
     } else {
       alert(res.error || 'No se pudo cancelar el pedido.');
     }
   };
 
   // Confirmar Aprobación de Pago Observado (CUS-06)
-  const handleConfirmApproval = () => {
-    if (!confirmApprovePago) return;
-    const res = approveObservedPayment(confirmApprovePago.pago.id);
+  const handleConfirmApproval = (pagoId: string) => {
+    const res = approveObservedPayment(pagoId);
     if (res.success) {
       setConfirmApprovePago(null);
     } else {
@@ -132,25 +120,12 @@ export const P4ReviewPayments: React.FC = () => {
   };
 
   // Confirmar Rechazo y Reembolso de Pago Observado
-  const handleConfirmRejection = () => {
-    if (!rejectModalData) return;
-    if (!rejectMotivo.trim()) {
-      setRejectErrorMsg('El motivo del rechazo es obligatorio para auditar la operación.');
-      return;
-    }
-
-    const res = rejectObservedPayment(
-      rejectModalData.pago.id,
-      rejectMotivo.trim(),
-      false
-    );
-
+  const handleConfirmRejection = (pagoId: string, motivo: string) => {
+    const res = rejectObservedPayment(pagoId, motivo.trim(), false);
     if (res.success) {
       setRejectModalData(null);
-      setRejectMotivo('');
-      setRejectErrorMsg('');
     } else {
-      setRejectErrorMsg(res.error || 'Error al procesar el rechazo.');
+      alert(res.error || 'Error al procesar el rechazo.');
     }
   };
 
@@ -430,9 +405,6 @@ export const P4ReviewPayments: React.FC = () => {
                             <button
                               onClick={() => {
                                 setConfirmPayModalOrder(pedido);
-                                setPayReference(
-                                  `REF-YAPE-${Math.floor(100000 + Math.random() * 900000)}`
-                                );
                               }}
                               className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#2D9D78] to-[#10B981] hover:opacity-95 text-white font-bold text-xs shadow-xs flex items-center gap-1 transition-transform active:scale-95 cursor-pointer"
                               title="Confirmar abono y cambiar a Pagado"
@@ -602,8 +574,6 @@ export const P4ReviewPayments: React.FC = () => {
                             <button
                               onClick={() => {
                                 setRejectModalData({ pago, pedido });
-                                setRejectMotivo('');
-                                setRejectErrorMsg('');
                               }}
                               className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#DE6978] hover:bg-[#DE6978]/90 text-white shadow-xs transition cursor-pointer flex items-center gap-1"
                               title="Rechazar pago y gestionar reembolso"
@@ -695,273 +665,37 @@ export const P4ReviewPayments: React.FC = () => {
         </div>
       )}
 
-      {/* ======================================================== */}
-      {/* MODAL 1: CONFIRMAR PAGO MANUAL (YA PAGÓ)                */}
-      {/* ======================================================== */}
+      {/* MODALES EXTRAÍDOS DESACOPLADOS */}
       {confirmPayModalOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-kawaii border border-[#2D9D78]/40 p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                <CheckCircle2 size={24} />
-              </div>
-              <div>
-                <h4 className="text-base font-bold text-[#343047]">
-                  ¿Confirmar Pago Recibido? 💜
-                </h4>
-                <p className="text-xs text-[#746E8B] mt-0.5">
-                  Pedido <strong>{confirmPayModalOrder.id}</strong> • Cliente: <strong>{confirmPayModalOrder.cliente.nombreOIdentificador}</strong>
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-[#FFF8FA] border border-[#FCDCE7] text-xs space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-[#746E8B]">Total del Pedido a Validar:</span>
-                <span className="text-base font-extrabold text-[#DE6978] font-mono">
-                  S/ {confirmPayModalOrder.total.toFixed(2)}
-                </span>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-semibold text-[#665E75] block mb-1">
-                  Método de Pago:
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(['Yape', 'Plin', 'BCP / Transferencia', 'Efectivo'] as const).map((m) => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setPayMethod(m)}
-                      className={`py-1.5 px-2.5 rounded-xl text-xs font-semibold border transition cursor-pointer ${
-                        payMethod === m
-                          ? 'bg-[#742284] text-white border-[#742284] shadow-xs'
-                          : 'bg-white text-[#746E8B] border-gray-200 hover:bg-gray-50'
-                      }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-semibold text-[#665E75] block mb-1">
-                  N° de Operación / Referencia:
-                </label>
-                <input
-                  type="text"
-                  value={payReference}
-                  onChange={(e) => setPayReference(e.target.value)}
-                  placeholder="Ej. REF-YAPE-998167"
-                  className="w-full px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-xs font-mono font-bold text-[#343047]"
-                />
-              </div>
-            </div>
-
-            <p className="text-[11px] text-[#746E8B] leading-relaxed">
-              🌸 Al confirmar, el pedido pasará de <strong>"Pendiente de pago"</strong> a <strong>"Pagado"</strong>, se descontará definitivamente el stock reservado del almacén y se habilitará el despacho con <strong>Olva Courier</strong>.
-            </p>
-
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setConfirmPayModalOrder(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-[#746E8B] hover:bg-gray-100 transition cursor-pointer"
-              >
-                Volver
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmOrderPayment}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#2D9D78] to-[#10B981] hover:opacity-95 text-white shadow-xs transition cursor-pointer flex items-center gap-1.5"
-              >
-                <Check size={14} />
-                <span>Confirmar Pago Aprobado</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmPayModal
+          order={confirmPayModalOrder}
+          onClose={() => setConfirmPayModalOrder(null)}
+          onConfirm={handleConfirmOrderPayment}
+        />
       )}
 
-      {/* ======================================================== */}
-      {/* MODAL 2: CANCELAR PEDIDO Y LIBERAR STOCK               */}
-      {/* ======================================================== */}
       {cancelModalOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-kawaii border border-rose-300 p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-                <XCircle size={24} />
-              </div>
-              <div>
-                <h4 className="text-base font-bold text-[#343047]">
-                  ¿Deseas Cancelar este Pedido? 💔
-                </h4>
-                <p className="text-xs text-[#746E8B] mt-0.5">
-                  Pedido <strong>{cancelModalOrder.id}</strong> • Total: <strong>S/ {cancelModalOrder.total.toFixed(2)}</strong>
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-100 text-xs text-rose-900 space-y-1">
-              <span className="font-bold flex items-center gap-1">
-                <ShieldAlert size={14} /> Regla de Invariante de Stock Físico:
-              </span>
-              <p className="text-[11px] leading-relaxed">
-                Al cancelar, las unidades retenidas ({cancelModalOrder.detalles.reduce((acc, d) => acc + d.cantidad, 0)} unidades) serán <strong>restituidas de inmediato al catálogo disponible</strong> para que otros clientes puedan comprarlas.
-              </p>
-            </div>
-
-            <div>
-              <label className="text-[11px] font-semibold text-[#665E75] block mb-1">
-                Motivo de la Cancelación:
-              </label>
-              <input
-                type="text"
-                value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
-                placeholder="Ej. Cliente solicitó cancelación / No envió comprobante"
-                className="w-full px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#343047]"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setCancelModalOrder(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-[#746E8B] hover:bg-gray-100 transition cursor-pointer"
-              >
-                No cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmOrderCancellation}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition cursor-pointer flex items-center gap-1"
-              >
-                <XCircle size={14} />
-                <span>Sí, Cancelar y Liberar Stock</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <CancelOrderModal
+          order={cancelModalOrder}
+          onClose={() => setCancelModalOrder(null)}
+          onConfirm={handleConfirmOrderCancellation}
+        />
       )}
 
-      {/* ======================================================== */}
-      {/* MODAL 3: APROBAR PAGO OBSERVADO CON DIFERENCIA          */}
-      {/* ======================================================== */}
       {confirmApprovePago && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-md rounded-3xl shadow-kawaii border border-[#2D9D78]/40 p-5 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#2D9D78]/15 text-[#2D9D78] flex items-center justify-center shrink-0">
-                <CheckCircle2 size={22} />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-[#343047]">
-                  ¿Aprobar pago con diferencia observada?
-                </h4>
-                <p className="text-xs text-[#746E8B] mt-0.5">
-                  Pedido <strong>{confirmApprovePago.pedido.id}</strong> • Ref: <strong>{confirmApprovePago.pago.referenciaExterna}</strong>
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-gray-50 border border-gray-100 text-xs space-y-1.5">
-              <div className="flex justify-between">
-                <span className="text-[#746E8B]">Total del Pedido:</span>
-                <span className="font-bold text-[#343047]">S/ {confirmApprovePago.pago.totalPedido.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#746E8B]">Monto Recibido:</span>
-                <span className="font-bold text-[#2D9D78]">S/ {confirmApprovePago.pago.montoRecibido.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between border-t border-gray-200 pt-1">
-                <span className="text-[#746E8B]">Diferencia Aceptada:</span>
-                <span className="font-bold text-[#F4A7C1]">S/ {confirmApprovePago.pago.diferencia.toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setConfirmApprovePago(null)}
-                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#746E8B] hover:bg-gray-100 transition cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmApproval}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#2D9D78] hover:bg-[#2D9D78]/90 text-white shadow-xs transition cursor-pointer"
-              >
-                Sí, aprobar pago
-              </button>
-            </div>
-          </div>
-        </div>
+        <ApprovePaymentModal
+          data={confirmApprovePago}
+          onClose={() => setConfirmApprovePago(null)}
+          onApprove={handleConfirmApproval}
+        />
       )}
 
-      {/* ======================================================== */}
-      {/* MODAL 4: RECHAZAR PAGO OBSERVADO Y REEMBOLSAR           */}
-      {/* ======================================================== */}
       {rejectModalData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-lg rounded-3xl shadow-kawaii border border-[#DE6978]/40 p-5 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#FFF0F6] text-[#DE6978] flex items-center justify-center shrink-0">
-                <XCircle size={22} />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-[#343047]">
-                  Rechazar Pago y Registrar Reembolso
-                </h4>
-                <p className="text-xs text-[#746E8B] mt-0.5">
-                  Pedido <strong>{rejectModalData.pedido.id}</strong> • Monto a reembolsar: <strong>S/ {rejectModalData.pago.montoRecibido.toFixed(2)}</strong>
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#343047] mb-1">
-                Motivo del Rechazo <span className="text-[#DE6978]">*</span> (Obligatorio):
-              </label>
-              <textarea
-                rows={3}
-                value={rejectMotivo}
-                onChange={(e) => {
-                  setRejectMotivo(e.target.value);
-                  if (rejectErrorMsg) setRejectErrorMsg('');
-                }}
-                placeholder="Indica la razón detallada para auditar el rechazo (ej. 'Monto incompleto', 'Pedido cancelado por vencimiento')..."
-                className="w-full text-xs p-2.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:border-[#DE6978] text-[#343047]"
-              />
-              {rejectErrorMsg && (
-                <p className="text-[11px] text-[#DE6978] mt-1 font-medium flex items-center gap-1">
-                  <AlertCircle size={12} /> {rejectErrorMsg}
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setRejectModalData(null)}
-                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-[#746E8B] hover:bg-gray-100 transition cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmRejection}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-[#DE6978] hover:bg-[#DE6978]/90 text-white shadow-xs transition cursor-pointer flex items-center gap-1"
-              >
-                <XCircle size={14} />
-                <span>Confirmar Rechazo y Reembolsar</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <RejectPaymentModal
+          data={rejectModalData}
+          onClose={() => setRejectModalData(null)}
+          onReject={handleConfirmRejection}
+        />
       )}
     </div>
   );

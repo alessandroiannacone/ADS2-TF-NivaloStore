@@ -22,6 +22,8 @@ import {
   deleteProductFromSupabase,
   updateOrderTrackingInSupabase,
 } from '../services/supabaseService';
+import { StockService } from '../services/stockService';
+import { OrderService } from '../services/orderService';
 import { isSupabaseConfigured } from '../lib/supabase';
 
 interface StoreContextType {
@@ -385,20 +387,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 observaciones: 'Vencimiento automático de 24 horas sin pago aprobado. Se libera la reserva de stock.',
               };
 
-              // Devolver stock reservado al disponible
-              setProductos((prevProds) =>
-                prevProds.map((prod) => {
-                  const detalle = ped.detalles.find((d) => d.productoId === prod.id);
-                  if (detalle) {
-                    return {
-                      ...prod,
-                      stockDisponible: prod.stockDisponible + detalle.cantidad,
-                      stockReservado: Math.max(0, prod.stockReservado - detalle.cantidad),
-                    };
-                  }
-                  return prod;
-                })
-              );
+              // Devolver stock reservado al disponible (StockService)
+              setProductos((prevProds) => StockService.releaseStockFromOrder(prevProds, ped.detalles));
 
               return {
                 ...ped,
@@ -561,9 +551,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const fechaVencimiento = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
 
     const subtotal = data.detalles.reduce((acc, curr) => acc + curr.subtotal, 0);
-    // Regla de envío: Si subtotal >= 80 es GRATIS (0 soles). Si es menor a 80, costo de envío es S/ 15.00
-    const costoEnvio = data.costoEnvio !== undefined ? data.costoEnvio : (subtotal >= 80 ? 0 : 15);
-    const total = subtotal + costoEnvio;
+    // Regla de envío calculada mediante OrderService
+    const { costoEnvio, total } = OrderService.calculateOrderTotals(subtotal, data.costoEnvio);
 
     const initialHistory: HistorialEstado = {
       id: `HIST-${Date.now()}-1`,
@@ -609,20 +598,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       enlacePagoActivo: `https://alessandroiannacone.github.io/ADS2-TF-NivaloStore/#/pago/${String(nextNumber).padStart(6, '0')}`,
     };
 
-    // Regla 3: Actualizar stock (disminuye disponible, aumenta reservado)
-    setProductos((prev) =>
-      prev.map((prod) => {
-        const item = data.detalles.find((d) => d.productoId === prod.id);
-        if (item) {
-          return {
-            ...prod,
-            stockDisponible: prod.stockDisponible - item.cantidad,
-            stockReservado: prod.stockReservado + item.cantidad,
-          };
-        }
-        return prod;
-      })
-    );
+    // Regla 3: Actualizar stock usando StockService (disminuye disponible, aumenta reservado)
+    setProductos((prev) => StockService.reserveStockForOrder(prev, data.detalles));
 
     setPedidos((prev) => [newPedido, ...prev]);
 
@@ -1256,20 +1233,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       observaciones: `Abono confirmado manualmente vía ${metodo} (Ref: ${ref}) por S/ ${targetPedido.total.toFixed(2)}. Stock rebajado definitivamente.`,
     };
 
-    // Actualizar stock: Al confirmarse el pago se decrementa stockReservado y stockTotalFisico
-    setProductos((prev) =>
-      prev.map((prod) => {
-        const item = targetPedido.detalles.find((d) => d.productoId === prod.id);
-        if (item) {
-          return {
-            ...prod,
-            stockReservado: Math.max(0, prod.stockReservado - item.cantidad),
-            stockTotalFisico: Math.max(0, prod.stockTotalFisico - item.cantidad),
-          };
-        }
-        return prod;
-      })
-    );
+    // Actualizar stock: Al confirmarse el pago se decrementa stockReservado y stockTotalFisico (StockService)
+    setProductos((prev) => StockService.confirmStockForOrder(prev, targetPedido.detalles));
 
     // Actualizar pedido
     setPedidos((prev) =>
@@ -1323,20 +1288,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const now = new Date();
 
-    // Restituir stock al cancelar: se decrementa stockReservado y se devuelve a stockDisponible
-    setProductos((prev) =>
-      prev.map((prod) => {
-        const item = targetPedido.detalles.find((d) => d.productoId === prod.id);
-        if (item) {
-          return {
-            ...prod,
-            stockDisponible: prod.stockDisponible + item.cantidad,
-            stockReservado: Math.max(0, prod.stockReservado - item.cantidad),
-          };
-        }
-        return prod;
-      })
-    );
+    // Restituir stock al cancelar: se decrementa stockReservado y se devuelve a stockDisponible (StockService)
+    setProductos((prev) => StockService.releaseStockFromOrder(prev, targetPedido.detalles));
 
     const newHistory: HistorialEstado = {
       id: `HIST-${Date.now()}`,

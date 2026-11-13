@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../hooks';
+import { ProductCard, CartSidebar } from '../components/storefront';
 import {
   Search,
   ShoppingBag,
@@ -8,13 +10,9 @@ import {
   User,
   Sparkles,
   ArrowRight,
-  Plus,
-  Minus,
-  Trash2,
   X,
   ChevronDown,
   Check,
-  Eye,
   SlidersHorizontal,
   RotateCcw,
   Truck,
@@ -72,8 +70,8 @@ const NivaloCatMascot: React.FC<{ className?: string }> = ({ className = 'w-9 h-
 );
 
 export const Storefront: React.FC = () => {
+  const { productos, createOrder } = useStore();
   const {
-    productos,
     cart,
     addToCart,
     removeFromCart,
@@ -86,9 +84,8 @@ export const Storefront: React.FC = () => {
     wishlist,
     toggleWishlist,
     transferCartToP1,
-    createOrder,
     clearCart,
-  } = useStore();
+  } = useCart();
 
   const { user, profile, isAdmin, signOut } = useAuth();
 
@@ -387,158 +384,21 @@ export const Storefront: React.FC = () => {
 
   const totalCartItems = cart.reduce((acc, curr) => acc + curr.cantidad, 0);
 
-  // Mensaje de WhatsApp para pedido
-  const generateWhatsAppMessage = () => {
-    if (cart.length === 0) return '';
-    let msg = '¡Hola Nivalo Store! 🌸 Quisiera pedir los siguientes productos de mi bolsa kawaii:\n\n';
-    cart.forEach((item, index) => {
-      msg += `${index + 1}. ${item.producto.nombre} x${item.cantidad} - S/ ${(item.producto.precio * item.cantidad).toFixed(2)}\n`;
-    });
-    const envioTxt = cartSubtotal >= 80 ? 'GRATIS ✨' : 'S/ 15.00';
-    msg += `\n*Subtotal:* S/ ${cartSubtotal.toFixed(2)}`;
-    msg += `\n*Envío:* ${envioTxt} (Olva Courier / Shalom 🚚)`;
-    msg += `\n*Total a Pagar:* S/ ${cartTotal.toFixed(2)}`;
-    msg += '\n\n¿Tienen disponibilidad para enviarlo hoy? ✨';
-    return encodeURIComponent(msg);
-  };
-
-  // Renderizador unificado de Card de Producto (Rosa Pastel Suave)
+  // Renderizador unificado de Card de Producto (Componente ProductCard desacoplado)
   const renderProductCard = (prod: Producto) => {
     const isWish = wishlist.includes(prod.id);
     const inCart = cart.find((item) => item.producto.id === prod.id);
 
     return (
-      <div
+      <ProductCard
         key={prod.id}
-        className="bg-white rounded-[22px] border border-[#FCE1ED] overflow-hidden shadow-[0_4px_16px_rgba(244,167,193,0.14)] hover:shadow-[0_12px_28px_rgba(244,167,193,0.26)] hover:border-[#F4A7C1] transition-all duration-300 flex flex-col group relative"
-      >
-        {/* Imagen */}
-        <div className="aspect-square relative overflow-hidden bg-[#FFF5F8] p-1.5">
-          <img
-            src={prod.imagen}
-            alt={prod.nombre}
-            className="w-full h-full object-cover rounded-[16px] group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-          />
-
-          {/* Badges de Descuento y Estado */}
-          <div className="absolute top-3 left-3 flex flex-col gap-1 items-start">
-            {prod.descuento && (
-              <span className="bg-[#FF9EB7] text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
-                {prod.descuento}
-              </span>
-            )}
-            {prod.badge && (
-              <span className="bg-gradient-to-r from-[#F7A6BF] to-[#F9B7CB] text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
-                {prod.badge}
-              </span>
-            )}
-          </div>
-
-          {/* Botón Favoritos */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleWishlist(prod.id);
-            }}
-            className="absolute top-3 right-3 w-7 h-7 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center text-[#7E5E6E] hover:text-[#E2678D] shadow-xs transition-transform active:scale-90 cursor-pointer border border-[#FCE1ED]"
-            title="Guardar en favoritos"
-          >
-            <Heart
-              size={14}
-              className={isWish ? 'fill-[#F4A7C1] text-[#F4A7C1]' : 'text-[#BA8D9E]'}
-            />
-          </button>
-
-          {/* Botones de acción rápida al hover */}
-          <div className="absolute inset-x-3 bottom-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => setSelectedProductQuickView(prod)}
-              className="flex-1 py-1.5 bg-white/95 backdrop-blur-xs hover:bg-[#FFF0F6] text-[11px] font-semibold text-[#543D4E] hover:text-[#E2678D] rounded-xl shadow-xs flex items-center justify-center gap-1 transition-colors cursor-pointer border border-[#FCE1ED]"
-            >
-              <Eye size={12} />
-              <span>Ver</span>
-            </button>
-            <button
-              onClick={() => addToCart(prod)}
-              disabled={prod.stockDisponible <= 0}
-              className="py-1.5 px-3 bg-[#F4A7C1] hover:bg-[#EE8EAF] text-white rounded-xl text-[11px] font-bold shadow-xs flex items-center justify-center transition-colors disabled:opacity-50 cursor-pointer"
-              title="Añadir a la bolsa"
-            >
-              <Plus size={13} />
-            </button>
-          </div>
-        </div>
-
-        {/* Info */}
-        <div className="p-3.5 flex-1 flex flex-col justify-between text-left">
-          <div>
-            <span className="text-[10px] text-[#BA8D9E] uppercase font-semibold tracking-wide block truncate">
-              {prod.marca || prod.categoria}
-            </span>
-
-            <h4
-              onClick={() => setSelectedProductQuickView(prod)}
-              className="text-xs font-semibold text-[#4A3B4E] mt-0.5 line-clamp-1 hover:text-[#E2678D] transition-colors cursor-pointer"
-              title={prod.nombre}
-            >
-              {prod.nombre}
-            </h4>
-
-            {/* Precio y Precio Anterior */}
-            <div className="mt-1 flex items-baseline gap-1.5">
-              <span className="text-sm font-bold text-[#E2678D]">
-                S/ {prod.precio.toFixed(2)}
-              </span>
-              {prod.precioAnterior && (
-                <span className="text-[10px] text-[#BAA0AC] line-through">
-                  S/ {prod.precioAnterior.toFixed(2)}
-                </span>
-              )}
-            </div>
-
-            {/* Puntos de recompensa ✨ */}
-            <div className="text-[10px] text-[#D17796] font-semibold flex items-center gap-0.5 mt-0.5">
-              <span>✨</span>
-              <span>+{prod.puntos || Math.round(prod.precio * 5)} pts</span>
-            </div>
-
-            {/* Chip de Medidas */}
-            {prod.medidas && (
-              <div className="mt-1.5">
-                <span className="inline-block text-[9px] px-2 py-0.5 rounded-md border border-[#FBD5E4] bg-[#FFF5F8] text-[#9C6E82] font-medium max-w-full truncate">
-                  {prod.medidas}
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-2.5 pt-2 border-t border-[#FFF0F6] flex items-center justify-between">
-            <span className="text-[10px] text-[#BAA0AC]">
-              Stock: {prod.stockDisponible}
-            </span>
-
-            <button
-              onClick={() => addToCart(prod)}
-              disabled={prod.stockDisponible <= 0}
-              className={`text-[11px] font-semibold px-2 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
-                inCart
-                  ? 'bg-[#FFF0F6] text-[#E2678D] border border-[#FCDCE7]'
-                  : 'text-[#E2678D] hover:bg-[#FFF0F6]'
-              }`}
-            >
-              {inCart ? (
-                <>
-                  <Check size={12} />
-                  <span>({inCart.cantidad})</span>
-                </>
-              ) : (
-                <span>+ Agregar</span>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
+        product={prod}
+        isWish={isWish}
+        inCartQuantity={inCart?.cantidad}
+        onAddToCart={addToCart}
+        onToggleWishlist={toggleWishlist}
+        onQuickView={setSelectedProductQuickView}
+      />
     );
   };
 
@@ -1534,203 +1394,22 @@ export const Storefront: React.FC = () => {
         </main>
       )}
 
-      {/* ================= DRAWER SLIDE-OUT DEL CARRITO ================= */}
-      {isCartOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden animate-in fade-in duration-200">
-          <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-xs transition-opacity"
-            onClick={() => setIsCartOpen(false)}
-          />
-
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-md bg-white border-l border-[#FCDCE7] shadow-2xl flex flex-col text-left">
-              <div className="p-4 sm:p-5 border-b border-[#FCE1ED] flex items-center justify-between bg-[#FFF7FA]">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-full bg-[#FFF0F6] text-[#E2678D] flex items-center justify-center">
-                    <ShoppingBag size={18} />
-                  </div>
-                  <div>
-                    <h3 className="font-display font-bold text-base text-[#4A3B4E]">
-                      Tu Bolsa Kawaii
-                    </h3>
-                    <p className="text-[11px] text-[#8E7C94]">
-                      {totalCartItems} artículos seleccionados
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setIsCartOpen(false)}
-                  className="p-1.5 rounded-full text-[#8E7C94] hover:bg-[#FFF0F6] hover:text-[#4A3B4E] transition-colors cursor-pointer"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              {/* Barra de envío gratis */}
-              <div className="p-3 bg-[#FFF0F6] border-b border-[#FCDCE7] text-xs text-center text-[#7E5E6E]">
-                {cartSubtotal >= 80 ? (
-                  <span className="text-[#3E8E62] font-bold flex items-center justify-center gap-1.5">
-                    🎉 ¡Felicidades! Tienes ENVÍO GRATIS a todo el Perú
-                  </span>
-                ) : (
-                  <div>
-                    <span>
-                      ¡Te faltan <strong>S/ {(80 - cartSubtotal).toFixed(2)}</strong> para <strong>Envío GRATIS</strong>! 🚚
-                    </span>
-                    <div className="w-full h-1.5 bg-[#FCDCE7] rounded-full mt-1.5 overflow-hidden">
-                      <div
-                        className="h-full bg-[#F4A7C1] rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min(100, (cartSubtotal / 80) * 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Lista de productos en carrito */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {cart.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
-                    <NivaloCatMascot className="w-16 h-16 opacity-85" />
-                    <h4 className="font-bold text-sm text-[#4A3B4E]">Tu bolsa está vacía</h4>
-                    <p className="text-xs text-[#8E7C94] max-w-xs">
-                      Explora nuestro catálogo kawaii de papelería, maquillaje, peluches y ropa coreana.
-                    </p>
-                    <button
-                      onClick={() => setIsCartOpen(false)}
-                      className="px-4 py-2 rounded-full bg-[#F4A7C1] text-white text-xs font-semibold shadow-xs cursor-pointer"
-                    >
-                      Explorar tienda
-                    </button>
-                  </div>
-                ) : (
-                  cart.map((item) => (
-                    <div
-                      key={item.producto.id}
-                      className="p-3 rounded-2xl bg-[#FFF8FA] border border-[#FCE1ED] flex items-center gap-3"
-                    >
-                      <img
-                        src={getAssetUrl(item.producto.imagen)}
-                        alt={item.producto.nombre}
-                        className="w-14 h-14 rounded-xl object-cover border border-[#FCDCE7] shrink-0 bg-pink-50"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.onerror = null;
-                          target.src = getAssetUrl('prod_memopads.jpg');
-                        }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h5 className="text-xs font-bold text-[#4A3B4E] truncate">
-                          {item.producto.nombre}
-                        </h5>
-                        <span className="text-xs font-bold text-[#E2678D]">
-                          S/ {item.producto.precio.toFixed(2)}
-                        </span>
-
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <div className="flex items-center border border-[#FCDCE7] rounded-lg bg-white overflow-hidden">
-                            <button
-                              onClick={() => updateCartQuantity(item.producto.id, item.cantidad - 1)}
-                              className="p-1 text-[#8E7C94] hover:bg-[#FFF0F6] cursor-pointer"
-                            >
-                              <Minus size={12} />
-                            </button>
-                            <span className="px-2 text-xs font-bold text-[#4A3B4E]">
-                              {item.cantidad}
-                            </span>
-                            <button
-                              onClick={() => updateCartQuantity(item.producto.id, item.cantidad + 1)}
-                              disabled={item.cantidad >= item.producto.stockDisponible}
-                              className="p-1 text-[#8E7C94] hover:bg-[#FFF0F6] disabled:opacity-40 cursor-pointer"
-                            >
-                              <Plus size={12} />
-                            </button>
-                          </div>
-
-                          <button
-                            onClick={() => removeFromCart(item.producto.id)}
-                            className="p-1 text-[#8E7C94] hover:text-[#DE6978] transition-colors ml-auto cursor-pointer"
-                            title="Eliminar"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* Footer del carrito */}
-              {cart.length > 0 && (
-                <div className="p-4 sm:p-5 border-t border-[#FCE1ED] bg-[#FFF7FA] space-y-3">
-                  <div className="space-y-1 text-xs">
-                    <div className="flex justify-between text-[#8E7C94]">
-                      <span>Subtotal</span>
-                      <span>S/ {cartSubtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-[#8E7C94] items-center">
-                      <span>Envío (Olva Courier / Shalom)</span>
-                      {cartSubtotal >= 80 ? (
-                        <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full text-[11px]">
-                          GRATIS ✨
-                        </span>
-                      ) : (
-                        <span className="font-bold text-[#4A3B4E] font-mono">
-                          S/ 15.00
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex justify-between text-sm font-bold text-[#4A3B4E] pt-2 border-t border-[#FCDCE7]">
-                      <span>Total a Pagar</span>
-                      <span className="text-base text-[#742284] font-extrabold font-mono">
-                        S/ {cartTotal.toFixed(2)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Botón Principal: Pagar con Yape / Plin / Boleta de Pago */}
-                  <button
-                    onClick={handleOpenCheckout}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#742284] via-[#631B72] to-[#50155E] hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-md transition-all active:scale-98 cursor-pointer group"
-                  >
-                    <img
-                      src={getAssetUrl('yape_logo.png')}
-                      alt="Yape"
-                      className="w-5 h-5 rounded-md object-contain bg-white p-0.5"
-                    />
-                    <span>Comprar con Yape / Plin (Pagar Aquí)</span>
-                    <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
-
-                  <a
-                    href={`https://wa.me/51998167789?text=${generateWhatsAppMessage()}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full py-2.5 rounded-2xl bg-[#25D366] hover:bg-[#20BD5A] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-transform active:scale-98"
-                  >
-                    <WhatsAppIcon size={15} />
-                    <span>Pedir por WhatsApp (Atención Asistida)</span>
-                  </a>
-
-                  {isAdmin && (
-                    <button
-                      onClick={() => {
-                        transferCartToP1();
-                        setIsCartOpen(false);
-                      }}
-                      className="w-full py-2 rounded-2xl bg-white hover:bg-[#FFF0F6] border border-[#F4A7C1] text-[#E2678D] font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <Sparkles size={13} />
-                      <span>Cargar en Panel Vendedor (P1)</span>
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* ================= DRAWER SLIDE-OUT DEL CARRITO (COMPONENTE MODULAR) ================= */}
+      <CartSidebar
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cart={cart}
+        cartSubtotal={cartSubtotal}
+        cartTotal={cartTotal}
+        onUpdateQuantity={updateCartQuantity}
+        onRemoveItem={removeFromCart}
+        onOpenCheckout={handleOpenCheckout}
+        onTransferToP1={() => {
+          transferCartToP1();
+          setIsCartOpen(false);
+        }}
+        isAdmin={isAdmin}
+      />
 
       {/* ================= MODAL VISTA RÁPIDA ================= */}
       {selectedProductQuickView && (
