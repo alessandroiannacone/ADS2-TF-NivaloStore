@@ -368,7 +368,12 @@ export const NivieBotChat: React.FC<NivieBotChatProps> = ({
                     {msg.products.map((p) => (
                       <div
                         key={p.id}
-                        className="flex items-center gap-2 p-1.5 rounded-xl bg-[#FFF8FA] border border-[#FCDCE7] hover:bg-[#FFF0F6] transition"
+                        onClick={() => {
+                          window.location.hash = `#/producto/${p.id}`;
+                          if (onClose) onClose();
+                        }}
+                        className="flex items-center gap-2 p-1.5 rounded-xl bg-[#FFF8FA] border border-[#FCDCE7] hover:bg-[#FFF0F6] transition cursor-pointer"
+                        title="Ver especificaciones completas"
                       >
                         <img
                           src={getAssetUrl(p.imagen)}

@@ -38,3 +38,4 @@ export function useCart() {
     itemCount: cart.reduce((acc, item) => acc + item.cantidad, 0),
   };
 }
+

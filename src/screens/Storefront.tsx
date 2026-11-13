@@ -397,7 +397,9 @@ export const Storefront: React.FC = () => {
         inCartQuantity={inCart?.cantidad}
         onAddToCart={addToCart}
         onToggleWishlist={toggleWishlist}
-        onQuickView={setSelectedProductQuickView}
+        onQuickView={() => {
+          window.location.hash = `#/producto/${prod.id}`;
+        }}
       />
     );
   };

@@ -5,3 +5,4 @@ export interface IProductRepository {
   save(producto: Producto): Promise<boolean>;
   delete(id: string): Promise<boolean>;
 }
+

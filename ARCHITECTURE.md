@@ -127,3 +127,4 @@ Este documento describe la arquitectura formal, los patrones de diseño aplicado
 1. Agregar el literal al tipo `EmpresaEnvio` en `src/types/index.ts`.
 2. Agregar la opción en `TrackingModal.tsx`.
 3. El cálculo de ruta y plantilla de WhatsApp se actualiza de inmediato sin tocar el resto de la aplicación.
+

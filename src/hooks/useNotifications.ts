@@ -19,3 +19,4 @@ export function useNotifications() {
     unreadCount: notificaciones.filter((n) => !n.leida).length,
   };
 }
+

@@ -12,6 +12,7 @@ import { P6TrackingOlva } from './screens/P6TrackingOlva';
 import { HistoryModal } from './components/HistoryModal';
 import { NotificationToast } from './components/NotificationToast';
 import { Storefront } from './screens/Storefront';
+import { ProductDetailPage } from './screens/ProductDetailPage';
 import { CustomerPaymentPage } from './screens/CustomerPaymentPage';
 import { CustomerAuthPage } from './screens/CustomerAuthPage';
 import { CustomerAccountPage } from './screens/CustomerAccountPage';
@@ -24,6 +25,7 @@ const MainLayout: React.FC = () => {
 
   const [currentRoute, setCurrentRoute] = useState<string>(() => window.location.hash || '#/');
   const [paymentOrderId, setPaymentOrderId] = useState<string | null>(null);
+  const [productDetailId, setProductDetailId] = useState<string | null>(null);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -37,10 +39,17 @@ const MainLayout: React.FC = () => {
         setPaymentOrderId(null);
       }
 
+      const matchProduct = hash.match(/^#\/producto\/([a-zA-Z0-9_-]+)/);
+      if (matchProduct) {
+        setProductDetailId(matchProduct[1]);
+      } else {
+        setProductDetailId(null);
+      }
+
       // Si se navega explícitamente a #/admin
       if (hash.startsWith('#/admin') && !hash.includes('/login')) {
         setViewMode('admin');
-      } else if (hash === '#/' || hash === '' || hash.startsWith('#/tienda')) {
+      } else if (hash === '#/' || hash === '' || hash.startsWith('#/tienda') || hash.startsWith('#/producto')) {
         setViewMode('storefront');
       }
     };
@@ -89,6 +98,25 @@ const MainLayout: React.FC = () => {
           setViewMode('storefront');
         }}
       />
+    );
+  }
+
+  // 2.5. Ruta de Detalle y Especificaciones de Producto (#/producto/:id)
+  if (productDetailId) {
+    return (
+      <>
+        <ProductDetailPage
+          productId={productDetailId}
+          onBackToStore={() => {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              window.location.hash = '#/';
+            }
+          }}
+        />
+        <NotificationToast />
+      </>
     );
   }
 
