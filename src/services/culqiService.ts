@@ -51,20 +51,22 @@ export const CULQI_CONFIG = {
   currency: 'PEN',
   testCards: {
     visa: {
-      number: '4242 4242 4242 4242',
-      exp: '12/28',
+      number: '4111 1111 1111 1111',
+      exp: '09/30',
       cvv: '123',
       name: 'Valeria Mendoza',
       email: 'valeria@nivalostore.pe',
       brand: 'Visa',
+      type: 'Débito',
     },
     mastercard: {
-      number: '5555 5555 5555 4444',
-      exp: '10/27',
-      cvv: '456',
+      number: '5105 1051 0510 5100',
+      exp: '09/30',
+      cvv: '123',
       name: 'Ana Martínez',
       email: 'ana@nivalostore.pe',
       brand: 'Mastercard',
+      type: 'Crédito',
     },
     amex: {
       number: '3782 822463 10005',
@@ -73,6 +75,7 @@ export const CULQI_CONFIG = {
       name: 'Camila Rojas',
       email: 'camila@nivalostore.pe',
       brand: 'American Express',
+      type: 'Crédito',
     },
     yape: {
       phone: '998 167 789',
@@ -146,7 +149,8 @@ export function validateCardData(data: CulqiCardData): { valid: boolean; error?:
     return { valid: false, error: 'El número de tarjeta debe tener 15 o 16 dígitos.' };
   }
 
-  if (!validateLuhn(cleanNumber)) {
+  const isCulqiTestErrorCard = /^411111111111111[2-9]$/.test(cleanNumber);
+  if (!isCulqiTestErrorCard && !validateLuhn(cleanNumber)) {
     return { valid: false, error: 'El número de tarjeta no es válido (falla verificación Luhn).' };
   }
 
@@ -216,11 +220,29 @@ export async function processCulqiCardPayment(
   // Simular latencia de red segura con Culqi (1.2s)
   await new Promise((resolve) => setTimeout(resolve, 1200));
 
-  const brand = detectCardBrand(cardData.cardNumber);
   const cleanNumber = cardData.cardNumber.replace(/\D/g, '');
+
+  // Verificación de tarjetas de prueba oficiales de Culqi para simulación de errores
+  if (cleanNumber === '4111111111111112') {
+    return { success: false, error: 'Fondos insuficientes en la tarjeta (Culqi Error: 402 Card Denied - Insufficient Funds).' };
+  }
+  if (cleanNumber === '4111111111111113') {
+    return { success: false, error: 'La tarjeta se encuentra vencida o inactiva (Culqi Error: Expired Card).' };
+  }
+  if (cleanNumber === '4111111111111114') {
+    return { success: false, error: 'Código de seguridad CVV incorrecto (Culqi Error: Invalid CVV).' };
+  }
+  if (cleanNumber === '4111111111111115') {
+    return { success: false, error: 'Operación denegada por el banco emisor. Contacte a su banco (Culqi Error: Contact Bank).' };
+  }
+
+  const brand = detectCardBrand(cardData.cardNumber);
   const lastFour = cleanNumber.slice(-4);
   const amountCents = Math.round(totalSol * 100);
   const now = new Date();
+
+  // Tipo de tarjeta según documentación de Culqi
+  const paymentMethod = cleanNumber === '4111111111111111' ? 'Tarjeta de Débito' : 'Tarjeta de Crédito';
 
   const charge: CulqiChargeResponse = {
     id: `chr_test_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`,
@@ -233,7 +255,7 @@ export async function processCulqiCardPayment(
     current_status: 'captured',
     card_brand: brand,
     last_four: lastFour,
-    payment_method: 'Tarjeta de Crédito',
+    payment_method: paymentMethod,
     creation_date: now.toISOString(),
     client_email: cardData.email.trim().toLowerCase(),
     order_id: orderId,
@@ -280,3 +302,4 @@ export async function processCulqiYapePayment(
 
   return { success: true, charge };
 }
+

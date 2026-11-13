@@ -330,23 +330,30 @@ export const CulqiCheckoutForm: React.FC<CulqiCheckoutFormProps> = ({
             </div>
           </div>
 
-          {/* Botones de Prueba Rápida Culqi */}
-          <div className="flex items-center justify-center gap-2 text-xs flex-wrap">
-            <span className="text-[11px] text-[#8E7C94] font-semibold">Tarjetas de Prueba Culqi:</span>
-            <button
-              type="button"
-              onClick={() => fillTestCard('visa')}
-              className="px-2.5 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0072CE] font-bold text-[11px] border border-blue-200 transition cursor-pointer"
-            >
-              💳 Visa Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => fillTestCard('mastercard')}
-              className="px-2.5 py-1 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#E05A2B] font-bold text-[11px] border border-orange-200 transition cursor-pointer"
-            >
-              💳 Mastercard Demo
-            </button>
+          {/* Botones de Prueba Rápida Culqi Oficial */}
+          <div className="space-y-1.5 text-center">
+            <div className="flex items-center justify-center gap-2 text-xs flex-wrap">
+              <span className="text-[11px] text-[#8E7C94] font-semibold">Tarjetas Oficiales Culqi Test:</span>
+              <button
+                type="button"
+                onClick={() => fillTestCard('visa')}
+                className="px-2.5 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0072CE] font-bold text-[11px] border border-blue-200 transition cursor-pointer"
+                title="Visa Débito de Prueba Culqi (4111 1111 1111 1111 - Vence 09/30 - CVV 123)"
+              >
+                💳 Visa Demo (4111 1111 1111 1111)
+              </button>
+              <button
+                type="button"
+                onClick={() => fillTestCard('mastercard')}
+                className="px-2.5 py-1 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#E05A2B] font-bold text-[11px] border border-orange-200 transition cursor-pointer"
+                title="Mastercard Crédito de Prueba Culqi (5105 1051 0510 5100 - Vence 09/30 - CVV 123)"
+              >
+                💳 Mastercard Demo (5105...)
+              </button>
+            </div>
+            <p className="text-[10px] text-[#8E7C94]">
+              ℹ️ Integración oficial Culqi Sandbox: <strong>4111 1111 1111 1111</strong> • Vence: <strong>09/30</strong> • CVV: <strong>123</strong> (Débito)
+            </p>
           </div>
 
           {/* Campos del Formulario */}
@@ -358,7 +365,7 @@ export const CulqiCheckoutForm: React.FC<CulqiCheckoutFormProps> = ({
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="4242 4242 4242 4242"
+                  placeholder="4111 1111 1111 1111"
                   value={cardNumber}
                   onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                   maxLength={19}
