@@ -161,7 +161,7 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
     <div className="min-h-screen bg-gradient-to-b from-[#FFF5F8] via-[#FFF9FB] to-white text-[#4A3B4E] font-['Poppins',sans-serif] pb-12">
       {/* Header Seguro */}
       <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#FCDCE7] px-4 py-3">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             {onBackToStore && (
               <button
@@ -187,7 +187,7 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
       </header>
 
       {/* Contenido Principal */}
-      <main className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
+      <main className="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
         {/* Banner de Reserva de 24 Horas */}
         {isPending && !isCancelled && (
           <div className="p-4 rounded-3xl bg-gradient-to-r from-[#FFF0F6] to-[#F3EEFF] border border-[#F4A7C1]/50 shadow-kawaii-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -308,22 +308,22 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                   </div>
                 </div>
 
-                {/* QR y Datos Organizados en Grid Amplio */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-2">
+                {/* QR y Datos Organizados de Forma Impecable */}
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center py-2">
                   {/* Código QR Oficial de Yape */}
-                  <div className="md:col-span-5 flex flex-col items-center justify-center">
-                    <div className="p-3.5 bg-gradient-to-br from-[#742284] via-[#631B72] to-[#4A3E4E] rounded-3xl shadow-lg flex flex-col items-center w-full max-w-[240px]">
-                      <div className="bg-white p-3 rounded-2xl shadow-inner flex flex-col items-center justify-center w-full">
+                  <div className="sm:col-span-5 flex flex-col items-center justify-center">
+                    <div className="p-3 bg-gradient-to-br from-[#742284] via-[#631B72] to-[#4A3E4E] rounded-3xl shadow-md flex flex-col items-center w-full max-w-[210px]">
+                      <div className="bg-white p-2.5 rounded-2xl shadow-inner flex flex-col items-center justify-center w-full">
                         <img
                           src={getAssetUrl('qr_yape.jpg')}
                           alt="Código QR Yape Nivalo Store"
-                          className="w-48 h-48 sm:w-52 sm:h-52 object-contain rounded-xl"
+                          className="w-36 h-36 sm:w-40 sm:h-40 object-contain rounded-xl"
                         />
-                        <div className="mt-2 text-center">
-                          <span className="text-xs font-bold text-[#742284] flex items-center justify-center gap-1">
+                        <div className="mt-1.5 text-center">
+                          <span className="text-[11px] font-bold text-[#742284] flex items-center justify-center gap-1">
                             <span>💜</span> Escanea con tu app Yape
                           </span>
-                          <span className="text-[10px] text-[#8E7C94]">
+                          <span className="text-[9px] text-[#8E7C94]">
                             Abre Yape y enfoca la cámara
                           </span>
                         </div>
@@ -331,55 +331,57 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                     </div>
                   </div>
 
-                  {/* Recuadros Bonitos y Amplios para que Todo Entre Perfecto */}
-                  <div className="md:col-span-7 space-y-3.5 w-full">
+                  {/* Recuadros Bonitos, Ordenados y Sin Desbordes */}
+                  <div className="sm:col-span-7 space-y-2.5 w-full min-w-0">
                     {/* Recuadro 1: Número Celular */}
-                    <div className="p-4 rounded-2xl bg-[#FFF8FA] border border-[#FCDCE7] shadow-xs space-y-1">
-                      <span className="text-[10px] uppercase font-bold text-[#742284] tracking-wider block">
-                        Número de Celular Yape:
-                      </span>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-lg sm:text-xl font-extrabold font-mono text-[#343047] tracking-wider whitespace-nowrap">
-                          {NIVALO_STORE_CONTACT.telefonoDisplay}
+                    <div className="p-3 sm:p-3.5 rounded-2xl bg-[#FFF8FA] border border-[#FCDCE7] shadow-xs">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-[10px] uppercase font-bold text-[#742284] tracking-wider truncate">
+                          Número Celular Yape:
                         </span>
                         <button
                           type="button"
                           onClick={copyNumber}
-                          className="px-3 py-1.5 rounded-xl bg-white hover:bg-purple-50 text-[#742284] font-bold text-xs border border-purple-200 transition-all flex items-center gap-1.5 shadow-2xs shrink-0 cursor-pointer active:scale-95"
+                          className="px-2.5 py-1 rounded-xl bg-white hover:bg-purple-100 text-[#742284] font-bold text-[11px] border border-purple-200 transition-all flex items-center gap-1 shadow-2xs shrink-0 cursor-pointer active:scale-95"
+                          title="Copiar número"
                         >
-                          {copiedNumber ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                          {copiedNumber ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
                           <span>{copiedNumber ? '¡Copiado!' : 'Copiar'}</span>
                         </button>
+                      </div>
+                      <div className="text-base sm:text-lg font-black font-mono text-[#343047] tracking-wider">
+                        {NIVALO_STORE_CONTACT.telefonoDisplay}
                       </div>
                     </div>
 
                     {/* Recuadro 2: Titular */}
-                    <div className="p-4 rounded-2xl bg-[#FFF8FA] border border-[#FCDCE7] shadow-xs space-y-1">
-                      <span className="text-[10px] uppercase font-bold text-[#742284] tracking-wider block">
+                    <div className="p-3 sm:p-3.5 rounded-2xl bg-[#FFF8FA] border border-[#FCDCE7] shadow-xs">
+                      <span className="text-[10px] uppercase font-bold text-[#742284] tracking-wider block mb-0.5">
                         Titular de la Cuenta:
                       </span>
-                      <p className="text-sm sm:text-base font-bold text-[#343047]">
+                      <p className="text-xs sm:text-sm font-bold text-[#343047] truncate">
                         Nivalo Store (Alessandro Iannacone)
                       </p>
                     </div>
 
                     {/* Recuadro 3: Total Exacto */}
-                    <div className="p-4 rounded-2xl bg-[#FFF0F6] border-2 border-[#F4A7C1] shadow-xs space-y-1">
-                      <span className="text-[10px] uppercase font-bold text-[#DE6978] tracking-wider block">
-                        Total Exacto a Yapear:
-                      </span>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-xl sm:text-2xl font-black font-mono text-[#DE6978] tracking-tight whitespace-nowrap">
-                          S/ {totalExacto.toFixed(2)}
+                    <div className="p-3 sm:p-3.5 rounded-2xl bg-[#FFF0F6] border-2 border-[#F4A7C1] shadow-xs">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-[10px] uppercase font-bold text-[#DE6978] tracking-wider truncate">
+                          Total Exacto a Yapear:
                         </span>
                         <button
                           type="button"
                           onClick={copyTotalAmount}
-                          className="px-3 py-1.5 rounded-xl bg-white hover:bg-pink-50 text-[#DE6978] font-bold text-xs border border-pink-200 transition-all flex items-center gap-1.5 shadow-2xs shrink-0 cursor-pointer active:scale-95"
+                          className="px-2.5 py-1 rounded-xl bg-white hover:bg-pink-100 text-[#DE6978] font-bold text-[11px] border border-pink-200 transition-all flex items-center gap-1 shadow-2xs shrink-0 cursor-pointer active:scale-95"
+                          title="Copiar total"
                         >
-                          {copiedTotal ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                          {copiedTotal ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
                           <span>{copiedTotal ? '¡Copiado!' : 'Copiar'}</span>
                         </button>
+                      </div>
+                      <div className="text-xl sm:text-2xl font-black font-mono text-[#DE6978] tracking-tight">
+                        S/ {totalExacto.toFixed(2)}
                       </div>
                     </div>
                   </div>
@@ -436,22 +438,22 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                   </div>
                 </div>
 
-                {/* QR y Datos Plin Organizados en Grid Amplio */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center py-2">
+                {/* QR y Datos Plin Organizados de Forma Impecable */}
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center py-2">
                   {/* Código QR Oficial de Plin (Imagen Subida) */}
-                  <div className="md:col-span-5 flex flex-col items-center justify-center">
-                    <div className="p-3.5 bg-gradient-to-br from-[#00A9E0] via-[#008CC9] to-[#0072CE] rounded-3xl shadow-lg flex flex-col items-center w-full max-w-[240px]">
-                      <div className="bg-white p-3 rounded-2xl shadow-inner flex flex-col items-center justify-center w-full">
+                  <div className="sm:col-span-5 flex flex-col items-center justify-center">
+                    <div className="p-3 bg-gradient-to-br from-[#00A9E0] via-[#008CC9] to-[#0072CE] rounded-3xl shadow-md flex flex-col items-center w-full max-w-[210px]">
+                      <div className="bg-white p-2.5 rounded-2xl shadow-inner flex flex-col items-center justify-center w-full">
                         <img
                           src={getAssetUrl('qr_plin.png')}
                           alt="Código QR Plin Nivalo Store"
-                          className="w-48 h-48 sm:w-52 sm:h-52 object-contain rounded-xl"
+                          className="w-36 h-36 sm:w-40 sm:h-40 object-contain rounded-xl"
                         />
-                        <div className="mt-2 text-center">
-                          <span className="text-xs font-bold text-[#0072CE] flex items-center justify-center gap-1">
+                        <div className="mt-1.5 text-center">
+                          <span className="text-[11px] font-bold text-[#0072CE] flex items-center justify-center gap-1">
                             <span>💙</span> Escanea con tu app Plin
                           </span>
-                          <span className="text-[10px] text-[#746E8B]">
+                          <span className="text-[9px] text-[#746E8B]">
                             BBVA • Interbank • Scotiabank
                           </span>
                         </div>
@@ -459,55 +461,57 @@ export const CustomerPaymentPage: React.FC<CustomerPaymentPageProps> = ({
                     </div>
                   </div>
 
-                  {/* Recuadros Bonitos y Amplios para Plin */}
-                  <div className="md:col-span-7 space-y-3.5 w-full">
+                  {/* Recuadros Bonitos, Ordenados y Sin Desbordes para Plin */}
+                  <div className="sm:col-span-7 space-y-2.5 w-full min-w-0">
                     {/* Recuadro 1: Celular Plin */}
-                    <div className="p-4 rounded-2xl bg-[#F0FAFF] border border-[#BFE8F7] shadow-xs space-y-1">
-                      <span className="text-[10px] uppercase font-bold text-[#0072CE] tracking-wider block">
-                        Número de Celular Plin:
-                      </span>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-lg sm:text-xl font-extrabold font-mono text-[#343047] tracking-wider whitespace-nowrap">
-                          {NIVALO_STORE_CONTACT.telefonoDisplay}
+                    <div className="p-3 sm:p-3.5 rounded-2xl bg-[#F0FAFF] border border-[#BFE8F7] shadow-xs">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-[10px] uppercase font-bold text-[#0072CE] tracking-wider truncate">
+                          Número Celular Plin:
                         </span>
                         <button
                           type="button"
                           onClick={copyNumber}
-                          className="px-3 py-1.5 rounded-xl bg-white hover:bg-cyan-50 text-[#0072CE] font-bold text-xs border border-cyan-200 transition-all flex items-center gap-1.5 shadow-2xs shrink-0 cursor-pointer active:scale-95"
+                          className="px-2.5 py-1 rounded-xl bg-white hover:bg-cyan-100 text-[#0072CE] font-bold text-[11px] border border-cyan-200 transition-all flex items-center gap-1 shadow-2xs shrink-0 cursor-pointer active:scale-95"
+                          title="Copiar número"
                         >
-                          {copiedNumber ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                          {copiedNumber ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
                           <span>{copiedNumber ? '¡Copiado!' : 'Copiar'}</span>
                         </button>
+                      </div>
+                      <div className="text-base sm:text-lg font-black font-mono text-[#343047] tracking-wider">
+                        {NIVALO_STORE_CONTACT.telefonoDisplay}
                       </div>
                     </div>
 
                     {/* Recuadro 2: Titular */}
-                    <div className="p-4 rounded-2xl bg-[#F0FAFF] border border-[#BFE8F7] shadow-xs space-y-1">
-                      <span className="text-[10px] uppercase font-bold text-[#0072CE] tracking-wider block">
+                    <div className="p-3 sm:p-3.5 rounded-2xl bg-[#F0FAFF] border border-[#BFE8F7] shadow-xs">
+                      <span className="text-[10px] uppercase font-bold text-[#0072CE] tracking-wider block mb-0.5">
                         Titular de la Cuenta:
                       </span>
-                      <p className="text-sm sm:text-base font-bold text-[#343047]">
+                      <p className="text-xs sm:text-sm font-bold text-[#343047] truncate">
                         Nivalo Store (Alessandro Iannacone)
                       </p>
                     </div>
 
                     {/* Recuadro 3: Total Exacto */}
-                    <div className="p-4 rounded-2xl bg-[#FFF0F6] border-2 border-[#F4A7C1] shadow-xs space-y-1">
-                      <span className="text-[10px] uppercase font-bold text-[#DE6978] tracking-wider block">
-                        Total Exacto a Pagar por Plin:
-                      </span>
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-xl sm:text-2xl font-black font-mono text-[#DE6978] tracking-tight whitespace-nowrap">
-                          S/ {totalExacto.toFixed(2)}
+                    <div className="p-3 sm:p-3.5 rounded-2xl bg-[#FFF0F6] border-2 border-[#F4A7C1] shadow-xs">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-[10px] uppercase font-bold text-[#DE6978] tracking-wider truncate">
+                          Total Exacto a Pagar por Plin:
                         </span>
                         <button
                           type="button"
                           onClick={copyTotalAmount}
-                          className="px-3 py-1.5 rounded-xl bg-white hover:bg-pink-50 text-[#DE6978] font-bold text-xs border border-pink-200 transition-all flex items-center gap-1.5 shadow-2xs shrink-0 cursor-pointer active:scale-95"
+                          className="px-2.5 py-1 rounded-xl bg-white hover:bg-pink-100 text-[#DE6978] font-bold text-[11px] border border-pink-200 transition-all flex items-center gap-1 shadow-2xs shrink-0 cursor-pointer active:scale-95"
+                          title="Copiar total"
                         >
-                          {copiedTotal ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                          {copiedTotal ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
                           <span>{copiedTotal ? '¡Copiado!' : 'Copiar'}</span>
                         </button>
+                      </div>
+                      <div className="text-xl sm:text-2xl font-black font-mono text-[#DE6978] tracking-tight">
+                        S/ {totalExacto.toFixed(2)}
                       </div>
                     </div>
                   </div>

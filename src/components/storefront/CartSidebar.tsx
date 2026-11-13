@@ -7,7 +7,6 @@ import {
   Trash2,
   ArrowRight,
   Sparkles,
-  CreditCard,
 } from 'lucide-react';
 import type { Producto } from '../../types';
 import { getAssetUrl } from '../../data/mockData';
