@@ -216,15 +216,17 @@ export const CartSidebar: React.FC<CartSidebarProps> = ({
                 </div>
               </div>
 
-              {/* Botón Principal: Pagar con Culqi / Tarjetas / Yape */}
+              {/* Botón Principal: Pagar con Yape / Plin */}
               <button
                 onClick={onOpenCheckout}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00A9E0] via-[#742284] to-[#50155E] hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-md transition-all active:scale-98 cursor-pointer group"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#742284] via-[#631B72] to-[#50155E] hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-md transition-all active:scale-98 cursor-pointer group"
               >
-                <div className="w-5 h-5 rounded-md bg-white/20 flex items-center justify-center shrink-0">
-                  <CreditCard size={14} className="text-white" />
-                </div>
-                <span>Pagar con Culqi / Tarjetas / Yape</span>
+                <img
+                  src={getAssetUrl('yape_logo.png')}
+                  alt="Yape"
+                  className="w-5 h-5 rounded-md object-contain bg-white p-0.5 shrink-0"
+                />
+                <span>Comprar con Yape / Plin (Pagar Aquí)</span>
                 <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
               </button>
 

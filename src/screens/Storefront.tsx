@@ -413,17 +413,19 @@ export const Storefront: React.FC = () => {
 
   // Secciones limpias y seleccionadas para la Pantalla Principal (Inicio)
   const masVendidosHome = useMemo(() => {
-    // 4 productos estrella que más se venden
-    return productos
-      .filter((p) => p.badge === 'TOP' || p.esFavorito || ['PROD-12', 'PROD-13', 'PROD-15', 'PROD-39'].includes(p.id))
-      .slice(0, 4);
+    const testProd = productos.find((p) => p.id === 'PROD-TEST-1SOL');
+    const others = productos
+      .filter((p) => p.id !== 'PROD-TEST-1SOL' && (p.badge === 'TOP' || p.esFavorito || ['PROD-12', 'PROD-13', 'PROD-15', 'PROD-39'].includes(p.id)))
+      .slice(0, 3);
+    return testProd ? [testProd, ...others] : others;
   }, [productos]);
 
   const ofertasHome = useMemo(() => {
-    // 4 productos con ofertas y descuentos destacados
-    return productos
-      .filter((p) => p.esOferta || p.badge === 'OFERTA' || p.descuento || ['PROD-28', 'PROD-31', 'PROD-02', 'PROD-33'].includes(p.id))
-      .slice(0, 4);
+    const testProd = productos.find((p) => p.id === 'PROD-TEST-1SOL');
+    const others = productos
+      .filter((p) => p.id !== 'PROD-TEST-1SOL' && (p.esOferta || p.badge === 'OFERTA' || p.descuento || ['PROD-28', 'PROD-31', 'PROD-02', 'PROD-33'].includes(p.id)))
+      .slice(0, 3);
+    return testProd ? [testProd, ...others] : others;
   }, [productos]);
 
   // Colecciones Temáticas Oficiales de Nivalo Store
@@ -2168,7 +2170,7 @@ export const Storefront: React.FC = () => {
                 <li>✉️ nivalostore@gmail.com</li>
                 <li>📞 +51 998 167 789</li>
                 <li>📍 Lima, Perú (Envíos a nivel nacional)</li>
-                <li>💳 Pasarela Culqi • Visa • Mastercard • Diners • Yape • Plin</li>
+                <li>💳 Yape • Plin • Transferencia BCP / Interbank</li>
               </ul>
             </div>
           </div>
@@ -2638,7 +2640,7 @@ export const Storefront: React.FC = () => {
             </div>
 
             <p className="text-xs text-[#8E7C94]">
-              Ingresa tus datos de contacto para acceder a la pasarela de pago seguro (Culqi: Tarjetas Débito/Crédito y Yape) y reservar tu stock por 24 horas:
+              Ingresa tus datos de contacto para emitir tu boleta con el <strong>código QR de Yape / Plin</strong> y reservar tu stock por 24 horas:
             </p>
 
             {checkoutError && (
@@ -2758,13 +2760,17 @@ export const Storefront: React.FC = () => {
             <button
               onClick={handleConfirmDirectPayment}
               disabled={isProcessingCheckout}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00A9E0] via-[#742284] to-[#50155E] hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-98 cursor-pointer disabled:opacity-60"
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#742284] via-[#631B72] to-[#50155E] hover:opacity-95 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-98 cursor-pointer disabled:opacity-60"
             >
-              <span>💳</span>
+              <img
+                src={getAssetUrl('yape_logo.png')}
+                alt="Yape"
+                className="w-5 h-5 rounded-md object-contain bg-white p-0.5"
+              />
               <span>
                 {isProcessingCheckout
-                  ? 'Generando tu orden...'
-                  : 'Continuar a Pagar con Culqi / Yape ➔'}
+                  ? 'Generando tu boleta...'
+                  : 'Ver Boleta y Código QR de Yape / Plin ➔'}
               </span>
             </button>
           </div>

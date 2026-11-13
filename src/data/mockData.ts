@@ -74,7 +74,9 @@ const RAW_PRODUCTOS: Producto[] = [
     stockReservado: 0,
     stockTotalFisico: 99,
     imagen: './cat_papeleria.jpg',
-    descripcion: 'Artículo de prueba especial para validar escaneo de código QR de Culqi / Yape y pasarela de cobro en vivo por exactamente S/ 1.00.',
+    descripcion: 'Artículo de prueba especial para validar escaneo de código QR de Yape / Plin en vivo por exactamente S/ 1.00.',
+    esFavorito: true,
+    esOferta: true,
     esRecomendado: true,
   },
   // 1. Sanrio
